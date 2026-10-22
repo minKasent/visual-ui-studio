@@ -39459,6 +39459,19 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
       });
     });
 
+    // Sidebar group filter chips (All / Ticket & Khung / Cinema & Chữ / 3D & Tilt)
+    document.querySelectorAll('[data-rb-group]').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('[data-rb-group]').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        rbState.filterGroup = chip.getAttribute('data-rb-group') || 'all';
+        rbState.activeSchemaId = 'master-all';
+        if (schemaSelect) schemaSelect.value = 'master-all';
+        if (sidebarSchemaSelect) sidebarSchemaSelect.value = 'master-all';
+        renderReactBitsGrids();
+      });
+    });
+
     // Theme toggle (Light = exact match to user's screenshots, Dark = Obsidian ReactBits)
     const btnTheme = document.getElementById('btn-rb-toggle-theme');
     if (btnTheme) {

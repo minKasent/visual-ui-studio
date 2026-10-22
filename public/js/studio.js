@@ -4086,7 +4086,22 @@
       });
     });
 
+    // Right Inspector 3-Tab Switcher (Customize / Design / Layout)
+    document.querySelectorAll('.insp-mode-tab').forEach(tabBtn => {
+      tabBtn.addEventListener('click', () => {
+        const targetId = tabBtn.getAttribute('data-insp-tab');
+        document.querySelectorAll('.insp-mode-tab').forEach(b => b.classList.toggle('active', b === tabBtn));
+        document.querySelectorAll('.insp-mode-pane').forEach(p => {
+          const isMatch = p.id === targetId;
+          p.classList.toggle('active', isMatch);
+          p.classList.toggle('hidden', !isMatch);
+        });
+      });
+    });
+
     document.querySelectorAll('[data-fx-icon]').forEach(btn => {
+      const svgEl = btn.querySelector('svg');
+      const iconMarkup = svgEl ? svgEl.outerHTML : btn.dataset.fxIcon;
       const injectIconFn = (el, iconVal, pos, isPreview) => {
         if (!el) return;
         const userText = extractCleanUserText(el);
@@ -4098,10 +4113,11 @@
           el.textContent = userText;
           return;
         }
+        const renderedIcon = svgEl ? iconMarkup : iconVal;
         if (pos === 'end') {
-          el.innerHTML = `<span>${userText}</span><span data-uilib-decor="true" style="margin-left:6px;">${iconVal}</span>`;
+          el.innerHTML = `<span>${userText}</span><span data-uilib-decor="true" style="display:inline-flex;align-items:center;margin-left:6px;">${renderedIcon}</span>`;
         } else {
-          el.innerHTML = `<span data-uilib-decor="true" style="margin-right:6px;">${iconVal}</span><span>${userText}</span>`;
+          el.innerHTML = `<span data-uilib-decor="true" style="display:inline-flex;align-items:center;margin-right:6px;">${renderedIcon}</span><span>${userText}</span>`;
         }
         el.style.setProperty('display', 'inline-flex', 'important');
         el.style.setProperty('align-items', 'center', 'important');
@@ -4111,7 +4127,7 @@
         if (!state.selectedEl) return;
         ensureHoverBackupBaseline(state.selectedEl);
         injectIconFn(state.selectedEl, btn.dataset.fxIcon, btn.dataset.fxPos, true);
-        showLivePreviewIndicator(`Icon: ${btn.dataset.fxIcon}`);
+        showLivePreviewIndicator(`Lucide SVG: ${btn.dataset.fxIcon}`);
       });
       btn.addEventListener('mouseleave', endHoverPreview);
       btn.addEventListener('click', () => {
@@ -4124,7 +4140,7 @@
         rec.styles['align-items'] = 'center';
         pushUndoAction({ type: 'snapshot', selector: before.selector, before, after: captureElementState(state.selectedEl) });
         updateHistoryUI();
-        showToast(btn.dataset.fxIcon === 'clear' ? 'Đã gỡ Icon khỏi phần tử' : `Đã gắn Icon ${btn.dataset.fxIcon} vào phần tử!`, '✨');
+        showToast(btn.dataset.fxIcon === 'clear' ? 'Đã gỡ SVG Icon khỏi phần tử' : `Đã gắn Lucide SVG (${btn.dataset.fxIcon}) vào phần tử!`, '✦');
       });
     });
 

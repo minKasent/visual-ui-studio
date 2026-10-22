@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Dancing+Script:wght@600;700&family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto:wght@300;400;500;700;900&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/studio.css?v=6.1" />
+  <link rel="stylesheet" href="./css/studio.css?v=6.2" />
 </head>
 <body>
   <!-- TOP NAVIGATION BAR (Shadcn + Luxe + Origin UI Aesthetic) -->
@@ -159,84 +159,78 @@
             </div>
           </div>
 
-          <!-- Category Filter Pills -->
+          <!-- Category Filter Pills (Clean Minimalist Typography) -->
           <div class="uilib-cat-bar" id="uilib-cat-pills">
-            <button type="button" class="uilib-cat-pill active" data-uicat="all">Tất cả</button>
-            <button type="button" class="uilib-cat-pill" data-uicat="button">🔘 Button</button>
-            <button type="button" class="uilib-cat-pill" data-uicat="card">🃏 Card &amp; Bento</button>
-            <button type="button" class="uilib-cat-pill" data-uicat="switch">🎚️ Switch</button>
-            <button type="button" class="uilib-cat-pill" data-uicat="checkbox">☑️ Checkbox</button>
-            <button type="button" class="uilib-cat-pill" data-uicat="input">⌨️ Input</button>
-            <button type="button" class="uilib-cat-pill" data-uicat="badge">🏷️ Badge</button>
-            <button type="button" class="uilib-cat-pill" data-uicat="nav">🧭 Navbar/Dock</button>
-            <button type="button" class="uilib-cat-pill" data-uicat="pricing">💎 Pricing</button>
-            <button type="button" class="uilib-cat-pill" data-uicat="modal">🪟 Modal</button>
-            <button type="button" class="uilib-cat-pill" data-uicat="tabs">🗂️ Tabs</button>
-            <button type="button" class="uilib-cat-pill" data-uicat="avatar">👤 Avatar</button>
-            <button type="button" class="uilib-cat-pill" data-uicat="alert">🔔 Alert</button>
-            <button type="button" class="uilib-cat-pill" data-uicat="custom" title="Chỉ hiện các mẫu Component do bạn tự Import từ code">📥 Đã Import</button>
-            <button type="button" class="uilib-cat-pill" data-uicat="directory">📚 38 Web Libs</button>
+            <button type="button" class="uilib-cat-pill active" data-uicat="all">All</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="button">Button</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="switch">Switch</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="checkbox">Checkbox</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="input">Input</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="card">Card</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="badge">Badge</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="nav">Navbar</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="tabs">Tabs</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="modal">Modal</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="avatar">Avatar</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="alert">Alert</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="slider">Slider</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="tooltip">Tooltip</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="pricing">Pricing</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="custom" title="Mẫu do bạn tự Import">Imported</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="directory">38 Libs</button>
           </div>
 
-          <!-- Smart Pro Toggles: Auto-Match Clicked Element & Morph Full FX/Icons -->
-          <div class="uilib-smart-toggles">
-            <label class="uilib-smart-chk" title="Khi bạn bấm vào Button, Input, Card... trên trang web, cột trái sẽ tự động lọc ra đúng các mẫu của loại đó!">
-              <input type="checkbox" id="chk-auto-match-el" checked />
-              <span>🎯 Tự lọc theo thẻ chọn</span>
-            </label>
-            <label class="uilib-smart-chk" title="Khi bấm ✨ Áp Style sẽ áp dụng luôn cả Animation, Hiệu ứng Hover và Icon của thư viện vào phần tử!">
-              <input type="checkbox" id="chk-morph-with-fx" checked />
-              <span>✨ Áp cả Icon &amp; Hiệu ứng</span>
-            </label>
-          </div>
-
-          <!-- Library Filter + Hover Preview Mode Row -->
+          <!-- Compact Filter & Action Row -->
           <div class="uilib-controls-row">
-            <select id="uilib-lib-filter" class="uilib-select-sm" title="Lọc theo Thư viện UI trong ảnh của bạn">
-              <option value="all">🌐 Tất cả 38+ Thư viện UI</option>
-              <option value="custom">📥 Chỉ mẫu Tự Import từ Code</option>
+            <select id="uilib-lib-filter" class="uilib-select-sm" title="Lọc theo Thư viện UI">
+              <option value="all">Tất cả 38+ Thư viện</option>
+              <option value="custom">Đã Import (.TSX)</option>
             </select>
-            <select id="uilib-hover-mode" class="uilib-select-sm" title="Khi rê chuột vào Component sẽ xem thử theo cách nào?">
-              <option value="auto">👁️ Hover: Tự động thông minh</option>
-              <option value="morph">✨ Hover: Biến hình phần tử đang chọn</option>
-              <option value="insert">➕ Hover: Xem thử chèn khối mới</option>
+            <select id="uilib-hover-mode" class="uilib-select-sm" title="Chế độ xem thử khi rê chuột">
+              <option value="auto">Hover: Tự động</option>
+              <option value="morph">Hover: Áp Style</option>
+              <option value="insert">Hover: Chèn mới</option>
             </select>
           </div>
 
-          <!-- Quick Action Toolbar: Expand Modal, Import Code & Clear Custom Imports -->
+          <!-- Compact Smart Toggles + Quick Actions in 1 Clean Bar -->
           <div class="uilib-quick-bar">
-            <button type="button" id="btn-expand-uilib-modal" class="uilib-action-pill" title="Mở kho thư viện UI toàn màn hình (Ctrl+K)">
-              ⤢ Mở Rộng
-            </button>
-            <button type="button" id="btn-open-custom-import" class="uilib-action-pill uilib-action-pill--accent" title="Copy code HTML / React JSX / Tailwind từ trang chủ Aceternity, 21st.dev, Magic UI... và dán vào đây!">
-              📥 Import Code
-            </button>
-            <button type="button" id="btn-clear-custom-imports" class="uilib-action-pill uilib-action-pill--danger hidden" title="Xóa toàn bộ các mẫu Component bạn đã tự Import từ code">
-              🗑️ Xóa Import
-            </button>
+            <label class="uilib-smart-chk" title="Tự động lọc loại Component theo thẻ bạn đang chọn trên web">
+              <input type="checkbox" id="chk-auto-match-el" checked />
+              <span>Tự lọc</span>
+            </label>
+            <label class="uilib-smart-chk" title="Áp dụng luôn cả Animation, Hover & SVG Icon khi bấm Áp Style">
+              <input type="checkbox" id="chk-morph-with-fx" checked />
+              <span>Kèm FX/SVG</span>
+            </label>
+            <button type="button" id="btn-expand-uilib-modal" class="uilib-action-pill" title="Mở kho thư viện toàn màn hình (Ctrl+K)">⤢ Mở rộng</button>
+            <button type="button" id="btn-open-custom-import" class="uilib-action-pill uilib-action-pill--accent" title="Dán code .TSX / JSX hoặc URL Registry JSON">📥 Import .TSX</button>
+            <button type="button" id="btn-clear-custom-imports" class="uilib-action-pill uilib-action-pill--danger hidden" title="Xóa toàn bộ mẫu tự Import">🗑️</button>
           </div>
 
-          <!-- 1-Click CDN Injector Bar -->
-          <div class="uilib-cdn-bar">
-            <span class="uilib-cdn-label" title="Bấm để nạp trực tiếp thư viện CDN vào trang web đang sửa">⚡ Nạp CDN:</span>
-            <button type="button" class="cdn-chip" data-inject-cdn="tailwind" title="Nạp Tailwind CSS Play CDN vào trang web để dùng mọi class Tailwind">Tailwind</button>
-            <button type="button" class="cdn-chip" data-inject-cdn="bootstrap5" title="Nạp Bootstrap 5.3 CSS/JS vào trang web">Bootstrap 5</button>
-            <button type="button" class="cdn-chip" data-inject-cdn="fontawesome" title="Nạp Font Awesome 6.5 Icons vào trang web">FontAwesome</button>
-            <button type="button" class="cdn-chip" data-inject-cdn="gsap" title="Nạp Animate.css + GSAP 3 vào trang web">GSAP/Animate</button>
-            <button type="button" class="cdn-chip" data-inject-cdn="swiper" title="Nạp Swiper 11 Carousel vào trang web">Swiper</button>
-          </div>
+          <!-- Collapsible 1-Click CDN Bar (Hidden by default to keep UI ultra-clean) -->
+          <details class="uilib-cdn-details">
+            <summary class="uilib-cdn-summary">⚡ Nạp thư viện CDN (Tailwind, Bootstrap, GSAP, Swiper...)</summary>
+            <div class="uilib-cdn-bar">
+              <button type="button" class="cdn-chip" data-inject-cdn="tailwind">Tailwind</button>
+              <button type="button" class="cdn-chip" data-inject-cdn="bootstrap5">Bootstrap 5</button>
+              <button type="button" class="cdn-chip" data-inject-cdn="fontawesome">FontAwesome</button>
+              <button type="button" class="cdn-chip" data-inject-cdn="gsap">GSAP</button>
+              <button type="button" class="cdn-chip" data-inject-cdn="swiper">Swiper</button>
+            </div>
+          </details>
         </div>
 
-        <!-- Auto-Detected Context Banner (Appears when user clicks a Button, Input, Card, etc. on the webpage!) -->
+        <!-- Auto-Detected Context Banner -->
         <div id="uilib-detected-banner" class="uilib-detected-banner hidden">
-          <span id="uilib-detected-text">🎯 Đang chọn: Button</span>
+          <span id="uilib-detected-text">Đang lọc: Button</span>
           <button type="button" id="btn-show-all-uilibs" class="uilib-detected-reset">Xem tất cả</button>
         </div>
 
-        <!-- Status Count & Hint -->
+        <!-- Status Count -->
         <div class="uilib-results-meta">
-          <span id="uilib-results-count">Đang hiển thị 45+ Component</span>
-          <span class="uilib-results-hint">Click Logo để mở Web!</span>
+          <span id="uilib-results-count">282+ Official Components</span>
+          <span class="uilib-results-hint">📄 .TSX &amp; ↗ Web</span>
         </div>
 
         <!-- Scrollable Component Cards List -->
@@ -404,427 +398,403 @@
       <!-- Active Controls when an element is selected -->
       <div id="inspector-controls" class="inspector-content hidden">
 
-        <!-- 0. OFFICIAL REACTBITS.DEV CUSTOMIZE SCRUBBERS (Sidebar Quick Deck + 3-Col Expand) -->
-        <section class="prop-group">
-          <div class="prop-group__header">
-            <span>🎛️ Customize (ReactBits.dev)</span>
-            <div class="header-right-inline">
-              <button type="button" class="btn-reset-pill btn-rb-reset-props" title="Đặt lại toàn bộ thông số Customize về mặc định">↺ Reset</button>
-              <button type="button" class="btn-reset-pill btn-toggle-rb-dock" title="Mở rộng Bảng Customize 3 cột chuẩn ReactBits.dev" style="background:rgba(168,85,247,0.2);color:#e9d5ff;border-color:rgba(168,85,247,0.5);">⤢ Bảng 3 Cột</button>
-            </div>
-          </div>
-          <div style="display:flex;gap:6px;margin-bottom:8px;">
-            <select id="rb-sidebar-schema-selector" class="select-control" style="flex:1;font-size:11.5px;" title="Chọn trong 218 bộ thông số Customize từ reactbits.dev"></select>
-            <button type="button" class="btn-secondary btn-xs btn-rb-insert-custom" title="Chèn mẫu ReactBits đã chỉnh sửa vào trang web">➕ Chèn</button>
-          </div>
-          <div class="rb-customize-scope" data-rb-theme="light" style="border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.12);">
-            <div id="rb-sidebar-options-grid" class="rb-preview-options rb-preview-options--sidebar" style="max-height:270px;overflow-y:auto;"></div>
-          </div>
-        </section>
+        <!-- FRAMER / REACTBITS / TWEAKCN 3-TAB INSPECTOR SWITCHER -->
+        <div class="inspector-mode-tabs" id="inspector-mode-tabs">
+          <button type="button" class="insp-mode-tab active" data-insp-tab="insp-pane-reactbits" title="Bảng thanh kéo Scrubber chuẩn ReactBits.dev (218 Bộ & 3,960 thông số)">
+            🎛️ Customize
+          </button>
+          <button type="button" class="insp-mode-tab" data-insp-tab="insp-pane-design" title="Màu sắc, Kiểu chữ Live-Hover, Viền, Bóng & Icon SVG Lucide">
+            🎨 Giao Diện &amp; Chữ
+          </button>
+          <button type="button" class="insp-mode-tab" data-insp-tab="insp-pane-layout" title="Tọa độ X/Y, Kích thước W/H, Padding, Margin & Flexbox">
+            📐 Bố Cục &amp; Tọa Độ
+          </button>
+        </div>
 
-        <!-- 1. REALTIME COORDINATES & POSITION -->
-        <section class="prop-group">
-          <div class="prop-group__header">
-            <span>📍 Tọa Độ &amp; Kích Thước</span>
-            <div class="header-right-inline">
-              <select id="drag-mode-select" class="select-xs" title="Cách thức dịch chuyển phần tử">
-                <option value="translate">Kéo tự do (Translate)</option>
-                <option value="margin">Đẩy bố cục (Margin)</option>
-              </select>
-              <button type="button" id="btn-pos-reset" class="btn-reset-pill" title="Đưa vị trí X, Y, góc xoay và kích thước về gốc ban đầu">↺ Vị trí gốc</button>
-            </div>
-          </div>
-
-          <!-- X & Y Coordinates with Quick Nudge Buttons -->
-          <div class="coord-grid">
-            <div class="coord-box">
-              <label>Ngang X (Trái / Phải)</label>
-              <div class="input-stepper">
-                <button type="button" class="step-btn" data-nudge-x="-10" title="Sang trái 10px (Rê chuột để xem thử)">-10</button>
-                <button type="button" class="step-btn" data-nudge-x="-1" title="Sang trái 1px">◀</button>
-                <input type="number" id="prop-x" value="0" />
-                <button type="button" class="step-btn" data-nudge-x="1" title="Sang phải 1px">▶</button>
-                <button type="button" class="step-btn" data-nudge-x="10" title="Sang phải 10px (Rê chuột để xem thử)">+10</button>
+        <!-- ==================== INSPECTOR PANE 1: REACTBITS CUSTOMIZE SCRUBBERS (DEFAULT) ==================== -->
+        <div id="insp-pane-reactbits" class="insp-mode-pane active">
+          <section class="prop-group prop-group--flush">
+            <div class="prop-group__header">
+              <span>🎛️ ReactBits Customize</span>
+              <div class="header-right-inline">
+                <button type="button" class="btn-reset-pill btn-rb-reset-props" title="Đặt lại toàn bộ thông số Customize về mặc định">↺ Reset</button>
+                <button type="button" class="btn-reset-pill btn-toggle-rb-dock" title="Mở rộng Bảng Customize 3 cột chuẩn ReactBits.dev" style="background:rgba(168,85,247,0.2);color:#e9d5ff;border-color:rgba(168,85,247,0.5);">⤢ Bảng 3 Cột</button>
               </div>
             </div>
 
-            <div class="coord-box">
-              <label>Dọc Y (Lên / Xuống)</label>
-              <div class="input-stepper">
-                <button type="button" class="step-btn" data-nudge-y="-10" title="Lên trên 10px (Rê chuột để xem thử)">-10</button>
-                <button type="button" class="step-btn" data-nudge-y="-1" title="Lên trên 1px">▲</button>
-                <input type="number" id="prop-y" value="0" />
-                <button type="button" class="step-btn" data-nudge-y="1" title="Xuống dưới 1px">▼</button>
-                <button type="button" class="step-btn" data-nudge-y="10" title="Xuống dưới 10px (Rê chuột để xem thử)">+10</button>
+            <div style="display:flex;gap:5px;margin-bottom:7px;">
+              <select id="rb-sidebar-schema-selector" class="select-control" style="flex:1;font-size:11.5px;height:28px;" title="Chọn trong 218 bộ thông số Customize từ reactbits.dev"></select>
+              <button type="button" class="btn-secondary btn-xs btn-rb-insert-custom" title="Chèn mẫu ReactBits đã chỉnh sửa vào trang web" style="height:28px;padding:0 9px;">➕ Chèn</button>
+            </div>
+
+            <!-- Compact Category Filter Pills for Master Controls -->
+            <div class="rb-sidebar-group-bar" id="rb-sidebar-group-pills">
+              <button type="button" class="rb-group-chip active" data-rb-group="all">Tất cả</button>
+              <button type="button" class="rb-group-chip" data-rb-group="ticket">🎫 Ticket &amp; Khung</button>
+              <button type="button" class="rb-group-chip" data-rb-group="cinema">🎬 Cinema &amp; Chữ</button>
+              <button type="button" class="rb-group-chip" data-rb-group="motion">🌀 3D &amp; Tilt</button>
+            </div>
+
+            <div class="rb-customize-scope" data-rb-theme="light" style="border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);">
+              <div id="rb-sidebar-options-grid" class="rb-preview-options rb-preview-options--sidebar"></div>
+            </div>
+          </section>
+        </div>
+
+        <!-- ==================== INSPECTOR PANE 2: DESIGN, TYPOGRAPHY, COLORS & LUCIDE SVG ==================== -->
+        <div id="insp-pane-design" class="insp-mode-pane hidden">
+
+          <!-- A. CONTENT & TYPOGRAPHY (WITH LIVE HOVER FONT PREVIEW) -->
+          <section class="prop-group">
+            <div class="prop-group__header">
+              <span>✍️ Nội Dung &amp; Kiểu Chữ</span>
+              <button type="button" id="btn-font-reset" class="btn-reset-pill" title="Khôi phục Font chữ, cỡ chữ, độ đậm về gốc">↺ Gốc</button>
+            </div>
+
+            <div class="prop-field" id="text-content-group">
+              <div class="label-row-between">
+                <label>Văn bản (Hoặc nhấp đúp trên web)</label>
+                <button type="button" id="btn-text-reset" class="btn-reset-pill" title="Khôi phục chữ gốc">↺ Chữ gốc</button>
+              </div>
+              <textarea id="prop-text-content" rows="2" placeholder="Nhập nội dung chữ..."></textarea>
+            </div>
+
+            <div class="prop-field mt-8" id="image-src-group">
+              <div class="label-row-between">
+                <label>Ảnh (URL / Tải lên)</label>
+                <button type="button" id="btn-img-reset" class="btn-reset-pill" title="Khôi phục ảnh gốc">↺ Ảnh gốc</button>
+              </div>
+              <div class="image-upload-row">
+                <input type="text" id="prop-img-src" placeholder="img/..." />
+                <label class="btn-secondary btn-xs upload-label">
+                  📁 Tải ảnh
+                  <input type="file" id="prop-img-file" accept="image/*" hidden />
+                </label>
               </div>
             </div>
-          </div>
 
-          <!-- Width & Height -->
-          <div class="prop-row-2col mt-8">
-            <div class="prop-field">
-              <label>Chiều rộng (W px)</label>
-              <div class="input-with-unit">
-                <input type="text" id="prop-width" placeholder="auto" />
-                <button type="button" class="unit-btn" id="btn-width-auto" title="Đặt lại chiều rộng tự động">auto</button>
+            <div class="prop-field mt-8 hidden" id="link-href-group">
+              <label>Liên kết (Href URL)</label>
+              <input type="text" id="prop-link-href" placeholder="https://..." />
+            </div>
+
+            <div class="prop-row-2col mt-8">
+              <div class="prop-field">
+                <label>Font chữ <span class="hint-eye">(Hover)</span></label>
+                <select id="prop-font-family">
+                  <option value="">Mặc định</option>
+                  <option value="'Plus Jakarta Sans', sans-serif">Plus Jakarta Sans</option>
+                  <option value="'Be Vietnam Pro', sans-serif">Be Vietnam Pro</option>
+                  <option value="'Inter', sans-serif">Inter</option>
+                  <option value="'Syne', sans-serif">Syne</option>
+                  <option value="'Space Grotesk', sans-serif">Space Grotesk</option>
+                  <option value="'Outfit', sans-serif">Outfit</option>
+                  <option value="'Montserrat', sans-serif">Montserrat</option>
+                  <option value="'Roboto', sans-serif">Roboto</option>
+                  <option value="'Playfair Display', serif">Playfair Display</option>
+                  <option value="'Lora', serif">Lora</option>
+                  <option value="'Dancing Script', cursive">Dancing Script</option>
+                  <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
+                </select>
+              </div>
+              <div class="prop-field">
+                <label>Độ đậm <span class="hint-eye">(Hover)</span></label>
+                <select id="prop-font-weight">
+                  <option value="">Mặc định</option>
+                  <option value="300">300 Light</option>
+                  <option value="400">400 Regular</option>
+                  <option value="500">500 Medium</option>
+                  <option value="600">600 SemiBold</option>
+                  <option value="700">700 Bold</option>
+                  <option value="800">800 ExtraBold</option>
+                  <option value="900">900 Black</option>
+                </select>
               </div>
             </div>
-            <div class="prop-field">
-              <label>Chiều cao (H px)</label>
-              <div class="input-with-unit">
-                <input type="text" id="prop-height" placeholder="auto" />
-                <button type="button" class="unit-btn" id="btn-height-auto" title="Đặt lại chiều cao tự động">auto</button>
+
+            <div class="slider-row mt-8">
+              <label>Cỡ chữ (px)</label>
+              <input type="range" id="prop-fontsize-slider" min="8" max="120" value="16" />
+              <input type="number" id="prop-fontsize-num" class="num-sm" value="16" min="6" max="300" />
+            </div>
+
+            <div class="prop-row-2col mt-8">
+              <div class="prop-field">
+                <label>Căn lề</label>
+                <div class="align-btn-group">
+                  <button type="button" class="align-btn" data-align="left" title="Căn trái">⬅</button>
+                  <button type="button" class="align-btn" data-align="center" title="Căn giữa">↔</button>
+                  <button type="button" class="align-btn" data-align="right" title="Căn phải">➡</button>
+                  <button type="button" class="align-btn" data-align="justify" title="Căn đều">☰</button>
+                </div>
+              </div>
+              <div class="prop-field">
+                <label>Giãn chữ (px)</label>
+                <input type="number" id="prop-letter-spacing" step="0.5" value="0" />
               </div>
             </div>
-          </div>
+          </section>
 
-          <!-- Rotate, Scale & Z-Index -->
-          <div class="prop-row-3col mt-8">
-            <div class="prop-field">
-              <label>Xoay (°)</label>
-              <input type="number" id="prop-rotate" value="0" step="1" />
+          <!-- B. COLORS & GRADIENTS (TWEAKCN / ORIGIN UI COMPACT PALETTE) -->
+          <section class="prop-group">
+            <div class="prop-group__header">
+              <span>🎨 Màu Sắc &amp; Gradient</span>
+              <button type="button" id="btn-all-colors-reset" class="btn-reset-pill" title="Khôi phục cả màu chữ lẫn màu nền về nguyên bản">↺ Màu gốc</button>
             </div>
-            <div class="prop-field">
-              <label>Tỷ lệ (%)</label>
-              <input type="number" id="prop-scale" value="100" step="5" min="10" max="300" />
-            </div>
-            <div class="prop-field">
-              <label>Lớp (Z-Index)</label>
-              <input type="number" id="prop-zindex" placeholder="auto" />
-            </div>
-          </div>
-        </section>
 
-        <!-- 2. COLORS & BACKGROUND (WITH LIVE HOVER PREVIEW & ORIGINAL COLOR RESET) -->
-        <section class="prop-group">
-          <div class="prop-group__header">
-            <span>🎨 Màu Sắc &amp; Nền (Rê chuột xem thử)</span>
-            <button type="button" id="btn-all-colors-reset" class="btn-reset-pill" title="Khôi phục cả màu chữ lẫn màu nền về nguyên bản">↺ Tất cả màu gốc</button>
-          </div>
-
-          <!-- Text Color -->
-          <div class="color-control-block">
-            <div class="color-row">
-              <label>Màu chữ</label>
-              <div class="color-picker-wrap">
-                <input type="color" id="prop-color-picker" value="#ffffff" />
-                <input type="text" id="prop-color-hex" class="hex-input" value="#ffffff" />
-                <button type="button" id="btn-color-reset" class="btn-reset-pill" title="Quay lại màu chữ gốc ban đầu của trang web">↺ Màu gốc</button>
+            <div class="color-control-block">
+              <div class="color-row">
+                <label>Màu chữ</label>
+                <div class="color-picker-wrap">
+                  <input type="color" id="prop-color-picker" value="#ffffff" />
+                  <input type="text" id="prop-color-hex" class="hex-input" value="#ffffff" />
+                  <button type="button" id="btn-color-reset" class="btn-reset-pill" title="Quay lại màu chữ gốc">↺</button>
+                </div>
+              </div>
+              <div class="swatch-row" id="text-color-swatches">
+                <button class="swatch" style="background:#ffffff" data-text-color="#ffffff" title="White"></button>
+                <button class="swatch" style="background:#a1a1aa" data-text-color="#a1a1aa" title="Zinc 400"></button>
+                <button class="swatch" style="background:#18181b" data-text-color="#18181b" title="Zinc 900"></button>
+                <button class="swatch" style="background:#6366f1" data-text-color="#6366f1" title="Indigo"></button>
+                <button class="swatch" style="background:#3b82f6" data-text-color="#3b82f6" title="Blue"></button>
+                <button class="swatch" style="background:#06b6d4" data-text-color="#06b6d4" title="Cyan"></button>
+                <button class="swatch" style="background:#10b981" data-text-color="#10b981" title="Emerald"></button>
+                <button class="swatch" style="background:#f59e0b" data-text-color="#f59e0b" title="Amber"></button>
+                <button class="swatch" style="background:#ef4444" data-text-color="#ef4444" title="Red"></button>
+                <button class="swatch" style="background:#ec4899" data-text-color="#ec4899" title="Pink"></button>
               </div>
             </div>
-            <div class="swatch-row" id="text-color-swatches">
-              <button class="swatch" style="background:#ffffff" data-text-color="#ffffff" title="Trắng"></button>
-              <button class="swatch" style="background:#f8fafc" data-text-color="#f8fafc" title="Trắng ngà"></button>
-              <button class="swatch" style="background:#94a3b8" data-text-color="#94a3b8" title="Xám nhạt"></button>
-              <button class="swatch" style="background:#1e293b" data-text-color="#1e293b" title="Đen xám"></button>
-              <button class="swatch" style="background:#000000" data-text-color="#000000" title="Đen"></button>
-              <button class="swatch" style="background:#6366f1" data-text-color="#6366f1" title="Tím Indigo"></button>
-              <button class="swatch" style="background:#3b82f6" data-text-color="#3b82f6" title="Xanh dương"></button>
-              <button class="swatch" style="background:#06b6d4" data-text-color="#06b6d4" title="Xanh Cyan"></button>
-              <button class="swatch" style="background:#00f5d4" data-text-color="#00f5d4" title="Xanh Neon"></button>
-              <button class="swatch" style="background:#10b981" data-text-color="#10b981" title="Xanh Ngọc"></button>
-              <button class="swatch" style="background:#f59e0b" data-text-color="#f59e0b" title="Vàng Cam"></button>
-              <button class="swatch" style="background:#f97316" data-text-color="#f97316" title="Cam"></button>
-              <button class="swatch" style="background:#ef4444" data-text-color="#ef4444" title="Đỏ"></button>
-              <button class="swatch" style="background:#ec4899" data-text-color="#ec4899" title="Hồng"></button>
-            </div>
-          </div>
 
-          <!-- Background Color -->
-          <div class="color-control-block mt-10">
-            <div class="color-row">
-              <label>Màu nền</label>
-              <div class="color-picker-wrap">
-                <input type="color" id="prop-bg-picker" value="#6366f1" />
-                <input type="text" id="prop-bg-hex" class="hex-input" value="#6366f1" />
-                <button type="button" id="btn-bg-transparent" class="btn-xs btn-ghost" title="Làm nền trong suốt">Trong suốt</button>
-                <button type="button" id="btn-bg-reset" class="btn-reset-pill" title="Quay lại màu nền / gradient gốc ban đầu của trang web">↺ Màu gốc</button>
+            <div class="color-control-block mt-8">
+              <div class="color-row">
+                <label>Màu nền</label>
+                <div class="color-picker-wrap">
+                  <input type="color" id="prop-bg-picker" value="#6366f1" />
+                  <input type="text" id="prop-bg-hex" class="hex-input" value="#6366f1" />
+                  <button type="button" id="btn-bg-transparent" class="btn-xs btn-ghost" title="Nền trong suốt">Clear</button>
+                  <button type="button" id="btn-bg-reset" class="btn-reset-pill" title="Quay lại màu nền gốc">↺</button>
+                </div>
+              </div>
+              <div class="swatch-row" id="bg-color-swatches">
+                <button class="swatch" style="background:#ffffff" data-bg-color="#ffffff" title="White"></button>
+                <button class="swatch" style="background:#18181b" data-bg-color="#18181b" title="Zinc 900"></button>
+                <button class="swatch" style="background:#09090b" data-bg-color="#09090b" title="Zinc 950"></button>
+                <button class="swatch" style="background:#6366f1" data-bg-color="#6366f1" title="Indigo"></button>
+                <button class="swatch" style="background:#2563eb" data-bg-color="#2563eb" title="Blue"></button>
+                <button class="swatch" style="background:#0891b2" data-bg-color="#0891b2" title="Cyan"></button>
+                <button class="swatch" style="background:#059669" data-bg-color="#059669" title="Emerald"></button>
+                <button class="swatch" style="background:#ea580c" data-bg-color="#ea580c" title="Orange"></button>
+                <button class="swatch" style="background:#e11d48" data-bg-color="#e11d48" title="Rose"></button>
+                <button class="swatch" style="background:#9333ea" data-bg-color="#9333ea" title="Purple"></button>
               </div>
             </div>
-            <div class="swatch-row" id="bg-color-swatches">
-              <button class="swatch" style="background:#ffffff" data-bg-color="#ffffff" title="Trắng"></button>
-              <button class="swatch" style="background:#f1f5f9" data-bg-color="#f1f5f9" title="Xám sáng"></button>
-              <button class="swatch" style="background:#1e293b" data-bg-color="#1e293b" title="Xám Đen"></button>
-              <button class="swatch" style="background:#0f172a" data-bg-color="#0f172a" title="Xanh Đen"></button>
-              <button class="swatch" style="background:#000000" data-bg-color="#000000" title="Đen"></button>
-              <button class="swatch" style="background:#6366f1" data-bg-color="#6366f1" title="Tím Indigo"></button>
-              <button class="swatch" style="background:#2563eb" data-bg-color="#2563eb" title="Xanh Royal"></button>
-              <button class="swatch" style="background:#0891b2" data-bg-color="#0891b2" title="Xanh Cyan"></button>
-              <button class="swatch" style="background:#00f5d4" data-bg-color="#00f5d4" title="Xanh Neon"></button>
-              <button class="swatch" style="background:#059669" data-bg-color="#059669" title="Xanh Lá"></button>
-              <button class="swatch" style="background:#eab308" data-bg-color="#eab308" title="Vàng"></button>
-              <button class="swatch" style="background:#ea580c" data-bg-color="#ea580c" title="Cam"></button>
-              <button class="swatch" style="background:#e11d48" data-bg-color="#e11d48" title="Đỏ Hồng"></button>
-              <button class="swatch" style="background:#9333ea" data-bg-color="#9333ea" title="Tím"></button>
-            </div>
-          </div>
 
-          <!-- Gradient Presets -->
-          <div class="mt-10">
-            <div class="label-row-between">
-              <label class="sub-label">Màu nền chuyển sắc (Rê chuột xem thử Gradient)</label>
-              <button type="button" id="btn-grad-reset" class="btn-reset-pill" title="Gỡ Gradient, quay về màu nền gốc">↺ Bỏ Gradient</button>
-            </div>
-            <div class="gradient-swatches" id="gradient-swatches">
-              <button class="grad-swatch" style="background:linear-gradient(135deg,#6366f1 0%,#a855f7 50%,#ec4899 100%)" data-bg-gradient="linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%)" title="Aurora Purple"></button>
-              <button class="grad-swatch" style="background:linear-gradient(135deg,#3b82f6 0%,#06b6d4 100%)" data-bg-gradient="linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%)" title="Ocean Blue"></button>
-              <button class="grad-swatch" style="background:linear-gradient(135deg,#00f5d4 0%,#3b82f6 100%)" data-bg-gradient="linear-gradient(135deg, #00f5d4 0%, #3b82f6 100%)" title="Cyber Mint"></button>
-              <button class="grad-swatch" style="background:linear-gradient(135deg,#10b981 0%,#059669 100%)" data-bg-gradient="linear-gradient(135deg, #10b981 0%, #059669 100%)" title="Emerald"></button>
-              <button class="grad-swatch" style="background:linear-gradient(135deg,#f97316 0%,#ef4444 100%)" data-bg-gradient="linear-gradient(135deg, #f97316 0%, #ef4444 100%)" title="Sunset Fire"></button>
-              <button class="grad-swatch" style="background:linear-gradient(135deg,#f59e0b 0%,#eab308 100%)" data-bg-gradient="linear-gradient(135deg, #f59e0b 0%, #eab308 100%)" title="Gold"></button>
-            </div>
-          </div>
-
-          <!-- Opacity -->
-          <div class="slider-row mt-10">
-            <label>Độ hiển thị (Opacity)</label>
-            <input type="range" id="prop-opacity-slider" min="0" max="100" value="100" />
-            <span id="prop-opacity-val" class="slider-val">100%</span>
-          </div>
-        </section>
-
-        <!-- 2.5 PRO ANIMATION, HOVER FX & 1-CLICK ICON INJECTOR -->
-        <section class="prop-group">
-          <div class="prop-group__header">
-            <span>🎬 Hiệu Ứng Động, Hover &amp; Icon 1-Click</span>
-            <button type="button" id="btn-fx-reset" class="btn-reset-pill" title="Gỡ hiệu ứng động và icon đã gắn thêm">↺ Bỏ FX/Icon</button>
-          </div>
-          <label class="sub-label">Chuyển động liên tục (Animation):</label>
-          <div class="preset-pills" id="fx-anim-pills">
-            <button type="button" class="preset-pill" data-fx-anim="rainbow" title="Chuyển màu cầu vồng liên tục kiểu Magic UI">🌈 Cầu vồng</button>
-            <button type="button" class="preset-pill" data-fx-anim="shimmer" title="Ánh sáng kim loại quét ngang kiểu Aceternity">✨ Shimmer</button>
-            <button type="button" class="preset-pill" data-fx-anim="glow" title="Hào quang nhịp thở phát sáng">🔮 Nhịp thở Glow</button>
-            <button type="button" class="preset-pill" data-fx-anim="float" title="Lơ lửng nhẹ nhàng lên xuống">🎈 Lơ lửng</button>
-            <button type="button" class="preset-pill" data-fx-anim="none" title="Tắt animation">🚫 Tắt</button>
-          </div>
-          <label class="sub-label mt-8">Hiệu ứng khi rê chuột (Hover FX):</label>
-          <div class="preset-pills" id="fx-hover-pills">
-            <button type="button" class="preset-pill" data-fx-hover="uilib-btn-hover-lift" title="Rê chuột vào sẽ nổi lên và sáng hơn">🚀 Nổi lên (Lift)</button>
-            <button type="button" class="preset-pill" data-fx-hover="uilib-btn-brutal" title="Rê chuột vào bật bóng cứng Neo-Brutalism">🟨 Neo-Brutal</button>
-            <button type="button" class="preset-pill" data-fx-hover="uilib-btn-duolingo" title="Nhấn xuống lún 3D kiểu Duolingo">🕹️ Nút 3D</button>
-          </div>
-          <label class="sub-label mt-8">Gắn nhanh Icon vào phần tử đang chọn:</label>
-          <div class="preset-pills" id="fx-icon-pills">
-            <button type="button" class="preset-pill" data-fx-icon="🌈" title="Gắn icon Cầu vồng vào đầu chữ">🌈</button>
-            <button type="button" class="preset-pill" data-fx-icon="✨" title="Gắn icon Lấp lánh vào đầu chữ">✨</button>
-            <button type="button" class="preset-pill" data-fx-icon="⚡" title="Gắn icon Tia sét vào đầu chữ">⚡</button>
-            <button type="button" class="preset-pill" data-fx-icon="🚀" title="Gắn icon Tên lửa vào đầu chữ">🚀</button>
-            <button type="button" class="preset-pill" data-fx-icon="🔥" title="Gắn icon Lửa Hot vào đầu chữ">🔥</button>
-            <button type="button" class="preset-pill" data-fx-icon="💎" title="Gắn icon Kim cương Pro vào đầu chữ">💎</button>
-            <button type="button" class="preset-pill" data-fx-icon="🛒" title="Gắn icon Giỏ hàng vào đầu chữ">🛒</button>
-            <button type="button" class="preset-pill" data-fx-icon="→" data-fx-pos="end" title="Gắn mũi tên → vào cuối chữ">→ Cuối</button>
-            <button type="button" class="preset-pill" data-fx-icon="clear" title="Xóa các icon đã gắn thêm">✕ Xóa Icon</button>
-          </div>
-        </section>
-
-        <!-- 3. TEXT, IMAGE & TYPOGRAPHY (WITH LIVE HOVER FONT PREVIEW!) -->
-        <section class="prop-group">
-          <div class="prop-group__header">
-            <span>✍️ Nội Dung &amp; Kiểu Chữ</span>
-            <button type="button" id="btn-font-reset" class="btn-reset-pill" title="Khôi phục Font chữ, cỡ chữ, độ đậm về gốc">↺ Kiểu chữ gốc</button>
-          </div>
-
-          <!-- Text content input -->
-          <div class="prop-field" id="text-content-group">
-            <div class="label-row-between">
-              <label>Nội dung văn bản (Hoặc nhấp đúp trực tiếp trên web)</label>
-              <button type="button" id="btn-text-reset" class="btn-reset-pill" title="Khôi phục nội dung chữ gốc ban đầu">↺ Chữ gốc</button>
-            </div>
-            <textarea id="prop-text-content" rows="2" placeholder="Nhập nội dung chữ..."></textarea>
-          </div>
-
-          <!-- Image Src Controls (Shown when IMG or element is selected) -->
-          <div class="prop-field mt-8" id="image-src-group">
-            <div class="label-row-between">
-              <label>Đường dẫn Ảnh (URL) hoặc tải ảnh từ máy</label>
-              <button type="button" id="btn-img-reset" class="btn-reset-pill" title="Khôi phục ảnh gốc ban đầu">↺ Ảnh gốc</button>
-            </div>
-            <div class="image-upload-row">
-              <input type="text" id="prop-img-src" placeholder="img/..." />
-              <label class="btn-secondary btn-xs upload-label">
-                📁 Chọn Ảnh
-                <input type="file" id="prop-img-file" accept="image/*" hidden />
-              </label>
-            </div>
-          </div>
-
-          <!-- Link Href Controls (Shown when <a> is selected) -->
-          <div class="prop-field mt-8 hidden" id="link-href-group">
-            <label>Đường dẫn liên kết (Link URL)</label>
-            <input type="text" id="prop-link-href" placeholder="https://..." />
-          </div>
-
-          <!-- Font Family & Weight (Upgraded with Custom Live-Hover Preview Dropdowns!) -->
-          <div class="prop-row-2col mt-8">
-            <div class="prop-field">
-              <label>Font chữ <span class="hint-eye">(Rê chuột xem thử)</span></label>
-              <select id="prop-font-family">
-                <option value="">Mặc định của trang</option>
-                <option value="'Plus Jakarta Sans', sans-serif">Plus Jakarta Sans</option>
-                <option value="'Be Vietnam Pro', sans-serif">Be Vietnam Pro (Tiếng Việt)</option>
-                <option value="'Inter', sans-serif">Inter (Hiện đại)</option>
-                <option value="'Syne', sans-serif">Syne (Nghệ thuật)</option>
-                <option value="'Space Grotesk', sans-serif">Space Grotesk (Tech)</option>
-                <option value="'Outfit', sans-serif">Outfit (Trẻ trung)</option>
-                <option value="'Montserrat', sans-serif">Montserrat (Mạnh mẽ)</option>
-                <option value="'Roboto', sans-serif">Roboto (Cổ điển)</option>
-                <option value="'Playfair Display', serif">Playfair Display (Sang trọng)</option>
-                <option value="'Lora', serif">Lora (Tạp chí)</option>
-                <option value="'Dancing Script', cursive">Dancing Script (Viết tay)</option>
-                <option value="'JetBrains Mono', monospace">JetBrains Mono (Code)</option>
-              </select>
-            </div>
-            <div class="prop-field">
-              <label>Độ đậm chữ <span class="hint-eye">(Xem thử)</span></label>
-              <select id="prop-font-weight">
-                <option value="">Mặc định</option>
-                <option value="300">300 - Mỏng (Light)</option>
-                <option value="400">400 - Thường (Regular)</option>
-                <option value="500">500 - Vừa (Medium)</option>
-                <option value="600">600 - Hơi đậm (SemiBold)</option>
-                <option value="700">700 - Đậm (Bold)</option>
-                <option value="800">800 - Rất đậm (ExtraBold)</option>
-                <option value="900">900 - Siêu đậm (Black)</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Font Size Slider & Input -->
-          <div class="slider-row mt-8">
-            <label>Cỡ chữ (px)</label>
-            <input type="range" id="prop-fontsize-slider" min="8" max="120" value="16" />
-            <input type="number" id="prop-fontsize-num" class="num-sm" value="16" min="6" max="300" />
-          </div>
-
-          <!-- Text Align & Letter Spacing -->
-          <div class="prop-row-2col mt-8">
-            <div class="prop-field">
-              <label>Căn lề chữ (Rê chuột xem thử)</label>
-              <div class="align-btn-group">
-                <button type="button" class="align-btn" data-align="left" title="Căn trái">⬅</button>
-                <button type="button" class="align-btn" data-align="center" title="Căn giữa">↔</button>
-                <button type="button" class="align-btn" data-align="right" title="Căn phải">➡</button>
-                <button type="button" class="align-btn" data-align="justify" title="Căn đều">☰</button>
+            <div class="mt-8">
+              <div class="label-row-between">
+                <label class="sub-label">Gradient Preset (Hover xem thử)</label>
+                <button type="button" id="btn-grad-reset" class="btn-reset-pill">↺ Bỏ</button>
+              </div>
+              <div class="gradient-swatches" id="gradient-swatches">
+                <button class="grad-swatch" style="background:linear-gradient(135deg,#6366f1 0%,#a855f7 50%,#ec4899 100%)" data-bg-gradient="linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%)" title="Aurora"></button>
+                <button class="grad-swatch" style="background:linear-gradient(135deg,#3b82f6 0%,#06b6d4 100%)" data-bg-gradient="linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%)" title="Ocean"></button>
+                <button class="grad-swatch" style="background:linear-gradient(135deg,#00f5d4 0%,#3b82f6 100%)" data-bg-gradient="linear-gradient(135deg, #00f5d4 0%, #3b82f6 100%)" title="Cyber"></button>
+                <button class="grad-swatch" style="background:linear-gradient(135deg,#10b981 0%,#059669 100%)" data-bg-gradient="linear-gradient(135deg, #10b981 0%, #059669 100%)" title="Emerald"></button>
+                <button class="grad-swatch" style="background:linear-gradient(135deg,#f97316 0%,#ef4444 100%)" data-bg-gradient="linear-gradient(135deg, #f97316 0%, #ef4444 100%)" title="Sunset"></button>
+                <button class="grad-swatch" style="background:linear-gradient(135deg,#18181b 0%,#3f3f46 100%)" data-bg-gradient="linear-gradient(135deg, #18181b 0%, #3f3f46 100%)" title="Obsidian"></button>
               </div>
             </div>
-            <div class="prop-field">
-              <label>Giãn chữ (px)</label>
-              <input type="number" id="prop-letter-spacing" step="0.5" value="0" />
-            </div>
-          </div>
-        </section>
 
-        <!-- 4. BORDER, RADIUS & SHADOWS -->
-        <section class="prop-group">
-          <div class="prop-group__header">
-            <span>🔲 Bo Góc, Viền &amp; Đổ Bóng</span>
-            <button type="button" id="btn-border-reset" class="btn-reset-pill" title="Khôi phục bo góc, viền và đổ bóng về gốc">↺ Viền &amp; Bóng gốc</button>
-          </div>
+            <div class="slider-row mt-8">
+              <label>Opacity</label>
+              <input type="range" id="prop-opacity-slider" min="0" max="100" value="100" />
+              <span id="prop-opacity-val" class="slider-val">100%</span>
+            </div>
+          </section>
 
-          <!-- Border Radius -->
-          <div class="slider-row">
-            <label>Bo tròn góc</label>
-            <input type="range" id="prop-radius-slider" min="0" max="64" value="0" />
-            <input type="number" id="prop-radius-num" class="num-sm" value="0" min="0" max="999" />
-            <button type="button" id="btn-radius-pill" class="btn-xs btn-ghost" title="Bo tròn hình viên thuốc (999px) — Rê chuột xem thử">Tròn</button>
-          </div>
+          <!-- C. BORDER, RADIUS & SHADOWS -->
+          <section class="prop-group">
+            <div class="prop-group__header">
+              <span>🔲 Bo Góc, Viền &amp; Bóng</span>
+              <button type="button" id="btn-border-reset" class="btn-reset-pill">↺ Gốc</button>
+            </div>
 
-          <!-- Border Width, Style, Color -->
-          <div class="prop-row-3col mt-8">
-            <div class="prop-field">
-              <label>Độ dày viền</label>
-              <input type="number" id="prop-border-width" min="0" max="40" value="0" />
+            <div class="slider-row">
+              <label>Radius</label>
+              <input type="range" id="prop-radius-slider" min="0" max="64" value="0" />
+              <input type="number" id="prop-radius-num" class="num-sm" value="0" min="0" max="999" />
+              <button type="button" id="btn-radius-pill" class="btn-xs btn-ghost" title="999px Pill">Pill</button>
             </div>
-            <div class="prop-field">
-              <label>Kiểu viền</label>
-              <select id="prop-border-style">
-                <option value="none">Không viền</option>
-                <option value="solid">Nét liền</option>
-                <option value="dashed">Nét đứt</option>
-                <option value="dotted">Nét chấm</option>
-              </select>
-            </div>
-            <div class="prop-field">
-              <label>Màu viền</label>
-              <input type="color" id="prop-border-color" value="#6366f1" class="color-full" />
-            </div>
-          </div>
 
-          <!-- Shadow Presets -->
-          <div class="mt-10">
-            <label class="sub-label">Hiệu ứng đổ bóng (Rê chuột xem thử Box Shadow)</label>
-            <div class="preset-pills" id="shadow-presets">
-              <button type="button" class="preset-pill" data-shadow="none">Không</button>
-              <button type="button" class="preset-pill" data-shadow="0 4px 12px rgba(0,0,0,0.12)">Nhẹ</button>
-              <button type="button" class="preset-pill" data-shadow="0 12px 32px rgba(0,0,0,0.25)">Nổi khối</button>
-              <button type="button" class="preset-pill" data-shadow="0 24px 48px rgba(0,0,0,0.45)">Sâu 3D</button>
-              <button type="button" class="preset-pill" data-shadow="0 0 24px rgba(99,102,241,0.65)">Neon Tím</button>
-              <button type="button" class="preset-pill" data-shadow="0 0 24px rgba(6,182,212,0.65)">Neon Xanh</button>
-              <button type="button" class="preset-pill" data-shadow="0 0 24px rgba(236,72,153,0.65)">Neon Hồng</button>
+            <div class="prop-row-3col mt-8">
+              <div class="prop-field">
+                <label>Dày (px)</label>
+                <input type="number" id="prop-border-width" min="0" max="40" value="0" />
+              </div>
+              <div class="prop-field">
+                <label>Kiểu</label>
+                <select id="prop-border-style">
+                  <option value="none">None</option>
+                  <option value="solid">Solid</option>
+                  <option value="dashed">Dashed</option>
+                  <option value="dotted">Dotted</option>
+                </select>
+              </div>
+              <div class="prop-field">
+                <label>Màu viền</label>
+                <input type="color" id="prop-border-color" value="#6366f1" class="color-full" />
+              </div>
             </div>
-          </div>
-        </section>
 
-        <!-- 5. PADDING & MARGIN (4 DIRECTIONS) -->
-        <section class="prop-group">
-          <div class="prop-group__header">
-            <span>📏 Khoảng Cách Trong (Padding) &amp; Ngoài (Margin)</span>
-            <button type="button" id="btn-spacing-reset" class="btn-reset-pill" title="Khôi phục Padding & Margin về gốc">↺ Khoảng cách gốc</button>
-          </div>
+            <div class="mt-8">
+              <label class="sub-label">Đổ bóng (Box Shadow)</label>
+              <div class="preset-pills" id="shadow-presets">
+                <button type="button" class="preset-pill" data-shadow="none">None</button>
+                <button type="button" class="preset-pill" data-shadow="0 4px 12px rgba(0,0,0,0.12)">Sm</button>
+                <button type="button" class="preset-pill" data-shadow="0 12px 32px rgba(0,0,0,0.25)">Md</button>
+                <button type="button" class="preset-pill" data-shadow="0 24px 48px rgba(0,0,0,0.45)">Xl</button>
+                <button type="button" class="preset-pill" data-shadow="0 0 24px rgba(99,102,241,0.65)">Indigo</button>
+                <button type="button" class="preset-pill" data-shadow="0 0 24px rgba(6,182,212,0.65)">Cyan</button>
+              </div>
+            </div>
+          </section>
 
-          <label class="sub-label">Padding — Khoảng đệm bên trong phần tử (px)</label>
-          <div class="box-4way">
-            <div class="prop-field">
-              <label>Trên</label>
-              <input type="number" id="prop-pad-top" value="0" />
+          <!-- D. COMPACT LUCIDE VECTOR SVG ICON & SHADER BAR (Replaces old cartoon emoji box!) -->
+          <section class="prop-group">
+            <div class="prop-group__header">
+              <span>✦ Lucide Vector SVG &amp; Shader</span>
+              <button type="button" id="btn-fx-reset" class="btn-reset-pill" title="Gỡ SVG Icon và hiệu ứng">↺ Reset</button>
             </div>
-            <div class="prop-field">
-              <label>Phải</label>
-              <input type="number" id="prop-pad-right" value="0" />
+            <div class="preset-pills" id="fx-anim-pills" style="margin-bottom:6px;">
+              <button type="button" class="preset-pill" data-fx-anim="shimmer">Shimmer</button>
+              <button type="button" class="preset-pill" data-fx-anim="rainbow">Rainbow</button>
+              <button type="button" class="preset-pill" data-fx-anim="glow">Pulse Glow</button>
+              <button type="button" class="preset-pill" data-fx-hover="uilib-btn-hover-lift">Hover Lift</button>
+              <button type="button" class="preset-pill" data-fx-anim="none">Off</button>
             </div>
-            <div class="prop-field">
-              <label>Dưới</label>
-              <input type="number" id="prop-pad-bottom" value="0" />
+            <div class="lucide-mini-grid" id="fx-icon-pills">
+              <button type="button" class="lucide-icon-btn" data-fx-icon="Sparkles" title="Chèn Lucide SVG: Sparkles"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg></button>
+              <button type="button" class="lucide-icon-btn" data-fx-icon="Zap" title="Chèn Lucide SVG: Zap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></button>
+              <button type="button" class="lucide-icon-btn" data-fx-icon="ArrowRight" data-fx-pos="end" title="Chèn Lucide SVG cuối: ArrowRight"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+              <button type="button" class="lucide-icon-btn" data-fx-icon="ArrowUpRight" data-fx-pos="end" title="Chèn Lucide SVG cuối: ArrowUpRight"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></button>
+              <button type="button" class="lucide-icon-btn" data-fx-icon="Check" title="Chèn Lucide SVG: Check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></button>
+              <button type="button" class="lucide-icon-btn" data-fx-icon="Plus" title="Chèn Lucide SVG: Plus"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg></button>
+              <button type="button" class="lucide-icon-btn" data-fx-icon="Play" title="Chèn Lucide SVG: Play"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="6 3 20 12 6 21 6 3"/></svg></button>
+              <button type="button" class="lucide-icon-btn" data-fx-icon="Star" title="Chèn Lucide SVG: Star"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+              <button type="button" class="lucide-icon-btn" data-fx-icon="Download" title="Chèn Lucide SVG: Download"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg></button>
+              <button type="button" class="lucide-icon-btn" data-fx-icon="Send" title="Chèn Lucide SVG: Send"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></svg></button>
+              <button type="button" class="lucide-icon-btn" data-fx-icon="Shield" title="Chèn Lucide SVG: Shield"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></button>
+              <button type="button" class="lucide-icon-btn" data-fx-icon="Terminal" title="Chèn Lucide SVG: Terminal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg></button>
+              <button type="button" class="lucide-icon-btn" data-fx-icon="clear" title="Xóa Icon đã gắn" style="width:auto;padding:0 8px;font-size:10.5px;color:#f87171;">✕ Gỡ</button>
             </div>
-            <div class="prop-field">
-              <label>Trái</label>
-              <input type="number" id="prop-pad-left" value="0" />
-            </div>
-          </div>
+          </section>
+        </div>
 
-          <label class="sub-label mt-8">Margin — Khoảng cách đẩy ra bên ngoài (px)</label>
-          <div class="box-4way">
-            <div class="prop-field">
-              <label>Trên</label>
-              <input type="number" id="prop-mar-top" value="0" />
+        <!-- ==================== INSPECTOR PANE 3: LAYOUT, COORDINATES & FLEXBOX ==================== -->
+        <div id="insp-pane-layout" class="insp-mode-pane hidden">
+          <section class="prop-group">
+            <div class="prop-group__header">
+              <span>📍 Tọa Độ &amp; Kích Thước</span>
+              <div class="header-right-inline">
+                <select id="drag-mode-select" class="select-xs" title="Cách thức dịch chuyển phần tử">
+                  <option value="translate">Translate</option>
+                  <option value="margin">Margin</option>
+                </select>
+                <button type="button" id="btn-pos-reset" class="btn-reset-pill">↺ Gốc</button>
+              </div>
             </div>
-            <div class="prop-field">
-              <label>Phải</label>
-              <input type="number" id="prop-mar-right" value="0" />
-            </div>
-            <div class="prop-field">
-              <label>Dưới</label>
-              <input type="number" id="prop-mar-bottom" value="0" />
-            </div>
-            <div class="prop-field">
-              <label>Trái</label>
-              <input type="number" id="prop-mar-left" value="0" />
-            </div>
-          </div>
-        </section>
 
-        <!-- 6. QUICK FLEX LAYOUT -->
-        <section class="prop-group">
-          <div class="prop-group__header">
-            <span>⚡ Căn Chỉnh Bố Cục Nhanh (Rê chuột xem thử)</span>
-          </div>
-          <div class="preset-pills">
-            <button type="button" class="preset-pill" id="btn-flex-row">↔ Xếp Hàng Ngang</button>
-            <button type="button" class="preset-pill" id="btn-flex-col">↕ Xếp Hàng Dọc</button>
-            <button type="button" class="preset-pill" id="btn-flex-center">🎯 Căn Giữa Tất Cả</button>
-            <button type="button" class="preset-pill" id="btn-flex-between">⇔ Giãn Đều 2 Bên</button>
-          </div>
-        </section>
+            <div class="coord-grid">
+              <div class="coord-box">
+                <label>Ngang X (px)</label>
+                <div class="input-stepper">
+                  <button type="button" class="step-btn" data-nudge-x="-10">-10</button>
+                  <button type="button" class="step-btn" data-nudge-x="-1">◀</button>
+                  <input type="number" id="prop-x" value="0" />
+                  <button type="button" class="step-btn" data-nudge-x="1">▶</button>
+                  <button type="button" class="step-btn" data-nudge-x="10">+10</button>
+                </div>
+              </div>
+
+              <div class="coord-box">
+                <label>Dọc Y (px)</label>
+                <div class="input-stepper">
+                  <button type="button" class="step-btn" data-nudge-y="-10">-10</button>
+                  <button type="button" class="step-btn" data-nudge-y="-1">▲</button>
+                  <input type="number" id="prop-y" value="0" />
+                  <button type="button" class="step-btn" data-nudge-y="1">▼</button>
+                  <button type="button" class="step-btn" data-nudge-y="10">+10</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="prop-row-2col mt-8">
+              <div class="prop-field">
+                <label>Width (px)</label>
+                <div class="input-with-unit">
+                  <input type="text" id="prop-width" placeholder="auto" />
+                  <button type="button" class="unit-btn" id="btn-width-auto">auto</button>
+                </div>
+              </div>
+              <div class="prop-field">
+                <label>Height (px)</label>
+                <div class="input-with-unit">
+                  <input type="text" id="prop-height" placeholder="auto" />
+                  <button type="button" class="unit-btn" id="btn-height-auto">auto</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="prop-row-3col mt-8">
+              <div class="prop-field">
+                <label>Rotate (°)</label>
+                <input type="number" id="prop-rotate" value="0" step="1" />
+              </div>
+              <div class="prop-field">
+                <label>Scale (%)</label>
+                <input type="number" id="prop-scale" value="100" step="5" min="10" max="300" />
+              </div>
+              <div class="prop-field">
+                <label>Z-Index</label>
+                <input type="number" id="prop-zindex" placeholder="auto" />
+              </div>
+            </div>
+          </section>
+
+          <section class="prop-group">
+            <div class="prop-group__header">
+              <span>📏 Padding &amp; Margin (px)</span>
+              <button type="button" id="btn-spacing-reset" class="btn-reset-pill">↺ Gốc</button>
+            </div>
+
+            <label class="sub-label">Padding (Trong)</label>
+            <div class="box-4way">
+              <div class="prop-field"><label>T</label><input type="number" id="prop-pad-top" value="0" /></div>
+              <div class="prop-field"><label>R</label><input type="number" id="prop-pad-right" value="0" /></div>
+              <div class="prop-field"><label>B</label><input type="number" id="prop-pad-bottom" value="0" /></div>
+              <div class="prop-field"><label>L</label><input type="number" id="prop-pad-left" value="0" /></div>
+            </div>
+
+            <label class="sub-label mt-8">Margin (Ngoài)</label>
+            <div class="box-4way">
+              <div class="prop-field"><label>T</label><input type="number" id="prop-mar-top" value="0" /></div>
+              <div class="prop-field"><label>R</label><input type="number" id="prop-mar-right" value="0" /></div>
+              <div class="prop-field"><label>B</label><input type="number" id="prop-mar-bottom" value="0" /></div>
+              <div class="prop-field"><label>L</label><input type="number" id="prop-mar-left" value="0" /></div>
+            </div>
+          </section>
+
+          <section class="prop-group">
+            <div class="prop-group__header">
+              <span>⚡ Flexbox Alignment</span>
+            </div>
+            <div class="preset-pills">
+              <button type="button" class="preset-pill" id="btn-flex-row">↔ Flex Row</button>
+              <button type="button" class="preset-pill" id="btn-flex-col">↕ Flex Col</button>
+              <button type="button" class="preset-pill" id="btn-flex-center">🎯 Center</button>
+              <button type="button" class="preset-pill" id="btn-flex-between">⇔ Space Between</button>
+            </div>
+          </section>
+        </div>
 
       </div>
     </aside>
@@ -1050,9 +1020,9 @@
   <!-- TOAST NOTIFICATION -->
   <div id="toast-container" class="toast-container"></div>
 
-  <script src="./js/ui-libs-registry.js?v=6.1"></script>
-  <script src="./js/reactbits-customize.js?v=6.1"></script>
-  <script src="./js/templates.js?v=6.1"></script>
-  <script src="./js/studio.js?v=6.1"></script>
+  <script src="./js/ui-libs-registry.js?v=6.2"></script>
+  <script src="./js/reactbits-customize.js?v=6.2"></script>
+  <script src="./js/templates.js?v=6.2"></script>
+  <script src="./js/studio.js?v=6.2"></script>
 </body>
 </html>
