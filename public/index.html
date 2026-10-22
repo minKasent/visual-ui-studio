@@ -3,21 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Visual UI Studio Pro v4.0 — Kéo Thả &amp; Kho 38+ Thư Viện UI Hàng Đầu</title>
+  <title>Visual UI Studio Pro v5.0 — Kéo Thả, Tự Nhận Diện UI &amp; Kho 38+ Thư Viện</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Dancing+Script:wght@600;700&family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto:wght@300;400;500;700;900&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/studio.css?v=4.3" />
+  <link rel="stylesheet" href="./css/studio.css?v=5.0" />
 </head>
 <body>
   <!-- TOP NAVIGATION BAR (Shadcn + Luxe + Origin UI Aesthetic) -->
   <header class="topbar">
     <div class="topbar__left">
-      <div class="brand">
+      <div class="brand" id="brand-home-logo" title="🏠 Click vào Logo để quay về Trang Chủ">
         <div class="brand__logo">✦</div>
         <div class="brand__text">
-          <span class="brand__title">Visual UI Studio <span class="pro-tag">v4.0</span></span>
-          <span class="brand__badge">38+ UI Libraries &amp; Live Hover</span>
+          <span class="brand__title">Visual UI Studio <span class="pro-tag">v5.0 PRO</span></span>
+          <span class="brand__badge">38+ UI Libraries &amp; NameThat AI</span>
         </div>
       </div>
 
@@ -125,24 +125,64 @@
       <!-- TAB 0 (DEFAULT ACTIVE): 38+ UI LIBRARIES & COMPONENT SEARCH ENGINE -->
       <div class="sidebar-panel active" id="tab-uilibs">
         <div class="uilib-hub-header">
-          <!-- Instant Search Bar -->
-          <div class="uilib-search-box">
-            <span class="uilib-search-icon">🔍</span>
-            <input type="text" id="uilib-search-input" placeholder="Gõ: button, card, input, aceternity, magic..." autocomplete="off" />
-            <button type="button" id="btn-clear-uilib-search" class="uilib-clear-btn hidden" title="Xóa tìm kiếm">✕</button>
+          <!-- Instant Search Bar + NameThat UI Checklist Trigger -->
+          <div class="uilib-search-row">
+            <div class="uilib-search-box" style="flex:1;">
+              <span class="uilib-search-icon">🔍</span>
+              <input type="text" id="uilib-search-input" placeholder="Gõ: button, switch, card, magic..." autocomplete="off" />
+              <button type="button" id="btn-clear-uilib-search" class="uilib-clear-btn hidden" title="Xóa tìm kiếm">✕</button>
+            </div>
+            <button type="button" id="btn-toggle-namethat-checklist" class="uilib-checklist-btn" title="Mở bảng Checklist các loại Component chuẩn NameThat UI (Button, Switch, Card, Checkbox, Modal, Tabs...)">
+              ☑️ Checklist <span id="namethat-checked-badge" class="namethat-badge hidden">0</span>
+            </button>
+          </div>
+
+          <!-- Expandable NameThat UI Checklist Drawer (Multi-select taxonomy from namethat.com / component.gallery) -->
+          <div id="namethat-checklist-panel" class="namethat-checklist-panel hidden">
+            <div class="namethat-panel__header">
+              <span>📋 <strong>Checklist Loại UI</strong> (Chuẩn NameThat)</span>
+              <div style="display:flex;gap:6px;align-items:center;">
+                <button type="button" id="btn-reset-namethat" class="namethat-reset-btn">↺ Bỏ chọn hết</button>
+                <button type="button" id="btn-close-namethat" class="namethat-close-btn" title="Đóng Checklist">✕</button>
+              </div>
+            </div>
+            <div id="namethat-checklist-grid" class="namethat-checklist-grid">
+              <!-- Populated dynamically from window.STUDIO_NAMETHAT_CATEGORIES -->
+            </div>
+            <div id="namethat-matching-libs" class="namethat-matching-libs hidden">
+              <!-- Shows which libraries have built the checked component types -->
+            </div>
           </div>
 
           <!-- Category Filter Pills -->
           <div class="uilib-cat-bar" id="uilib-cat-pills">
             <button type="button" class="uilib-cat-pill active" data-uicat="all">Tất cả</button>
-            <button type="button" class="uilib-cat-pill" data-uicat="custom" title="Chỉ hiện các mẫu Component do bạn tự Import từ code">📥 Đã Import</button>
             <button type="button" class="uilib-cat-pill" data-uicat="button">🔘 Button</button>
             <button type="button" class="uilib-cat-pill" data-uicat="card">🃏 Card &amp; Bento</button>
-            <button type="button" class="uilib-cat-pill" data-uicat="badge">🏷️ Badge</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="switch">🎚️ Switch</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="checkbox">☑️ Checkbox</button>
             <button type="button" class="uilib-cat-pill" data-uicat="input">⌨️ Input</button>
-            <button type="button" class="uilib-cat-pill" data-uicat="pricing">💎 Pricing/KPI</button>
-            <button type="button" class="uilib-cat-pill" data-uicat="hero">🚀 Hero &amp; Nav</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="badge">🏷️ Badge</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="nav">🧭 Navbar/Dock</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="pricing">💎 Pricing</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="modal">🪟 Modal</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="tabs">🗂️ Tabs</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="avatar">👤 Avatar</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="alert">🔔 Alert</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="custom" title="Chỉ hiện các mẫu Component do bạn tự Import từ code">📥 Đã Import</button>
             <button type="button" class="uilib-cat-pill" data-uicat="directory">📚 38 Web Libs</button>
+          </div>
+
+          <!-- Smart Pro Toggles: Auto-Match Clicked Element & Morph Full FX/Icons -->
+          <div class="uilib-smart-toggles">
+            <label class="uilib-smart-chk" title="Khi bạn bấm vào Button, Input, Card... trên trang web, cột trái sẽ tự động lọc ra đúng các mẫu của loại đó!">
+              <input type="checkbox" id="chk-auto-match-el" checked />
+              <span>🎯 Tự lọc theo thẻ chọn</span>
+            </label>
+            <label class="uilib-smart-chk" title="Khi bấm ✨ Áp Style sẽ áp dụng luôn cả Animation, Hiệu ứng Hover và Icon của thư viện vào phần tử!">
+              <input type="checkbox" id="chk-morph-with-fx" checked />
+              <span>✨ Áp cả Icon &amp; Hiệu ứng</span>
+            </label>
           </div>
 
           <!-- Library Filter + Hover Preview Mode Row -->
@@ -182,10 +222,16 @@
           </div>
         </div>
 
+        <!-- Auto-Detected Context Banner (Appears when user clicks a Button, Input, Card, etc. on the webpage!) -->
+        <div id="uilib-detected-banner" class="uilib-detected-banner hidden">
+          <span id="uilib-detected-text">🎯 Đang chọn: Button</span>
+          <button type="button" id="btn-show-all-uilibs" class="uilib-detected-reset">Xem tất cả</button>
+        </div>
+
         <!-- Status Count & Hint -->
         <div class="uilib-results-meta">
-          <span id="uilib-results-count">Đang hiển thị 30+ Component</span>
-          <span class="uilib-results-hint">Rê chuột để xem trên Web!</span>
+          <span id="uilib-results-count">Đang hiển thị 45+ Component</span>
+          <span class="uilib-results-hint">Click Logo để mở Web!</span>
         </div>
 
         <!-- Scrollable Component Cards List -->
@@ -506,6 +552,40 @@
             <label>Độ hiển thị (Opacity)</label>
             <input type="range" id="prop-opacity-slider" min="0" max="100" value="100" />
             <span id="prop-opacity-val" class="slider-val">100%</span>
+          </div>
+        </section>
+
+        <!-- 2.5 PRO ANIMATION, HOVER FX & 1-CLICK ICON INJECTOR -->
+        <section class="prop-group">
+          <div class="prop-group__header">
+            <span>🎬 Hiệu Ứng Động, Hover &amp; Icon 1-Click</span>
+            <button type="button" id="btn-fx-reset" class="btn-reset-pill" title="Gỡ hiệu ứng động và icon đã gắn thêm">↺ Bỏ FX/Icon</button>
+          </div>
+          <label class="sub-label">Chuyển động liên tục (Animation):</label>
+          <div class="preset-pills" id="fx-anim-pills">
+            <button type="button" class="preset-pill" data-fx-anim="rainbow" title="Chuyển màu cầu vồng liên tục kiểu Magic UI">🌈 Cầu vồng</button>
+            <button type="button" class="preset-pill" data-fx-anim="shimmer" title="Ánh sáng kim loại quét ngang kiểu Aceternity">✨ Shimmer</button>
+            <button type="button" class="preset-pill" data-fx-anim="glow" title="Hào quang nhịp thở phát sáng">🔮 Nhịp thở Glow</button>
+            <button type="button" class="preset-pill" data-fx-anim="float" title="Lơ lửng nhẹ nhàng lên xuống">🎈 Lơ lửng</button>
+            <button type="button" class="preset-pill" data-fx-anim="none" title="Tắt animation">🚫 Tắt</button>
+          </div>
+          <label class="sub-label mt-8">Hiệu ứng khi rê chuột (Hover FX):</label>
+          <div class="preset-pills" id="fx-hover-pills">
+            <button type="button" class="preset-pill" data-fx-hover="uilib-btn-hover-lift" title="Rê chuột vào sẽ nổi lên và sáng hơn">🚀 Nổi lên (Lift)</button>
+            <button type="button" class="preset-pill" data-fx-hover="uilib-btn-brutal" title="Rê chuột vào bật bóng cứng Neo-Brutalism">🟨 Neo-Brutal</button>
+            <button type="button" class="preset-pill" data-fx-hover="uilib-btn-duolingo" title="Nhấn xuống lún 3D kiểu Duolingo">🕹️ Nút 3D</button>
+          </div>
+          <label class="sub-label mt-8">Gắn nhanh Icon vào phần tử đang chọn:</label>
+          <div class="preset-pills" id="fx-icon-pills">
+            <button type="button" class="preset-pill" data-fx-icon="🌈" title="Gắn icon Cầu vồng vào đầu chữ">🌈</button>
+            <button type="button" class="preset-pill" data-fx-icon="✨" title="Gắn icon Lấp lánh vào đầu chữ">✨</button>
+            <button type="button" class="preset-pill" data-fx-icon="⚡" title="Gắn icon Tia sét vào đầu chữ">⚡</button>
+            <button type="button" class="preset-pill" data-fx-icon="🚀" title="Gắn icon Tên lửa vào đầu chữ">🚀</button>
+            <button type="button" class="preset-pill" data-fx-icon="🔥" title="Gắn icon Lửa Hot vào đầu chữ">🔥</button>
+            <button type="button" class="preset-pill" data-fx-icon="💎" title="Gắn icon Kim cương Pro vào đầu chữ">💎</button>
+            <button type="button" class="preset-pill" data-fx-icon="🛒" title="Gắn icon Giỏ hàng vào đầu chữ">🛒</button>
+            <button type="button" class="preset-pill" data-fx-icon="→" data-fx-pos="end" title="Gắn mũi tên → vào cuối chữ">→ Cuối</button>
+            <button type="button" class="preset-pill" data-fx-icon="clear" title="Xóa các icon đã gắn thêm">✕ Xóa Icon</button>
           </div>
         </section>
 
@@ -906,8 +986,8 @@
   <!-- TOAST NOTIFICATION -->
   <div id="toast-container" class="toast-container"></div>
 
-  <script src="./js/ui-libs-registry.js?v=4.3"></script>
-  <script src="./js/templates.js?v=4.3"></script>
-  <script src="./js/studio.js?v=4.3"></script>
+  <script src="./js/ui-libs-registry.js?v=5.0"></script>
+  <script src="./js/templates.js?v=5.0"></script>
+  <script src="./js/studio.js?v=5.0"></script>
 </body>
 </html>

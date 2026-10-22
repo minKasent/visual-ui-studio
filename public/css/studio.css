@@ -170,6 +170,14 @@ body {
   display: flex;
   align-items: center;
   gap: 9px;
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: 8px;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.brand:hover {
+  background: var(--bg-hover);
+  transform: translateY(-1px);
 }
 
 .brand__logo {
@@ -595,11 +603,212 @@ button, select, input, textarea {
   color: var(--text-main);
 }
 
+/* Search Row + NameThat UI Checklist Button & Expandable Drawer */
+.uilib-search-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.uilib-checklist-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 9px;
+  border-radius: var(--radius-sm);
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.45);
+  color: var(--accent-hover);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+[data-studio-theme="daylight"] .uilib-checklist-btn {
+  color: #4f46e5;
+  background: rgba(79, 70, 229, 0.1);
+}
+.uilib-checklist-btn:hover,
+.uilib-checklist-btn.active {
+  background: var(--accent-grad);
+  color: #ffffff !important;
+  border-color: transparent;
+  box-shadow: 0 2px 12px var(--accent-glow);
+}
+.namethat-badge {
+  background: #ffffff;
+  color: #4f46e5;
+  border-radius: 99px;
+  padding: 0 5px;
+  font-size: 9.5px;
+  font-weight: 800;
+}
+
+.namethat-checklist-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-focus);
+  border-radius: var(--radius-md);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+.namethat-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-main);
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--border-color);
+}
+.namethat-reset-btn,
+.namethat-close-btn {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.namethat-reset-btn:hover,
+.namethat-close-btn:hover {
+  color: var(--text-main);
+  border-color: var(--accent);
+}
+.namethat-checklist-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  max-height: 210px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+.namethat-check-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+  padding: 5px 7px;
+  border-radius: 6px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  font-size: 10.5px;
+  color: var(--text-main);
+  transition: all 0.14s;
+  user-select: none;
+}
+.namethat-check-item:hover {
+  border-color: var(--border-focus);
+}
+.namethat-check-item.checked {
+  background: rgba(99, 102, 241, 0.18);
+  border-color: var(--accent);
+  font-weight: 700;
+}
+.namethat-check-item input[type="checkbox"] {
+  accent-color: var(--accent);
+  cursor: pointer;
+  margin: 0;
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+.namethat-check-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+.namethat-check-count {
+  font-size: 9.5px;
+  color: var(--text-dim);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.namethat-matching-libs {
+  padding-top: 5px;
+  border-top: 1px dashed var(--border-color);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* Smart Toggles & Auto-Detected Banner */
+.uilib-smart-toggles {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 2px 2px 0;
+}
+.uilib-smart-chk {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+.uilib-smart-chk:hover {
+  color: var(--text-main);
+}
+.uilib-smart-chk input {
+  accent-color: var(--accent);
+  cursor: pointer;
+  margin: 0;
+}
+
+.uilib-detected-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 6px 10px;
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.22), rgba(236, 72, 153, 0.18));
+  border-bottom: 1px solid rgba(139, 92, 246, 0.45);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-main);
+  flex-shrink: 0;
+}
+.uilib-detected-reset {
+  padding: 2px 7px;
+  border-radius: 99px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.uilib-detected-reset:hover {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+}
+
 /* Category Filter Wrap Pills (No ugly horizontal scrollbar!) */
 .uilib-cat-bar {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+  max-height: 54px;
+  overflow-y: auto;
 }
 
 .uilib-cat-pill {
@@ -648,9 +857,11 @@ button, select, input, textarea {
 }
 
 .uilib-quick-bar {
-  display: grid;
-  grid-template-columns: 1fr 1.15fr;
+  display: flex;
   gap: 5px;
+}
+.uilib-quick-bar > * {
+  flex: 1;
 }
 
 .uilib-action-pill {
@@ -822,6 +1033,16 @@ button, select, input, textarea {
   border: 1px solid rgba(99, 102, 241, 0.35);
   white-space: nowrap;
   flex-shrink: 0;
+  text-decoration: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  transition: transform 0.14s ease, filter 0.14s ease;
+}
+.uilib-lib-badge:hover {
+  transform: scale(1.05);
+  filter: brightness(1.18);
 }
 .uilib-comp-title {
   font-size: 11.5px;

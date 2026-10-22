@@ -340,27 +340,76 @@ window.STUDIO_UI_LIBRARIES = [
   }
 ];
 
+window.STUDIO_NAMETHAT_CATEGORIES = [
+  { id: 'button', name: 'Button', vnName: 'Nút bấm / CTA', icon: '🔘', related: ['button', 'badge'] },
+  { id: 'card', name: 'Card & Bento', vnName: 'Thẻ nội dung / Bento', icon: '🃏', related: ['card', 'pricing', 'modal', 'testimonial'] },
+  { id: 'switch', name: 'Switch / Toggle', vnName: 'Công tắc Bật/Tắt', icon: '🎚️', related: ['switch', 'checkbox', 'input'] },
+  { id: 'checkbox', name: 'Checkbox / Radio', vnName: 'Ô tích chọn', icon: '☑️', related: ['checkbox', 'switch', 'input'] },
+  { id: 'input', name: 'Input / Combobox', vnName: 'Ô nhập / Tìm kiếm', icon: '⌨️', related: ['input', 'switch', 'checkbox'] },
+  { id: 'badge', name: 'Badge / Pill', vnName: 'Nhãn trạng thái', icon: '🏷️', related: ['badge', 'button', 'alert'] },
+  { id: 'nav', name: 'Navbar / Dock', vnName: 'Thanh điều hướng', icon: '🧭', related: ['nav', 'tabs', 'hero'] },
+  { id: 'hero', name: 'Hero / Banner', vnName: 'Khối mở đầu trang', icon: '🚀', related: ['hero', 'nav', 'card'] },
+  { id: 'pricing', name: 'Pricing / KPI Stat', vnName: 'Bảng giá & Số liệu', icon: '💎', related: ['pricing', 'card'] },
+  { id: 'modal', name: 'Modal / Dialog', vnName: 'Hộp thoại nổi', icon: '🪟', related: ['modal', 'alert', 'card'] },
+  { id: 'tabs', name: 'Tabs / Accordion', vnName: 'Chuyển Tab & FAQ', icon: '🗂️', related: ['tabs', 'nav'] },
+  { id: 'avatar', name: 'Avatar / Profile', vnName: 'Ảnh đại diện / Nhóm', icon: '👤', related: ['avatar', 'badge', 'testimonial'] },
+  { id: 'alert', name: 'Alert / Toast', vnName: 'Thông báo / Cảnh báo', icon: '🔔', related: ['alert', 'badge', 'modal'] },
+  { id: 'slider', name: 'Slider / Progress', vnName: 'Thanh trượt & Tiến độ', icon: '📊', related: ['slider', 'input'] },
+  { id: 'tooltip', name: 'Tooltip / Popover', vnName: 'Chú thích nổi', icon: '💬', related: ['tooltip', 'badge'] },
+  { id: 'skeleton', name: 'Skeleton / Loader', vnName: 'Khung chờ tải (Loading)', icon: '⏳', related: ['skeleton', 'card'] },
+  { id: 'testimonial', name: 'Testimonial / Review', vnName: 'Đánh giá khách hàng', icon: '🌟', related: ['testimonial', 'card', 'avatar'] },
+  { id: 'custom', name: 'Custom Import', vnName: 'Mẫu tự dán Code', icon: '📥', related: ['custom'] }
+];
+
 window.STUDIO_LIB_COMPONENTS_CSS = `
 @keyframes uilib-shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
 @keyframes uilib-rainbow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% { background-position: 0% 50%; filter: hue-rotate(0deg); }
+  50% { background-position: 100% 50%; filter: hue-rotate(25deg); }
+  100% { background-position: 0% 50%; filter: hue-rotate(0deg); }
 }
 @keyframes uilib-pulse-dot {
   0%, 100% { transform: scale(1); opacity: 1; }
   50% { transform: scale(1.45); opacity: 0.55; }
 }
+@keyframes uilib-pulse-glow {
+  0%, 100% { box-shadow: 0 0 18px rgba(139, 92, 246, 0.5), 0 0 36px rgba(236, 72, 153, 0.25); }
+  50% { box-shadow: 0 0 28px rgba(139, 92, 246, 0.85), 0 0 55px rgba(236, 72, 153, 0.55); }
+}
+@keyframes uilib-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+@keyframes uilib-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 .uilib-comp {
   box-sizing: border-box;
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
+.uilib-anim-rainbow {
+  background-image: linear-gradient(90deg, #6366f1, #ec4899, #f59e0b, #10b981, #6366f1) !important;
+  background-size: 300% 300% !important;
+  animation: uilib-rainbow 2.6s linear infinite !important;
+}
+.uilib-anim-shimmer {
+  background-image: linear-gradient(110deg, #09090b 40%, #52525b 50%, #09090b 60%) !important;
+  background-size: 200% 100% !important;
+  animation: uilib-shimmer 2.2s infinite linear !important;
+}
+.uilib-anim-glow {
+  animation: uilib-pulse-glow 2.2s ease-in-out infinite !important;
+}
+.uilib-anim-float {
+  animation: uilib-float 2.6s ease-in-out infinite !important;
+}
 .uilib-btn-hover-lift:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.08);
+  transform: translateY(-3px) scale(1.02) !important;
+  filter: brightness(1.1) !important;
 }
 .uilib-btn-brutal:hover {
   transform: translate(-3px, -3px) !important;
@@ -1097,5 +1146,213 @@ window.STUDIO_LIB_COMPONENTS = [
       'box-shadow': '0 16px 40px rgba(0, 0, 0, 0.45)'
     },
     html: `<nav class="uilib-comp" style="display:inline-flex;align-items:center;gap:4px;padding:6px 8px;background:rgba(9,9,11,0.85);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.12);border-radius:999px;box-shadow:0 16px 40px rgba(0,0,0,0.45);font-family:'Inter',sans-serif;"><a href="#home" style="padding:6px 12px;background:#27272a;color:#ffffff;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;">Trang chủ</a><a href="#features" style="padding:6px 12px;color:#a1a1aa;border-radius:999px;font-size:12px;font-weight:500;text-decoration:none;">Tính năng</a><a href="#cta" style="padding:6px 14px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#ffffff;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;">Bắt đầu</a></nav>`
+  },
+  // ==================== NAMETHAT UI EXPANDED TAXONOMY COMPONENTS (Switch, Checkbox, Modal, Tabs, Avatar, Alert, Slider, Tooltip, Skeleton, Testimonial) ====================
+  {
+    id: 'shadcn-ios-switch',
+    name: 'Shadcn Animated Toggle Switch',
+    libId: 'shadcn',
+    libName: 'Shadcn UI',
+    category: 'switch',
+    tags: ['switch', 'toggle', 'cong tac', 'bat tat', 'shadcn', 'form', 'namethat'],
+    morphStyles: {
+      'display': 'inline-flex',
+      'align-items': 'center',
+      'gap': '10px',
+      'padding': '8px 14px',
+      'background': '#18181b',
+      'border': '1px solid #27272a',
+      'border-radius': '999px',
+      'color': '#f8fafc'
+    },
+    html: `<label class="uilib-comp" style="display:inline-flex;align-items:center;gap:10px;padding:8px 14px;background:#18181b;border:1px solid #27272a;border-radius:999px;cursor:pointer;font-family:'Inter',sans-serif;font-size:13px;color:#f8fafc;font-weight:500;"><span style="width:38px;height:22px;background:#6366f1;border-radius:999px;position:relative;display:inline-flex;align-items:center;padding:2px;box-shadow:0 0 12px rgba(99,102,241,0.45);"><span style="width:18px;height:18px;background:#ffffff;border-radius:50%;margin-left:auto;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></span></span><span>Chế độ AI Tự động</span></label>`
+  },
+  {
+    id: 'originui-neon-switch',
+    name: 'Origin UI Dual Icon Switch',
+    libId: 'originui',
+    libName: 'Origin UI (Originkit)',
+    category: 'switch',
+    tags: ['switch', 'toggle', 'dark mode', 'origin ui', 'cong tac', 'namethat'],
+    morphStyles: {
+      'display': 'inline-flex',
+      'align-items': 'center',
+      'gap': '10px',
+      'padding': '8px 16px',
+      'background': 'rgba(16, 185, 129, 0.14)',
+      'border': '1px solid rgba(16, 185, 129, 0.4)',
+      'border-radius': '12px',
+      'color': '#ecfdf5'
+    },
+    html: `<label class="uilib-comp" style="display:inline-flex;align-items:center;gap:10px;padding:8px 14px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.35);border-radius:12px;cursor:pointer;font-family:'Inter',sans-serif;font-size:13px;color:#ecfdf5;font-weight:600;"><span style="width:36px;height:20px;background:#10b981;border-radius:999px;display:inline-flex;align-items:center;padding:2px;"><span style="width:16px;height:16px;background:#fff;border-radius:50%;margin-left:auto;"></span></span><span>⚡ Tăng tốc GPU</span></label>`
+  },
+  {
+    id: 'shadcn-checkbox-card',
+    name: 'Shadcn Checkbox With Description',
+    libId: 'shadcn',
+    libName: 'Shadcn UI',
+    category: 'checkbox',
+    tags: ['checkbox', 'radio', 'o tich', 'shadcn', 'terms', 'form', 'namethat'],
+    morphStyles: {
+      'display': 'flex',
+      'align-items': 'flex-start',
+      'gap': '10px',
+      'padding': '12px 16px',
+      'background': '#09090b',
+      'border': '1px solid #27272a',
+      'border-radius': '10px',
+      'color': '#f8fafc'
+    },
+    html: `<div class="uilib-comp" style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:#09090b;border:1px solid #27272a;border-radius:10px;font-family:'Inter',sans-serif;color:#f8fafc;"><input type="checkbox" checked class="uilib-shadcn-checkbox" /><div style="display:grid;gap:4px;"><label style="font-size:13.5px;font-weight:600;line-height:1;cursor:pointer;">Đồng ý điều khoản dịch vụ</label><p style="margin:0;font-size:12px;color:#a1a1aa;">Bạn đồng ý với chính sách bảo mật &amp; điều khoản sử dụng.</p></div></div>`
+  },
+  {
+    id: 'originui-plan-checkbox',
+    name: 'Origin UI Rich Choice Checkbox',
+    libId: 'originui',
+    libName: 'Origin UI (Originkit)',
+    category: 'checkbox',
+    tags: ['checkbox', 'radio', 'choice', 'origin ui', 'o tich', 'namethat'],
+    morphStyles: {
+      'padding': '12px 16px',
+      'background': 'rgba(99, 102, 241, 0.12)',
+      'border': '1.5px solid #6366f1',
+      'border-radius': '12px',
+      'color': '#ffffff'
+    },
+    html: `<label class="uilib-comp" style="display:flex;align-items:center;justify-content:space-between;gap:14px;min-width:240px;padding:11px 14px;background:rgba(99,102,241,0.12);border:1.5px solid #6366f1;border-radius:12px;color:#ffffff;font-family:'Inter',sans-serif;cursor:pointer;"><span style="display:flex;align-items:center;gap:9px;"><input type="checkbox" checked class="uilib-shadcn-checkbox" /><span style="font-size:13px;font-weight:700;">Gói Vĩnh Viễn (Lifetime)</span></span><span style="padding:2px 7px;background:#6366f1;border-radius:6px;font-size:11px;font-weight:700;">-40%</span></label>`
+  },
+  {
+    id: 'shadcn-glass-modal',
+    name: 'Shadcn Glass Confirmation Dialog',
+    libId: 'shadcn',
+    libName: 'Shadcn UI',
+    category: 'modal',
+    tags: ['modal', 'dialog', 'popup', 'hop thoai', 'shadcn', 'namethat'],
+    morphStyles: {
+      'background': 'rgba(9, 9, 11, 0.96)',
+      'border': '1px solid #27272a',
+      'border-radius': '16px',
+      'padding': '24px',
+      'box-shadow': '0 25px 60px rgba(0,0,0,0.65)',
+      'color': '#f8fafc'
+    },
+    html: `<div class="uilib-comp" style="max-width:320px;padding:20px;background:#09090b;border:1px solid #27272a;border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,0.65);font-family:'Inter',sans-serif;color:#f8fafc;"><h4 style="margin:0 0 6px;font-size:15px;font-weight:700;">Xác nhận xuất bản dự án?</h4><p style="margin:0 0 14px;font-size:12.5px;color:#a1a1aa;line-height:1.5;">Giao diện của bạn sẽ được cập nhật trực tiếp lên hệ thống.</p><div style="display:flex;justify-content:flex-end;gap:8px;"><button type="button" style="padding:6px 12px;background:#18181b;color:#e4e4e7;border:1px solid #27272a;border-radius:8px;font-size:12px;cursor:pointer;">Hủy</button><button type="button" style="padding:6px 14px;background:#6366f1;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Xuất bản ngay</button></div></div>`
+  },
+  {
+    id: 'aceternity-animated-tabs',
+    name: 'Aceternity Sliding Pill Tabs',
+    libId: 'aceternity',
+    libName: 'Aceternity UI',
+    category: 'tabs',
+    tags: ['tabs', 'accordion', 'faq', 'menu', 'chuyen tab', 'aceternity', 'namethat'],
+    morphStyles: {
+      'display': 'inline-flex',
+      'padding': '5px',
+      'background': '#09090b',
+      'border': '1px solid #27272a',
+      'border-radius': '999px'
+    },
+    html: `<div class="uilib-comp" style="display:inline-flex;align-items:center;gap:4px;padding:5px;background:#09090b;border:1px solid #27272a;border-radius:999px;font-family:'Inter',sans-serif;"><button type="button" style="padding:6px 14px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(99,102,241,0.4);">Tổng quan</button><button type="button" style="padding:6px 14px;background:transparent;color:#a1a1aa;border:none;border-radius:999px;font-size:12px;font-weight:500;cursor:pointer;">Tích hợp</button><button type="button" style="padding:6px 14px;background:transparent;color:#a1a1aa;border:none;border-radius:999px;font-size:12px;font-weight:500;cursor:pointer;">Báo cáo</button></div>`
+  },
+  {
+    id: 'magicui-avatar-stack',
+    name: 'Magic UI Trusted Avatar Stack',
+    libId: 'magicui',
+    libName: 'Magic UI',
+    category: 'avatar',
+    tags: ['avatar', 'profile', 'users', 'social proof', 'magic ui', 'anh dai dien', 'namethat'],
+    morphStyles: {
+      'display': 'inline-flex',
+      'align-items': 'center',
+      'gap': '10px',
+      'padding': '6px 14px',
+      'background': 'rgba(24, 24, 27, 0.9)',
+      'border-radius': '999px',
+      'border': '1px solid rgba(255,255,255,0.1)'
+    },
+    html: `<div class="uilib-comp" style="display:inline-flex;align-items:center;gap:10px;padding:6px 14px 6px 8px;background:rgba(24,24,27,0.9);border:1px solid rgba(255,255,255,0.12);border-radius:999px;font-family:'Inter',sans-serif;"><div style="display:flex;align-items:center;"><span style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#a855f7);border:2px solid #09090b;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;">K</span><span style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#ec4899,#f43f5e);border:2px solid #09090b;margin-left:-8px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;">A</span><span style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#10b981,#06b6d4);border:2px solid #09090b;margin-left:-8px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;">+9k</span></div><span style="font-size:12px;color:#e4e4e7;font-weight:600;">⭐⭐⭐⭐⭐ 12,000+ Designer tin dùng</span></div>`
+  },
+  {
+    id: 'kokonut-glow-alert',
+    name: 'KokonutUI Toast Notification Banner',
+    libId: 'kokonutui',
+    libName: 'KokonutUI',
+    category: 'alert',
+    tags: ['alert', 'toast', 'notification', 'thong bao', 'kokonutui', 'namethat'],
+    morphStyles: {
+      'display': 'flex',
+      'align-items': 'center',
+      'gap': '12px',
+      'padding': '12px 16px',
+      'background': 'rgba(16, 185, 129, 0.12)',
+      'border': '1px solid rgba(16, 185, 129, 0.35)',
+      'border-radius': '12px',
+      'color': '#ecfdf5'
+    },
+    html: `<div class="uilib-comp" style="display:flex;align-items:center;gap:10px;padding:11px 16px;background:rgba(9,9,11,0.95);border:1px solid rgba(16,185,129,0.45);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.4);font-family:'Inter',sans-serif;color:#f8fafc;"><span style="width:24px;height:24px;border-radius:50%;background:rgba(16,185,129,0.2);color:#34d399;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;">✓</span><div style="font-size:12.5px;"><strong style="color:#34d399;">Đã đồng bộ thành công!</strong> Mọi thay đổi UI đã được lưu realtime.</div></div>`
+  },
+  {
+    id: 'alignui-range-slider',
+    name: 'AlignUI Progress & Range Meter',
+    libId: 'alignui',
+    libName: 'AlignUI Design System',
+    category: 'slider',
+    tags: ['slider', 'progress', 'range', 'thanh truot', 'alignui', 'namethat'],
+    morphStyles: {
+      'padding': '14px 18px',
+      'background': '#09090b',
+      'border': '1px solid #27272a',
+      'border-radius': '12px',
+      'color': '#f8fafc'
+    },
+    html: `<div class="uilib-comp" style="min-width:240px;padding:12px 16px;background:#09090b;border:1px solid #27272a;border-radius:12px;font-family:'Inter',sans-serif;color:#f8fafc;"><div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-bottom:8px;"><span>⚡ Dung lượng AI Pro</span><span style="color:#818cf8;">85%</span></div><div style="width:100%;height:8px;background:#27272a;border-radius:999px;overflow:hidden;"><div style="width:85%;height:100%;background:linear-gradient(90deg,#6366f1,#ec4899);border-radius:999px;"></div></div></div>`
+  },
+  {
+    id: 'cultui-floating-tooltip',
+    name: 'Cult UI Glass Popover Tooltip',
+    libId: 'cultui',
+    libName: 'Cult UI',
+    category: 'tooltip',
+    tags: ['tooltip', 'popover', 'hint', 'chu thich', 'cult ui', 'namethat'],
+    morphStyles: {
+      'padding': '8px 14px',
+      'background': 'rgba(24, 24, 27, 0.95)',
+      'border': '1px solid rgba(168, 85, 247, 0.45)',
+      'border-radius': '10px',
+      'box-shadow': '0 12px 28px rgba(0,0,0,0.45)',
+      'color': '#f8fafc'
+    },
+    html: `<div class="uilib-comp uilib-anim-float" style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(24,24,27,0.95);border:1px solid rgba(168,85,247,0.45);border-radius:10px;box-shadow:0 12px 28px rgba(0,0,0,0.45);font-family:'Inter',sans-serif;font-size:12px;color:#f8fafc;"><span style="color:#c084fc;">💬</span><span>Mẹo: Nhấp đúp để sửa chữ trực tiếp!</span><kbd style="padding:2px 5px;background:#27272a;border-radius:4px;font-size:10px;color:#a1a1aa;">Pro</kbd></div>`
+  },
+  {
+    id: 'shadcn-shimmer-skeleton',
+    name: 'Shadcn Shimmer Loading Skeleton',
+    libId: 'shadcn',
+    libName: 'Shadcn UI',
+    category: 'skeleton',
+    tags: ['skeleton', 'loader', 'spinner', 'loading', 'shadcn', 'namethat'],
+    morphStyles: {
+      'padding': '16px',
+      'background': '#09090b',
+      'border': '1px solid #27272a',
+      'border-radius': '14px'
+    },
+    html: `<div class="uilib-comp" style="display:flex;align-items:center;gap:12px;min-width:250px;padding:14px;background:#09090b;border:1px solid #27272a;border-radius:14px;"><div class="uilib-anim-shimmer" style="width:42px;height:42px;border-radius:50%;flex-shrink:0;"></div><div style="flex:1;display:grid;gap:8px;"><div class="uilib-anim-shimmer" style="height:12px;width:75%;border-radius:6px;"></div><div class="uilib-anim-shimmer" style="height:10px;width:50%;border-radius:6px;"></div></div></div>`
+  },
+  {
+    id: '21stdev-review-testimonial',
+    name: '21st.dev Verified Testimonial Card',
+    libId: '21stdev',
+    libName: '21st.dev',
+    category: 'testimonial',
+    tags: ['testimonial', 'review', 'quote', 'danh gia', '21st.dev', 'card', 'namethat'],
+    morphStyles: {
+      'padding': '20px',
+      'background': 'linear-gradient(145deg, #18181b 0%, #09090b 100%)',
+      'border': '1px solid rgba(99, 102, 241, 0.35)',
+      'border-radius': '16px',
+      'color': '#f8fafc'
+    },
+    html: `<div class="uilib-comp uilib-card-hover" style="max-width:320px;padding:18px;background:linear-gradient(145deg,#18181b 0%,#09090b 100%);border:1px solid rgba(99,102,241,0.35);border-radius:16px;font-family:'Inter',sans-serif;color:#f8fafc;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span style="font-size:12px;font-weight:700;color:#e4e4e7;">🌟 Minh Khoa — Founder</span><span style="font-size:11px;color:#facc15;">★★★★★</span></div><p style="margin:0;font-size:12.5px;color:#a1a1aa;line-height:1.5;">"Chỉ cần thả web vào, chọn nút bấm rồi áp style Aceternity/Magic UI là web đẹp như студия triệu đô!"</p></div>`
   }
 ];

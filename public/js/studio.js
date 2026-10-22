@@ -27,6 +27,10 @@
     uilibCategory: 'all',
     uilibSelectedLib: 'all',
     uilibSearchQuery: '',
+    namethatCheckedSet: new Set(),
+    autoMatchSelectedEl: true,
+    morphWithFx: true,
+    autoDetectedCategory: null,
     undoStack: [],
     redoStack: [],
     blobUrlMap: new Map() // for dropped folders
@@ -34,6 +38,7 @@
 
   // ==================== DOM REFERENCES ====================
   const dom = {
+    brandHomeLogo: document.getElementById('brand-home-logo'),
     folderLabel: document.getElementById('current-folder-label'),
     pageSelector: document.getElementById('page-selector'),
     btnChangeFolder: document.getElementById('btn-change-folder'),
@@ -59,6 +64,19 @@
     // Left Sidebar: UI Libraries Hub + Layers + Add + Magic + History
     uilibSearchInput: document.getElementById('uilib-search-input'),
     btnClearUilibSearch: document.getElementById('btn-clear-uilib-search'),
+    btnToggleNamethatChecklist: document.getElementById('btn-toggle-namethat-checklist'),
+    namethatCheckedBadge: document.getElementById('namethat-checked-badge'),
+    namethatChecklistPanel: document.getElementById('namethat-checklist-panel'),
+    namethatChecklistGrid: document.getElementById('namethat-checklist-grid'),
+    namethatMatchingLibs: document.getElementById('namethat-matching-libs'),
+    btnResetNamethat: document.getElementById('btn-reset-namethat'),
+    btnCloseNamethat: document.getElementById('btn-close-namethat'),
+    chkAutoMatchEl: document.getElementById('chk-auto-match-el'),
+    chkMorphWithFx: document.getElementById('chk-morph-with-fx'),
+    uilibDetectedBanner: document.getElementById('uilib-detected-banner'),
+    uilibDetectedText: document.getElementById('uilib-detected-text'),
+    btnShowAllUilibs: document.getElementById('btn-show-all-uilibs'),
+    btnFxReset: document.getElementById('btn-fx-reset'),
     uilibCatPills: document.getElementById('uilib-cat-pills'),
     uilibLibFilter: document.getElementById('uilib-lib-filter'),
     uilibHoverMode: document.getElementById('uilib-hover-mode'),
@@ -400,20 +418,74 @@
     updateHistoryUI();
   }
 
+  function cloneEditRecord(rec) {
+    if (!rec) return null;
+    return {
+      selector: rec.selector,
+      tagName: rec.tagName,
+      label: rec.label,
+      styles: { ...(rec.styles || {}) },
+      textChanged: rec.textChanged,
+      attrChanges: { ...(rec.attrChanges || {}) },
+      deleted: Boolean(rec.deleted)
+    };
+  }
+
+  function captureElementState(el) {
+    if (!el) return null;
+    const selector = getUniqueSelector(el);
+    return {
+      selector,
+      styleAttr: el.getAttribute('style'),
+      classAttr: el.getAttribute('class'),
+      innerHTML: el.innerHTML,
+      dx: el.getAttribute('data-ui-dx'),
+      dy: el.getAttribute('data-ui-dy'),
+      rot: el.getAttribute('data-ui-rot'),
+      scale: el.getAttribute('data-ui-scale'),
+      origText: el.getAttribute('data-ui-orig-text'),
+      editRec: cloneEditRecord(state.editsMap.get(selector))
+    };
+  }
+
+  function restoreElementState(doc, snap) {
+    if (!doc || !snap || !snap.selector) return null;
+    const el = doc.querySelector(snap.selector);
+    if (!el) return null;
+
+    if (snap.styleAttr === null || snap.styleAttr === undefined) el.removeAttribute('style');
+    else el.setAttribute('style', snap.styleAttr);
+
+    if (snap.classAttr === null || snap.classAttr === undefined) el.removeAttribute('class');
+    else el.setAttribute('class', snap.classAttr);
+
+    if (snap.innerHTML !== undefined && snap.innerHTML !== null && el.innerHTML !== snap.innerHTML) {
+      el.innerHTML = snap.innerHTML;
+    }
+
+    const syncAttr = (attrName, val) => {
+      if (val === null || val === undefined) el.removeAttribute(attrName);
+      else el.setAttribute(attrName, val);
+    };
+    syncAttr('data-ui-dx', snap.dx);
+    syncAttr('data-ui-dy', snap.dy);
+    syncAttr('data-ui-rot', snap.rot);
+    syncAttr('data-ui-scale', snap.scale);
+    syncAttr('data-ui-orig-text', snap.origText);
+
+    if (snap.editRec) {
+      state.editsMap.set(snap.selector, cloneEditRecord(snap.editRec));
+    } else {
+      state.editsMap.delete(snap.selector);
+    }
+    return el;
+  }
+
   function applyStyleProperty(el, prop, value, recordHistory = true) {
     if (!el) return;
-    const prevValue = el.style.getPropertyValue(prop);
+    endHoverPreview();
+    const beforeSnap = recordHistory ? captureElementState(el) : null;
     const rec = ensureEditRecord(el);
-
-    if (recordHistory) {
-      pushUndoAction({
-        type: 'style',
-        selector: rec.selector,
-        prop,
-        prevValue,
-        newValue: value
-      });
-    }
 
     if (value === '' || value === null) {
       el.style.removeProperty(prop);
@@ -421,6 +493,16 @@
     } else {
       el.style.setProperty(prop, value, 'important');
       rec.styles[prop] = value;
+    }
+
+    if (recordHistory && beforeSnap) {
+      const afterSnap = captureElementState(el);
+      pushUndoAction({
+        type: 'snapshot',
+        selector: rec.selector,
+        before: beforeSnap,
+        after: afterSnap
+      });
     }
 
     updateOverlayPosition();
@@ -440,13 +522,61 @@
   }
 
   function performUndo() {
+    endHoverPreview();
+    clearPreviewAddBlock();
     const action = state.undoStack.pop();
-    if (!action) return;
+    if (!action) {
+      showToast('Không còn bước nào để hoàn tác (Ctrl+Z)', 'ℹ️');
+      return;
+    }
     state.redoStack.push(action);
     const doc = dom.iframe.contentDocument;
     if (!doc) return;
+
+    if (action.type === 'snapshot') {
+      const el = restoreElementState(doc, action.before);
+      selectElement(el);
+      buildDomTree();
+      syncUndoRedoButtons();
+      updateHistoryUI();
+      showToast('Đã hoàn tác (Ctrl+Z)', '↩️');
+      return;
+    }
+
+    if (action.type === 'add_node' && action.nodeInfo) {
+      const target = doc.querySelector(`[data-ui-custom-id="${action.nodeInfo.id}"]`);
+      if (target) target.remove();
+      state.addedNodes = state.addedNodes.filter(n => n.id !== action.nodeInfo.id);
+      selectElement(null);
+      buildDomTree();
+      syncUndoRedoButtons();
+      updateHistoryUI();
+      showToast('Đã hoàn tác chèn khối (Ctrl+Z)', '↩️');
+      return;
+    }
+
+    if (action.type === 'remove_added_node' && action.nodeInfo) {
+      const parent = doc.querySelector(action.nodeInfo.parentSelector) || doc.body;
+      const temp = doc.createElement('div');
+      temp.innerHTML = action.nodeInfo.html;
+      const restoredEl = temp.firstElementChild;
+      if (restoredEl) {
+        parent.appendChild(restoredEl);
+        state.addedNodes.push(action.nodeInfo);
+        selectElement(restoredEl);
+      }
+      buildDomTree();
+      syncUndoRedoButtons();
+      updateHistoryUI();
+      showToast('Đã khôi phục khối vừa xóa (Ctrl+Z)', '↩️');
+      return;
+    }
+
     const el = doc.querySelector(action.selector);
-    if (!el) return;
+    if (!el) {
+      syncUndoRedoButtons();
+      return;
+    }
 
     if (action.type === 'move') {
       applyElementPosition(el, action.prevDx, action.prevDy, action.prevRot, action.prevScale);
@@ -464,19 +594,68 @@
     }
 
     selectElement(el);
+    buildDomTree();
     syncUndoRedoButtons();
     updateHistoryUI();
-    showToast('Đã hoàn tác (Undo)', '↩️');
+    showToast('Đã hoàn tác (Ctrl+Z)', '↩️');
   }
 
   function performRedo() {
+    endHoverPreview();
+    clearPreviewAddBlock();
     const action = state.redoStack.pop();
-    if (!action) return;
+    if (!action) {
+      showToast('Không còn bước nào để làm lại (Ctrl+Y)', 'ℹ️');
+      return;
+    }
     state.undoStack.push(action);
     const doc = dom.iframe.contentDocument;
     if (!doc) return;
+
+    if (action.type === 'snapshot') {
+      const el = restoreElementState(doc, action.after);
+      selectElement(el);
+      buildDomTree();
+      syncUndoRedoButtons();
+      updateHistoryUI();
+      showToast('Đã làm lại (Ctrl+Y)', '↪️');
+      return;
+    }
+
+    if (action.type === 'add_node' && action.nodeInfo) {
+      const parent = doc.querySelector(action.nodeInfo.parentSelector) || doc.body;
+      const temp = doc.createElement('div');
+      temp.innerHTML = action.nodeInfo.html;
+      const restoredEl = temp.firstElementChild;
+      if (restoredEl) {
+        parent.appendChild(restoredEl);
+        state.addedNodes.push(action.nodeInfo);
+        selectElement(restoredEl);
+      }
+      buildDomTree();
+      syncUndoRedoButtons();
+      updateHistoryUI();
+      showToast('Đã làm lại chèn khối (Ctrl+Y)', '↪️');
+      return;
+    }
+
+    if (action.type === 'remove_added_node' && action.nodeInfo) {
+      const target = doc.querySelector(`[data-ui-custom-id="${action.nodeInfo.id}"]`);
+      if (target) target.remove();
+      state.addedNodes = state.addedNodes.filter(n => n.id !== action.nodeInfo.id);
+      selectElement(null);
+      buildDomTree();
+      syncUndoRedoButtons();
+      updateHistoryUI();
+      showToast('Đã làm lại xóa khối (Ctrl+Y)', '↪️');
+      return;
+    }
+
     const el = doc.querySelector(action.selector);
-    if (!el) return;
+    if (!el) {
+      syncUndoRedoButtons();
+      return;
+    }
 
     if (action.type === 'move') {
       applyElementPosition(el, action.newDx, action.newDy, action.newRot, action.newScale);
@@ -494,13 +673,14 @@
     }
 
     selectElement(el);
+    buildDomTree();
     syncUndoRedoButtons();
     updateHistoryUI();
-    showToast('Đã làm lại (Redo)', '↪️');
+    showToast('Đã làm lại (Ctrl+Y)', '↪️');
   }
 
-  // ==================== LIVE HOVER PREVIEW ENGINE (FONT, COLOR, GRADIENT, SHADOW, LAYOUT, ADD BLOCK) ====================
-  let activeHoverBackup = null; // { el, styleAttr, dx, dy, rot, scale }
+  // ==================== LIVE HOVER PREVIEW ENGINE (FONT, COLOR, GRADIENT, SHADOW, LAYOUT, ADD BLOCK, FULL FX MORPH) ====================
+  let activeHoverBackup = null; // { el, styleAttr, classAttr, innerHTML }
   let activeGhostBlockEl = null;
 
   function showLivePreviewIndicator(label) {
@@ -513,6 +693,28 @@
     }
   }
 
+  function ensureHoverBackupBaseline(el) {
+    if (!el) return;
+    if (!activeHoverBackup || activeHoverBackup.el !== el) {
+      activeHoverBackup = {
+        el,
+        styleAttr: el.getAttribute('style'),
+        classAttr: el.getAttribute('class'),
+        innerHTML: el.innerHTML
+      };
+    } else {
+      if (activeHoverBackup.styleAttr === null) el.removeAttribute('style');
+      else el.setAttribute('style', activeHoverBackup.styleAttr);
+
+      if (activeHoverBackup.classAttr === null) el.removeAttribute('class');
+      else el.setAttribute('class', activeHoverBackup.classAttr);
+
+      if (activeHoverBackup.innerHTML !== undefined && el.innerHTML !== activeHoverBackup.innerHTML) {
+        el.innerHTML = activeHoverBackup.innerHTML;
+      }
+    }
+  }
+
   /**
    * Temporarily applies CSS properties or position offsets to `state.selectedEl` on mouseenter
    * without mutating `state.editsMap` or `state.undoStack`. Reverts 100% cleanly on mouseleave!
@@ -521,16 +723,7 @@
     const el = state.selectedEl;
     if (!el || state.mode !== 'edit') return;
 
-    if (!activeHoverBackup || activeHoverBackup.el !== el) {
-      activeHoverBackup = {
-        el,
-        styleAttr: el.getAttribute('style')
-      };
-    } else {
-      // Restore baseline before applying next hovered option
-      if (activeHoverBackup.styleAttr === null) el.removeAttribute('style');
-      else el.setAttribute('style', activeHoverBackup.styleAttr);
-    }
+    ensureHoverBackupBaseline(el);
 
     Object.entries(stylePropsMap).forEach(([prop, val]) => {
       if (val === null || val === undefined || val === '' || val === '__ORIGINAL__') {
@@ -546,9 +739,16 @@
 
   function endHoverPreview() {
     if (activeHoverBackup && activeHoverBackup.el) {
-      const { el, styleAttr } = activeHoverBackup;
+      const { el, styleAttr, classAttr, innerHTML } = activeHoverBackup;
       if (styleAttr === null) el.removeAttribute('style');
       else el.setAttribute('style', styleAttr);
+
+      if (classAttr === null) el.removeAttribute('class');
+      else el.setAttribute('class', classAttr);
+
+      if (innerHTML !== undefined && el.innerHTML !== innerHTML) {
+        el.innerHTML = innerHTML;
+      }
     }
     activeHoverBackup = null;
     showLivePreviewIndicator('');
@@ -682,10 +882,11 @@
     const existing = doc.getElementById('__ui_studio_overlay_root__');
     if (existing) existing.remove();
 
-    // Snapshot initial inline styles on all elements so "↺ Màu gốc / Về Gốc" restores 100% accurately
+    // Snapshot initial inline styles & classes on all elements so "↺ Màu gốc / Về Gốc" restores 100% accurately
     doc.querySelectorAll('*').forEach(node => {
       if (!node.hasAttribute('data-ui-init-style') && !node.hasAttribute('data-studio-ignore')) {
         node.setAttribute('data-ui-init-style', node.getAttribute('style') || '');
+        node.setAttribute('data-ui-init-class', node.getAttribute('class') || '');
       }
     });
 
@@ -1063,6 +1264,7 @@
           type: 'resize',
           dir: handle.getAttribute('data-resize'),
           el: state.selectedEl,
+          startSnap: captureElementState(state.selectedEl),
           startX: e.clientX,
           startY: e.clientY,
           startW: rect.width,
@@ -1107,6 +1309,7 @@
       dragSession = {
         type: 'move',
         el: target,
+        startSnap: captureElementState(target),
         startX: e.clientX,
         startY: e.clientY,
         startDx: dx,
@@ -1268,26 +1471,23 @@
       overlayRefs.snapH.style.display = 'none';
     }
     if (dragSession.hasMoved && dragSession.el) {
-      const { dx, dy, rot, scale } = getElementOffsets(dragSession.el);
       const selector = getUniqueSelector(dragSession.el);
-      pushUndoAction({
-        type: 'move',
-        selector,
-        prevDx: dragSession.startDx,
-        prevDy: dragSession.startDy,
-        prevRot: dragSession.startRot,
-        prevScale: dragSession.startScale,
-        newDx: dx,
-        newDy: dy,
-        newRot: rot,
-        newScale: scale
-      });
+      const afterSnap = captureElementState(dragSession.el);
+      if (dragSession.startSnap && afterSnap) {
+        pushUndoAction({
+          type: 'snapshot',
+          selector,
+          before: dragSession.startSnap,
+          after: afterSnap
+        });
+      }
       updateHistoryUI();
     }
     dragSession = null;
   }
 
   function enableInlineTextEdit(el) {
+    const beforeSnap = captureElementState(el);
     const prevText = el.innerText;
     el.setAttribute('contenteditable', 'true');
     el.classList.add('__ui_inline_editing');
@@ -1301,19 +1501,82 @@
       el.removeEventListener('blur', onBlur);
       const newText = el.innerText;
       if (newText !== prevText) {
+        el.setAttribute('data-ui-orig-text', newText.trim());
         const rec = ensureEditRecord(el);
         rec.textChanged = newText;
         dom.propTextContent.value = newText;
+        const afterSnap = captureElementState(el);
         pushUndoAction({
-          type: 'text',
+          type: 'snapshot',
           selector: rec.selector,
-          prevText,
-          newText
+          before: beforeSnap,
+          after: afterSnap
         });
         updateHistoryUI();
       }
     };
     el.addEventListener('blur', onBlur);
+  }
+
+  function detectElementUiCategory(el) {
+    if (!el || el.nodeType !== 1) return null;
+    const tag = el.tagName.toLowerCase();
+    const cls = ((el.className && typeof el.className === 'string') ? el.className : '').toLowerCase();
+    const id = (el.id || '').toLowerCase();
+    const role = (el.getAttribute('role') || '').toLowerCase();
+    const type = (el.getAttribute('type') || '').toLowerCase();
+    const hint = `${tag} ${cls} ${id} ${role}`;
+
+    if (tag === 'button' || type === 'button' || type === 'submit' || role === 'button' || /\b(btn|button|cta)\b/.test(hint)) {
+      return 'button';
+    }
+    if (type === 'checkbox' || type === 'radio' || /\bcheckbox\b/.test(hint)) {
+      if (role === 'switch' || /\b(switch|toggle)\b/.test(hint)) return 'switch';
+      return 'checkbox';
+    }
+    if (role === 'switch' || /\b(switch|toggle)\b/.test(hint)) {
+      return 'switch';
+    }
+    if (tag === 'input' || tag === 'textarea' || tag === 'select' || /\b(input|search|field|prompt)\b/.test(hint)) {
+      return 'input';
+    }
+    if (tag === 'nav' || tag === 'header' || /\b(nav|navbar|dock|menu|topbar)\b/.test(hint)) {
+      return 'nav';
+    }
+    if (/\b(badge|pill|tag|chip|status)\b/.test(hint) || (tag === 'span' && el.textContent.trim().length < 32)) {
+      return 'badge';
+    }
+    if (/\b(pricing|price|kpi|stat|metric)\b/.test(hint)) {
+      return 'pricing';
+    }
+    if (/\b(modal|dialog|popup)\b/.test(hint) || role === 'dialog') {
+      return 'modal';
+    }
+    if (/\b(tab|tabs|accordion|faq)\b/.test(hint)) {
+      return 'tabs';
+    }
+    if (/\b(avatar|profile)\b/.test(hint) || (tag === 'img' && el.getBoundingClientRect().width <= 96)) {
+      return 'avatar';
+    }
+    if (/\b(alert|toast|notification)\b/.test(hint)) {
+      return 'alert';
+    }
+    if (/\b(testimonial|review|quote)\b/.test(hint)) {
+      return 'testimonial';
+    }
+    if (/\b(card|bento|box|feature)\b/.test(hint) || tag === 'article') {
+      return 'card';
+    }
+    if (tag === 'section' || tag === 'h1' || /\b(hero|banner)\b/.test(hint)) {
+      return 'hero';
+    }
+    if (tag === 'a') {
+      return 'button';
+    }
+    if (tag === 'div') {
+      return 'card';
+    }
+    return null;
   }
 
   // ==================== ELEMENT SELECTION & INSPECTOR SYNC ====================
@@ -1322,6 +1585,8 @@
 
     if (!el) {
       state.selectedSelector = null;
+      state.autoDetectedCategory = null;
+      if (dom.uilibDetectedBanner) dom.uilibDetectedBanner.classList.add('hidden');
       dom.selectedTagBadge.textContent = 'NONE';
       dom.selectedSelectorLabel.textContent = 'Chưa chọn phần tử nào';
       dom.statusBreadcrumb.textContent = 'Chưa chọn phần tử nào';
@@ -1334,12 +1599,32 @@
       updateOverlayPosition();
       updateLiveCoordsReadout(null);
       highlightTreeNode(null);
+      if (state.autoMatchSelectedEl && typeof renderSidebarUiLibraries === 'function') {
+        renderSidebarUiLibraries();
+      }
       return;
     }
 
     const selector = getUniqueSelector(el);
     state.selectedSelector = selector;
     const tag = el.tagName.toLowerCase();
+
+    // Auto-detect UI category for Left Sidebar when clicking any element on the page!
+    if (state.autoMatchSelectedEl) {
+      const detectedCat = detectElementUiCategory(el);
+      state.autoDetectedCategory = detectedCat;
+      if (detectedCat && dom.uilibDetectedBanner && dom.uilibDetectedText) {
+        const taxonomy = (window.STUDIO_NAMETHAT_CATEGORIES || []).find(t => t.id === detectedCat);
+        const catLabel = taxonomy ? `${taxonomy.icon} ${taxonomy.name} (${taxonomy.vnName})` : detectedCat.toUpperCase();
+        dom.uilibDetectedText.innerHTML = `🎯 Đang chọn <code>&lt;${tag}&gt;</code> ➔ Gợi ý: <strong>${catLabel}</strong>`;
+        dom.uilibDetectedBanner.classList.remove('hidden');
+      } else if (dom.uilibDetectedBanner) {
+        dom.uilibDetectedBanner.classList.add('hidden');
+      }
+      if (typeof renderSidebarUiLibraries === 'function') {
+        renderSidebarUiLibraries();
+      }
+    }
 
     dom.selectedTagBadge.textContent = tag.toUpperCase();
     dom.selectedSelectorLabel.textContent = getFriendlyElementLabel(el);
@@ -2190,17 +2475,22 @@
       container.appendChild(newEl);
     }
 
-    state.addedNodes.push({
+    const nodeInfo = {
       id: uniqueId,
       parentSelector,
       html: newEl.outerHTML
+    };
+    state.addedNodes.push(nodeInfo);
+    pushUndoAction({
+      type: 'add_node',
+      nodeInfo
     });
 
     selectElement(newEl);
     newEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     buildDomTree();
     updateHistoryUI();
-    showToast('Đã chèn khối mới — Bạn có thể kéo thả ngay!', '➕');
+    showToast('Đã chèn khối mới — Bạn có thể kéo thả ngay! (Ctrl+Z để hoàn tác)', '➕');
   }
 
   // ==================== KEYBOARD SHORTCUTS ====================
@@ -2225,15 +2515,21 @@
       return;
     }
 
-    // Do not intercept typing inside inputs/textareas/contenteditable
+    // Only block shortcuts if user is actively typing text inside a text input, textarea, or contenteditable
+    const isTextTypingNode = node => {
+      if (!node) return false;
+      if (node.tagName === 'TEXTAREA' || node.getAttribute('contenteditable') === 'true') return true;
+      if (node.tagName === 'INPUT') {
+        const t = (node.type || 'text').toLowerCase();
+        return ['text', 'search', 'url', 'number', 'email', 'password', 'tel'].includes(t);
+      }
+      return false;
+    };
+
     const active = document.activeElement;
-    const isTypingInHost = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT');
+    const isTypingInHost = isTextTypingNode(active);
     const iframeActive = dom.iframe.contentDocument && dom.iframe.contentDocument.activeElement;
-    const isTypingInIframe = iframeActive && (
-      iframeActive.tagName === 'INPUT' ||
-      iframeActive.tagName === 'TEXTAREA' ||
-      iframeActive.getAttribute('contenteditable') === 'true'
-    );
+    const isTypingInIframe = isTextTypingNode(iframeActive);
 
     if (isTypingInHost || isTypingInIframe) {
       if (e.key === 'Escape' && isTypingInIframe) {
@@ -2242,7 +2538,7 @@
       return;
     }
 
-    // Undo / Redo
+    // Undo / Redo (Ctrl+Z, Ctrl+Shift+Z, Ctrl+Y) — works anywhere!
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
       e.preventDefault();
       if (e.shiftKey) performRedo();
@@ -2258,24 +2554,28 @@
     if (!state.selectedEl || state.mode !== 'edit') return;
 
     const step = e.shiftKey ? 10 : 1;
-    const { dx, dy, rot, scale } = getElementOffsets(state.selectedEl);
+    const { dx, dy } = getElementOffsets(state.selectedEl);
 
     if (e.key === 'ArrowLeft') {
       e.preventDefault();
-      pushUndoAction({ type: 'move', selector: state.selectedSelector, prevDx: dx, prevDy: dy, prevRot: rot, prevScale: scale, newDx: dx - step, newDy: dy, newRot: rot, newScale: scale });
+      const before = captureElementState(state.selectedEl);
       applyElementPosition(state.selectedEl, dx - step, dy);
+      pushUndoAction({ type: 'snapshot', selector: before.selector, before, after: captureElementState(state.selectedEl) });
     } else if (e.key === 'ArrowRight') {
       e.preventDefault();
-      pushUndoAction({ type: 'move', selector: state.selectedSelector, prevDx: dx, prevDy: dy, prevRot: rot, prevScale: scale, newDx: dx + step, newDy: dy, newRot: rot, newScale: scale });
+      const before = captureElementState(state.selectedEl);
       applyElementPosition(state.selectedEl, dx + step, dy);
+      pushUndoAction({ type: 'snapshot', selector: before.selector, before, after: captureElementState(state.selectedEl) });
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      pushUndoAction({ type: 'move', selector: state.selectedSelector, prevDx: dx, prevDy: dy, prevRot: rot, prevScale: scale, newDx: dx, newDy: dy - step, newRot: rot, newScale: scale });
+      const before = captureElementState(state.selectedEl);
       applyElementPosition(state.selectedEl, dx, dy - step);
+      pushUndoAction({ type: 'snapshot', selector: before.selector, before, after: captureElementState(state.selectedEl) });
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
-      pushUndoAction({ type: 'move', selector: state.selectedSelector, prevDx: dx, prevDy: dy, prevRot: rot, prevScale: scale, newDx: dx, newDy: dy + step, newRot: rot, newScale: scale });
+      const before = captureElementState(state.selectedEl);
       applyElementPosition(state.selectedEl, dx, dy + step);
+      pushUndoAction({ type: 'snapshot', selector: before.selector, before, after: captureElementState(state.selectedEl) });
     } else if (e.key === 'Delete' || e.key === 'Backspace') {
       e.preventDefault();
       deleteSelectedElement();
@@ -2294,29 +2594,45 @@
     const el = state.selectedEl;
     const customId = el.getAttribute('data-ui-custom-id');
 
-    // If this is a newly added element, remove it cleanly from DOM & state.addedNodes
+    // If this is a newly added element, remove it cleanly from DOM & state.addedNodes (and record undo!)
     if (customId) {
       const idx = state.addedNodes.findIndex(n => n.id === customId);
+      let removedNodeInfo = null;
       if (idx !== -1) {
+        removedNodeInfo = state.addedNodes[idx];
         state.addedNodes.splice(idx, 1);
+      } else {
+        removedNodeInfo = {
+          id: customId,
+          parentSelector: getUniqueSelector(el.parentElement) || 'body',
+          html: el.outerHTML
+        };
       }
       state.editsMap.delete(getUniqueSelector(el));
       el.remove();
+      pushUndoAction({
+        type: 'remove_added_node',
+        nodeInfo: removedNodeInfo
+      });
       selectElement(null);
       buildDomTree();
       updateHistoryUI();
-      showToast('Đã xóa sạch khối mới thêm!', '🗑️');
+      showToast('Đã xóa khối mới thêm! (Bấm Ctrl+Z nếu muốn lấy lại)', '🗑️');
       return;
     }
 
+    const beforeSnap = captureElementState(el);
     const rec = ensureEditRecord(el);
-    pushUndoAction({
-      type: 'delete',
-      selector: rec.selector
-    });
     el.style.setProperty('display', 'none', 'important');
     rec.deleted = true;
     rec.styles['display'] = 'none';
+    const afterSnap = captureElementState(el);
+    pushUndoAction({
+      type: 'snapshot',
+      selector: rec.selector,
+      before: beforeSnap,
+      after: afterSnap
+    });
     selectElement(null);
     buildDomTree();
     updateHistoryUI();
@@ -2326,6 +2642,7 @@
   function resetElementToOriginal(el) {
     if (!el) return;
     endHoverPreview();
+    const beforeSnap = captureElementState(el);
     const selector = getUniqueSelector(el);
     const rec = state.editsMap.get(selector);
     if (rec) {
@@ -2337,24 +2654,55 @@
       if (initStyle === '') el.removeAttribute('style');
       else el.setAttribute('style', initStyle);
     }
+    const initClass = el.getAttribute('data-ui-init-class');
+    if (initClass !== null) {
+      if (initClass === '') el.removeAttribute('class');
+      else el.setAttribute('class', initClass);
+    } else {
+      Array.from(el.classList).forEach(c => {
+        if (c.startsWith('uilib-')) el.classList.remove(c);
+      });
+    }
+    const origText = el.getAttribute('data-ui-orig-text');
+    if (origText !== null) {
+      el.textContent = origText;
+      el.removeAttribute('data-ui-orig-text');
+    } else {
+      el.querySelectorAll('[data-uilib-decor="true"]').forEach(n => n.remove());
+    }
     el.removeAttribute('data-ui-dx');
     el.removeAttribute('data-ui-dy');
     el.removeAttribute('data-ui-rot');
     el.removeAttribute('data-ui-scale');
+    const afterSnap = captureElementState(el);
+    pushUndoAction({
+      type: 'snapshot',
+      selector,
+      before: beforeSnap,
+      after: afterSnap
+    });
     if (state.selectedEl === el) selectElement(el);
     buildDomTree();
     updateHistoryUI();
-    showToast('Đã khôi phục phần tử về nguyên trạng gốc!', '↺');
+    showToast('Đã khôi phục phần tử về nguyên trạng gốc! (Ctrl+Z để hoàn tác)', '↺');
   }
 
   function resetPropertiesGroup(el, propsList, toastMsg) {
     if (!el) return;
     endHoverPreview();
+    const beforeSnap = captureElementState(el);
     const selector = getUniqueSelector(el);
     const rec = state.editsMap.get(selector);
     propsList.forEach(p => {
       el.style.removeProperty(p);
       if (rec && rec.styles) delete rec.styles[p];
+    });
+    const afterSnap = captureElementState(el);
+    pushUndoAction({
+      type: 'snapshot',
+      selector,
+      before: beforeSnap,
+      after: afterSnap
     });
     selectElement(el);
     updateHistoryUI();
@@ -2514,11 +2862,19 @@
           return;
         }
         endHoverPreview();
-        Object.entries(preset.styles).forEach(([k, v], idx, arr) => {
-          applyStyleProperty(state.selectedEl, k, v, idx === arr.length - 1);
+        const beforeSnap = captureElementState(state.selectedEl);
+        Object.entries(preset.styles).forEach(([k, v]) => {
+          applyStyleProperty(state.selectedEl, k, v, false);
+        });
+        const afterSnap = captureElementState(state.selectedEl);
+        pushUndoAction({
+          type: 'snapshot',
+          selector: beforeSnap.selector,
+          before: beforeSnap,
+          after: afterSnap
         });
         selectElement(state.selectedEl);
-        showToast(`Đã áp dụng "${preset.name}"! (Bấm ↺ Về Gốc nếu muốn hủy)`, '✨');
+        showToast(`Đã áp dụng "${preset.name}"! (Bấm Ctrl+Z hoặc ↺ Về Gốc nếu muốn hủy)`, '✨');
       });
       dom.magicPresetsList.appendChild(card);
     });
@@ -2664,6 +3020,180 @@
     return /\b(px-\d|py-\d|bg-[a-z]+-|rounded-|flex\b|items-center|justify-|text-[a-z]+-|shadow-|hover:|bg-gradient-to-)/.test(htmlStr);
   }
 
+  function extractCleanUserText(el) {
+    if (!el) return '';
+    if (el.hasAttribute('data-ui-orig-text')) {
+      return el.getAttribute('data-ui-orig-text');
+    }
+    const clone = el.cloneNode(true);
+    clone.querySelectorAll('[data-uilib-decor="true"]').forEach(n => n.remove());
+    return (clone.textContent || '').trim();
+  }
+
+  function applyComponentStyleAndFxToElement(el, comp, isPreviewOnly = false) {
+    if (!el || !comp) return false;
+    const doc = el.ownerDocument;
+    syncLibraryCssEverywhere(doc);
+
+    if (looksLikeTailwind(comp.html) && !state.injectedCdns.has('tailwind')) {
+      state.injectedCdns.add('tailwind');
+      applyInjectedCdnsToDoc(doc);
+      syncCdnChipsUI();
+    }
+
+    const temp = document.createElement('div');
+    temp.innerHTML = comp.html || '';
+    const tplRoot = temp.firstElementChild;
+
+    // 1. Build merged style map from tplRoot inline styles + comp.morphStyles
+    const mergedStyles = {};
+    const tag = el.tagName.toLowerCase();
+    const isLeafInteractive = ['button', 'a', 'span', 'label', 'h1', 'h2', 'h3', 'h4', 'p'].includes(tag);
+
+    if (tplRoot && tplRoot.getAttribute('style')) {
+      tplRoot.getAttribute('style').split(';').forEach(pair => {
+        const colonIdx = pair.indexOf(':');
+        if (colonIdx === -1) return;
+        const k = pair.slice(0, colonIdx).trim().toLowerCase();
+        const v = pair.slice(colonIdx + 1).trim();
+        if (!k || !v) return;
+        if (isLeafInteractive && ['width', 'min-width', 'max-width', 'height', 'min-height'].includes(k)) return;
+        mergedStyles[k] = v;
+      });
+    }
+
+    Object.entries(comp.morphStyles || {}).forEach(([k, v]) => {
+      mergedStyles[k.toLowerCase()] = v;
+    });
+
+    if (Object.keys(mergedStyles).length === 0 && !tplRoot) {
+      return false;
+    }
+
+    const rec = !isPreviewOnly ? ensureEditRecord(el) : null;
+
+    // Apply regular styles first, then background-size & animation AFTER background so shorthand doesn't reset them
+    const deferredProps = ['background-size', 'background-position', 'animation'];
+    Object.entries(mergedStyles).forEach(([k, v]) => {
+      if (deferredProps.includes(k)) return;
+      el.style.setProperty(k, v, 'important');
+      if (rec) rec.styles[k] = v;
+    });
+    deferredProps.forEach(k => {
+      if (mergedStyles[k]) {
+        el.style.setProperty(k, mergedStyles[k], 'important');
+        if (rec) rec.styles[k] = mergedStyles[k];
+      }
+    });
+
+    // 2. If "✨ Áp cả Icon & Hiệu ứng" is enabled, transfer classes, animations, hover FX & icons!
+    if (state.morphWithFx && tplRoot) {
+      // Remove previous uilib-* effect classes before applying new ones
+      Array.from(el.classList).forEach(c => {
+        if (c.startsWith('uilib-')) el.classList.remove(c);
+      });
+      el.classList.add('uilib-comp');
+      Array.from(tplRoot.classList).forEach(c => {
+        if (c.startsWith('uilib-')) el.classList.add(c);
+      });
+
+      const animStr = (mergedStyles['animation'] || '') + ' ' + (comp.id || '');
+      if (animStr.includes('rainbow')) el.classList.add('uilib-anim-rainbow');
+      if (animStr.includes('shimmer')) el.classList.add('uilib-anim-shimmer');
+
+      if (rec) {
+        rec.attrChanges['class'] = el.getAttribute('class') || '';
+      }
+
+      // Transfer decorative icons, glowing dots, SVG icons, or trailing arrows while preserving user's text!
+      const hasComplexBlockChildren = Boolean(el.querySelector('div, section, article, ul, table, form, input, img'));
+      if (isLeafInteractive && !hasComplexBlockChildren) {
+        const userText = extractCleanUserText(el);
+        if (userText) {
+          if (!isPreviewOnly && !el.hasAttribute('data-ui-orig-text')) {
+            el.setAttribute('data-ui-orig-text', userText);
+          }
+
+          const tplChildren = Array.from(tplRoot.children);
+          const allInlineDecor = tplChildren.length >= 2 && tplChildren.every(c =>
+            ['SPAN', 'SVG', 'I', 'KBD', 'SMALL', 'STRONG'].includes(c.tagName)
+          );
+
+          if (allInlineDecor) {
+            const clonedTpl = tplRoot.cloneNode(true);
+            let mainTextNode = null;
+            let maxLen = -1;
+            Array.from(clonedTpl.children).forEach(child => {
+              const t = (child.textContent || '').trim();
+              if (child.tagName === 'SPAN' && t.length > maxLen && !/^[→↗↵›»✦⚡✨🌈🚀🔥💎]+$/u.test(t)) {
+                maxLen = t.length;
+                mainTextNode = child;
+              }
+            });
+            Array.from(clonedTpl.children).forEach(child => {
+              if (child === mainTextNode) {
+                child.textContent = userText;
+              } else {
+                child.setAttribute('data-uilib-decor', 'true');
+              }
+            });
+            el.innerHTML = clonedTpl.innerHTML;
+            el.style.setProperty('display', 'inline-flex', 'important');
+            el.style.setProperty('align-items', 'center', 'important');
+            el.style.setProperty('gap', mergedStyles['gap'] || '8px', 'important');
+            if (rec) {
+              rec.styles['display'] = 'inline-flex';
+              rec.styles['align-items'] = 'center';
+              rec.styles['gap'] = mergedStyles['gap'] || '8px';
+            }
+          } else {
+            const rawTplText = (tplRoot.textContent || '').trim();
+            const leadMatch = rawTplText.match(/^([\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}✦⚡✨🌈🚀🔥💎🟢🔐🎉💬⏳🌟🔘✓]+)\s+/u);
+            const trailMatch = rawTplText.match(/\s+([→↗↵›»]+)$/u);
+            const leadSvg = tplRoot.querySelector('svg');
+
+            if (leadSvg || leadMatch || trailMatch) {
+              const parts = [];
+              if (leadSvg) {
+                const svgClone = leadSvg.cloneNode(true);
+                svgClone.setAttribute('data-uilib-decor', 'true');
+                parts.push(svgClone.outerHTML);
+              } else if (leadMatch) {
+                parts.push(`<span data-uilib-decor="true" style="display:inline-flex;align-items:center;">${leadMatch[1]}</span>`);
+              }
+              parts.push(`<span>${userText}</span>`);
+              if (trailMatch) {
+                parts.push(`<span data-uilib-decor="true" style="opacity:0.85;">${trailMatch[1]}</span>`);
+              }
+              el.innerHTML = parts.join('');
+              el.style.setProperty('display', 'inline-flex', 'important');
+              el.style.setProperty('align-items', 'center', 'important');
+              el.style.setProperty('gap', mergedStyles['gap'] || '8px', 'important');
+              if (rec) {
+                rec.styles['display'] = 'inline-flex';
+                rec.styles['align-items'] = 'center';
+                rec.styles['gap'] = mergedStyles['gap'] || '8px';
+              }
+            } else if (el.querySelector('[data-uilib-decor="true"]')) {
+              el.textContent = userText;
+            }
+          }
+        }
+      }
+    }
+
+    return true;
+  }
+
+  function startComponentFullMorphPreview(comp, labelText = '') {
+    const el = state.selectedEl;
+    if (!el || state.mode !== 'edit') return;
+    ensureHoverBackupBaseline(el);
+    applyComponentStyleAndFxToElement(el, comp, true);
+    showLivePreviewIndicator(labelText || `${comp.libName}: ${comp.name}`);
+    updateOverlayPosition();
+  }
+
   function morphSelectedWithLibComponent(comp) {
     if (!state.selectedEl) {
       showToast('Hãy click chọn 1 phần tử trên trang web trước, hoặc bấm "➕ Chèn Mới"!', '👆');
@@ -2671,17 +3201,25 @@
     }
     endHoverPreview();
     clearPreviewAddBlock();
-    const styles = comp.morphStyles || {};
-    const entries = Object.entries(styles);
-    if (entries.length === 0) {
+
+    const beforeSnap = captureElementState(state.selectedEl);
+    const didMorph = applyComponentStyleAndFxToElement(state.selectedEl, comp, false);
+    if (!didMorph) {
       insertLibComponentToPage(comp);
       return;
     }
-    entries.forEach(([k, v], idx) => {
-      applyStyleProperty(state.selectedEl, k, v, idx === entries.length - 1);
+
+    const afterSnap = captureElementState(state.selectedEl);
+    pushUndoAction({
+      type: 'snapshot',
+      selector: beforeSnap.selector,
+      before: beforeSnap,
+      after: afterSnap
     });
+
     selectElement(state.selectedEl);
-    showToast(`Đã biến hình theo "${comp.libName} — ${comp.name}"! (Bấm ↺ Về Gốc nếu muốn hủy)`, '✨');
+    updateHistoryUI();
+    showToast(`Đã áp dụng trọn bộ Style, Hiệu ứng & Icon "${comp.libName} — ${comp.name}"! (Bấm Ctrl+Z hoặc ↺ Gốc để hủy)`, '✨');
   }
 
   function insertLibComponentToPage(comp) {
@@ -2712,6 +3250,7 @@
 
     newEl.setAttribute('data-ui-custom-id', uniqueId);
     newEl.setAttribute('data-ui-init-style', newEl.getAttribute('style') || '');
+    newEl.setAttribute('data-ui-init-class', newEl.getAttribute('class') || '');
 
     if (state.selectedEl && state.selectedEl.parentElement === container) {
       state.selectedEl.insertAdjacentElement('afterend', newEl);
@@ -2719,41 +3258,45 @@
       container.appendChild(newEl);
     }
 
-    state.addedNodes.push({
+    const nodeInfo = {
       id: uniqueId,
       libName: comp.libName,
       compName: comp.name,
       parentSelector,
       html: newEl.outerHTML
+    };
+    state.addedNodes.push(nodeInfo);
+    pushUndoAction({
+      type: 'add_node',
+      nodeInfo
     });
 
     selectElement(newEl);
     newEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     buildDomTree();
     updateHistoryUI();
-    showToast(`Đã chèn "${comp.name}" (${comp.libName}) vào trang!`, '➕');
+    showToast(`Đã chèn "${comp.name}" (${comp.libName}) vào trang! (Bấm Ctrl+Z để hoàn tác)`, '➕');
   }
 
   function previewComponentCardOnHover(comp) {
     const mode = dom.uilibHoverMode ? dom.uilibHoverMode.value : 'auto';
     const hasSelected = Boolean(state.selectedEl);
-    const hasMorph = comp.morphStyles && Object.keys(comp.morphStyles).length > 0;
+    const hasMorph = Boolean((comp.morphStyles && Object.keys(comp.morphStyles).length > 0) || comp.html);
 
     if (mode === 'morph' && hasSelected && hasMorph) {
-      startHoverPreview(comp.morphStyles, `${comp.libName}: ${comp.name}`);
+      startComponentFullMorphPreview(comp, `${comp.libName}: ${comp.name}`);
       return;
     }
     if (mode === 'insert') {
       previewRawHtmlBlockOnHover(comp.html, `${comp.libName}: ${comp.name}`);
       return;
     }
-    // Auto smart mode: if user has selected a button/link/badge and hovers a button/badge component, preview morphing it directly!
-    // Otherwise preview inserting the full component block onto the page!
+    // Auto smart mode: if user has selected a button/link/badge and hovers a button/badge component, preview morphing it (with icon & animation) directly!
     if (hasSelected && hasMorph) {
       const selTag = state.selectedEl.tagName.toLowerCase();
       const isBtnLike = selTag === 'button' || selTag === 'a' || selTag === 'span';
       if ((comp.category === 'button' || comp.category === 'badge') && isBtnLike) {
-        startHoverPreview(comp.morphStyles, `Biến hình nút → ${comp.libName}: ${comp.name}`);
+        startComponentFullMorphPreview(comp, `Biến hình nút → ${comp.libName}: ${comp.name}`);
         return;
       }
     }
@@ -2800,7 +3343,7 @@
     const card = document.createElement('div');
     card.className = 'uilib-comp-card';
 
-    const isLargeBlock = comp.category === 'card' || comp.category === 'pricing' || comp.category === 'hero' || comp.category === 'nav';
+    const isLargeBlock = comp.category === 'card' || comp.category === 'pricing' || comp.category === 'hero' || comp.category === 'nav' || comp.category === 'modal' || comp.category === 'testimonial';
 
     const topRightHtml = isCustom
       ? `
@@ -2814,7 +3357,10 @@
     card.innerHTML = `
       <div class="uilib-comp-card__top">
         <div class="uilib-comp-card__meta">
-          <span class="uilib-lib-badge" style="border-color:${libMeta.accent}55;color:${libMeta.accent};background:${libMeta.accent}18;">${libMeta.name}</span>
+          <a href="${libMeta.url}" target="_blank" rel="noopener" class="uilib-lib-badge" title="Click vào Logo ${libMeta.name} để mở Trang Chủ (${libMeta.url})" style="border-color:${libMeta.accent}55;color:${libMeta.accent};background:${libMeta.accent}18;">
+            <span style="width:6px;height:6px;border-radius:50%;background:${libMeta.accent};display:inline-block;"></span>
+            <span>${libMeta.name}</span>
+          </a>
           <span class="uilib-comp-title" title="${comp.name}">${comp.name}</span>
         </div>
         ${topRightHtml}
@@ -2823,8 +3369,8 @@
         ${comp.html}
       </div>
       <div class="uilib-comp-card__actions ${isCustom ? 'uilib-comp-card__actions--3col' : ''}">
-        <button type="button" class="uilib-act-btn btn-morph-comp" title="Rê chuột để xem thử biến hình phần tử đang chọn theo phong cách của ${libMeta.name}">
-          ✨ Áp Style
+        <button type="button" class="uilib-act-btn btn-morph-comp" title="Rê chuột để xem thử & Áp cả Style, Animation, Hiệu ứng Hover + Icon của ${libMeta.name} vào thẻ đang chọn">
+          ✨ Áp Style &amp; FX
         </button>
         <button type="button" class="uilib-act-btn uilib-act-btn--primary btn-insert-comp" title="Rê chuột để xem thử & Chèn Component này vào trang web">
           ➕ Chèn Mới
@@ -2869,12 +3415,12 @@
     });
     stageEl.addEventListener('mouseleave', clearComponentHoverPreview);
 
-    // Action Button 1: Morph currently selected element
+    // Action Button 1: Morph currently selected element (with full style, animation, hover FX & icon!)
     const btnMorph = card.querySelector('.btn-morph-comp');
     btnMorph.addEventListener('mouseenter', () => {
       clearPreviewAddBlock();
-      if (state.selectedEl && comp.morphStyles) {
-        startHoverPreview(comp.morphStyles, `Áp Style ${libMeta.name}: ${comp.name}`);
+      if (state.selectedEl) {
+        startComponentFullMorphPreview(comp, `Áp Style & FX ${libMeta.name}: ${comp.name}`);
       }
     });
     btnMorph.addEventListener('mouseleave', clearComponentHoverPreview);
@@ -2904,11 +3450,12 @@
     return card;
   }
 
-  function getFilteredUiComponents(queryStr, categoryFilter, libFilter) {
+  function getFilteredUiComponents(queryStr, categoryFilter, libFilter, checkedSet = null, autoDetectedCat = null) {
     const allComps = window.STUDIO_LIB_COMPONENTS || [];
     const q = (queryStr || '').trim().toLowerCase();
+    const hasChecked = checkedSet && checkedSet.size > 0;
 
-    return allComps.filter(comp => {
+    let filtered = allComps.filter(comp => {
       if (libFilter && libFilter !== 'all') {
         if (libFilter === 'custom') {
           if (!isCustomImportedComp(comp)) return false;
@@ -2916,7 +3463,16 @@
           return false;
         }
       }
-      if (categoryFilter && categoryFilter !== 'all' && categoryFilter !== 'directory') {
+
+      // 1. If user checked 1 or more items in NameThat UI Checklist, filter by checked categories!
+      if (hasChecked) {
+        if (checkedSet.has('custom') && isCustomImportedComp(comp)) {
+          // Matches custom
+        } else if (!checkedSet.has(comp.category)) {
+          return false;
+        }
+      } else if (categoryFilter && categoryFilter !== 'all' && categoryFilter !== 'directory') {
+        // 2. Otherwise use category pill filter
         if (categoryFilter === 'custom') {
           if (!isCustomImportedComp(comp)) return false;
         } else if (categoryFilter === 'hero') {
@@ -2924,7 +3480,13 @@
         } else if (comp.category !== categoryFilter) {
           return false;
         }
+      } else if (autoDetectedCat && !q) {
+        // 3. Auto-Match Selected Element on Canvas: show exact category + related categories!
+        const taxonomy = (window.STUDIO_NAMETHAT_CATEGORIES || []).find(t => t.id === autoDetectedCat);
+        const allowedCats = taxonomy && taxonomy.related ? taxonomy.related : [autoDetectedCat];
+        if (!allowedCats.includes(comp.category)) return false;
       }
+
       if (!q) return true;
       const hay = [
         comp.name,
@@ -2935,6 +3497,83 @@
       ].join(' ').toLowerCase();
       return hay.includes(q);
     });
+
+    // If autoDetectedCat is active, sort exact category matches first, then related categories!
+    if (autoDetectedCat && !hasChecked && (!categoryFilter || categoryFilter === 'all')) {
+      filtered = filtered.slice().sort((a, b) => {
+        const aExact = a.category === autoDetectedCat ? 0 : 1;
+        const bExact = b.category === autoDetectedCat ? 0 : 1;
+        return aExact - bExact;
+      });
+    }
+
+    return filtered;
+  }
+
+  function renderNamethatChecklistUI() {
+    if (!dom.namethatChecklistGrid) return;
+    const categories = window.STUDIO_NAMETHAT_CATEGORIES || [];
+    const allComps = window.STUDIO_LIB_COMPONENTS || [];
+    const libs = window.STUDIO_UI_LIBRARIES || [];
+
+    dom.namethatChecklistGrid.innerHTML = '';
+    categories.forEach(cat => {
+      const count = cat.id === 'custom'
+        ? allComps.filter(isCustomImportedComp).length
+        : allComps.filter(c => c.category === cat.id).length;
+
+      const isChecked = state.namethatCheckedSet.has(cat.id);
+      const labelEl = document.createElement('label');
+      labelEl.className = 'namethat-check-item' + (isChecked ? ' checked' : '');
+      labelEl.title = `${cat.name} — ${cat.vnName} (${count} mẫu có sẵn)`;
+      labelEl.innerHTML = `
+        <span class="namethat-check-label">
+          <input type="checkbox" value="${cat.id}" ${isChecked ? 'checked' : ''} />
+          <span>${cat.icon} ${cat.name}</span>
+        </span>
+        <span class="namethat-check-count">${count}</span>
+      `;
+      const chk = labelEl.querySelector('input');
+      chk.addEventListener('change', () => {
+        if (chk.checked) {
+          state.namethatCheckedSet.add(cat.id);
+        } else {
+          state.namethatCheckedSet.delete(cat.id);
+        }
+        renderNamethatChecklistUI();
+        renderSidebarUiLibraries();
+      });
+      dom.namethatChecklistGrid.appendChild(labelEl);
+    });
+
+    const checkedCount = state.namethatCheckedSet.size;
+    if (dom.namethatCheckedBadge) {
+      dom.namethatCheckedBadge.textContent = checkedCount;
+      dom.namethatCheckedBadge.classList.toggle('hidden', checkedCount === 0);
+    }
+    if (dom.btnToggleNamethatChecklist) {
+      dom.btnToggleNamethatChecklist.classList.toggle('active', checkedCount > 0 || (dom.namethatChecklistPanel && !dom.namethatChecklistPanel.classList.contains('hidden')));
+    }
+
+    // Show which UI Libraries have built the checked component types!
+    if (dom.namethatMatchingLibs) {
+      if (checkedCount === 0) {
+        dom.namethatMatchingLibs.classList.add('hidden');
+        dom.namethatMatchingLibs.innerHTML = '';
+      } else {
+        const matchingComps = allComps.filter(c =>
+          (state.namethatCheckedSet.has('custom') && isCustomImportedComp(c)) ||
+          state.namethatCheckedSet.has(c.category)
+        );
+        const uniqueLibIds = Array.from(new Set(matchingComps.map(c => c.libId)));
+        const badgesHtml = uniqueLibIds.map(lid => {
+          const lMeta = libs.find(l => l.id === lid) || { id: lid, name: lid, url: 'https://21st.dev', accent: '#6366f1' };
+          return `<a href="${lMeta.url}" target="_blank" rel="noopener" class="uilib-lib-badge" title="Click mở trang chủ ${lMeta.name} (${lMeta.url})" style="border-color:${lMeta.accent}55;color:${lMeta.accent};background:${lMeta.accent}18;">${lMeta.name} ↗</a>`;
+        }).join('');
+        dom.namethatMatchingLibs.innerHTML = `<span>Thư viện có sẵn (${uniqueLibIds.length}):</span> ${badgesHtml}`;
+        dom.namethatMatchingLibs.classList.remove('hidden');
+      }
+    }
   }
 
   function renderSidebarUiLibraries() {
@@ -2945,13 +3584,13 @@
     const q = (state.uilibSearchQuery || '').trim().toLowerCase();
 
     // If user chose "📚 38 Web Libs" directory mode, render the 38 libraries directory cards!
-    if (state.uilibCategory === 'directory') {
+    if (state.uilibCategory === 'directory' && state.namethatCheckedSet.size === 0) {
       const filteredLibs = libs.filter(l => {
         if (!q) return true;
         return `${l.name} ${l.category} ${l.desc} ${l.badge}`.toLowerCase().includes(q);
       });
       if (dom.uilibResultsCount) {
-        dom.uilibResultsCount.textContent = `Danh bạ ${filteredLibs.length} Thư viện UI trong ảnh của bạn`;
+        dom.uilibResultsCount.textContent = `Danh bạ ${filteredLibs.length} Thư viện UI (Click Logo mở Web)`;
       }
       filteredLibs.forEach(lib => {
         const compCount = (window.STUDIO_LIB_COMPONENTS || []).filter(c => c.libId === lib.id).length;
@@ -2959,11 +3598,11 @@
         el.className = 'uilib-site-card';
         el.innerHTML = `
           <div class="uilib-site-card__top">
-            <div class="uilib-site-card__name">
+            <a href="${lib.url}" target="_blank" rel="noopener" class="uilib-site-card__name" title="Click vào Logo để mở trang chủ ${lib.name} (${lib.url})" style="text-decoration:none;">
               <span style="width:8px;height:8px;border-radius:50%;background:${lib.accent};display:inline-block;"></span>
-              <span>${lib.name}</span>
-            </div>
-            <span class="uilib-lib-badge" style="border-color:${lib.accent}55;color:${lib.accent};background:${lib.accent}15;">${lib.badge}</span>
+              <span>${lib.name} ↗</span>
+            </a>
+            <a href="${lib.url}" target="_blank" rel="noopener" class="uilib-lib-badge" style="border-color:${lib.accent}55;color:${lib.accent};background:${lib.accent}15;">${lib.badge}</a>
           </div>
           <div class="uilib-site-card__desc">${lib.desc}</div>
           <div class="uilib-site-card__btns">
@@ -2991,24 +3630,51 @@
       return;
     }
 
+    const activeAutoCat = (state.autoMatchSelectedEl && state.uilibCategory === 'all' && state.namethatCheckedSet.size === 0)
+      ? state.autoDetectedCategory
+      : null;
+
     const matched = getFilteredUiComponents(
       state.uilibSearchQuery,
       state.uilibCategory,
-      state.uilibSelectedLib
+      state.uilibSelectedLib,
+      state.namethatCheckedSet,
+      activeAutoCat
     );
 
     if (dom.uilibResultsCount) {
       const uniqueLibs = new Set(matched.map(m => m.libName)).size;
-      dom.uilibResultsCount.textContent = `Tìm thấy ${matched.length} Component từ ${uniqueLibs} Thư viện`;
+      if (state.namethatCheckedSet.size > 0) {
+        dom.uilibResultsCount.textContent = `☑️ Checklist (${state.namethatCheckedSet.size} loại): ${matched.length} mẫu từ ${uniqueLibs} Thư viện`;
+      } else if (activeAutoCat) {
+        dom.uilibResultsCount.textContent = `🎯 Gợi ý theo thẻ chọn: ${matched.length} mẫu từ ${uniqueLibs} Thư viện`;
+      } else {
+        dom.uilibResultsCount.textContent = `Tìm thấy ${matched.length} Component từ ${uniqueLibs} Thư viện`;
+      }
     }
 
     if (matched.length === 0) {
       dom.uilibComponentsList.innerHTML = `
         <div class="empty-state-sm">
-          Không tìm thấy mẫu khớp với "<strong>${state.uilibSearchQuery}</strong>".<br/><br/>
-          💡 Bạn có thể bấm nút <strong>"📥 Import Code Từ Web"</strong> ở trên để dán bất kỳ code HTML/Tailwind/JSX nào từ trang chủ các thư viện!
+          Không tìm thấy mẫu khớp với bộ lọc hiện tại.<br/><br/>
+          <button type="button" class="btn-secondary btn-sm" id="btn-empty-reset-filter">↺ Hiện tất cả Component</button>
         </div>
       `;
+      const resetBtn = dom.uilibComponentsList.querySelector('#btn-empty-reset-filter');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          state.uilibSearchQuery = '';
+          if (dom.uilibSearchInput) dom.uilibSearchInput.value = '';
+          state.uilibCategory = 'all';
+          state.uilibSelectedLib = 'all';
+          state.namethatCheckedSet.clear();
+          state.autoDetectedCategory = null;
+          if (dom.uilibDetectedBanner) dom.uilibDetectedBanner.classList.add('hidden');
+          if (dom.uilibLibFilter) dom.uilibLibFilter.value = 'all';
+          renderNamethatChecklistUI();
+          renderSidebarUiLibraries();
+        });
+      }
       return;
     }
 
@@ -3069,6 +3735,99 @@
   function initUiLibrariesHub() {
     loadSavedCustomComponents();
     syncLibraryCssEverywhere();
+    renderNamethatChecklistUI();
+
+    // Brand Logo Click -> Return to Home Page (index.html / index-creative-developer.html or Demo Home)
+    if (dom.brandHomeLogo) {
+      dom.brandHomeLogo.addEventListener('click', () => {
+        if (state.files && state.files.length > 0) {
+          const homeFile =
+            state.files.find(f => f.relativePath === 'index-creative-developer.html') ||
+            state.files.find(f => f.relativePath === 'index.html') ||
+            state.files[0];
+          if (homeFile) {
+            if (dom.pageSelector) dom.pageSelector.value = homeFile.relativePath;
+            loadWorkspacePage(homeFile.relativePath);
+            showToast(`🏠 Đã quay về Trang Chủ (${homeFile.name})!`, '🏠');
+            return;
+          }
+        }
+        loadBuiltInDemo();
+        showToast('🏠 Đã quay về Trang Chủ Demo!', '🏠');
+      });
+    }
+
+    // NameThat UI Checklist Toggle, Reset & Close
+    if (dom.btnToggleNamethatChecklist && dom.namethatChecklistPanel) {
+      dom.btnToggleNamethatChecklist.addEventListener('click', () => {
+        const isHidden = dom.namethatChecklistPanel.classList.toggle('hidden');
+        dom.btnToggleNamethatChecklist.classList.toggle('active', !isHidden || state.namethatCheckedSet.size > 0);
+        if (!isHidden) {
+          renderNamethatChecklistUI();
+        }
+      });
+    }
+    if (dom.btnResetNamethat) {
+      dom.btnResetNamethat.addEventListener('click', () => {
+        state.namethatCheckedSet.clear();
+        renderNamethatChecklistUI();
+        renderSidebarUiLibraries();
+        showToast('Đã bỏ chọn toàn bộ Checklist NameThat UI', '↺');
+      });
+    }
+    if (dom.btnCloseNamethat && dom.namethatChecklistPanel) {
+      dom.btnCloseNamethat.addEventListener('click', () => {
+        dom.namethatChecklistPanel.classList.add('hidden');
+        if (dom.btnToggleNamethatChecklist) {
+          dom.btnToggleNamethatChecklist.classList.toggle('active', state.namethatCheckedSet.size > 0);
+        }
+      });
+    }
+
+    // Smart Toggles: Auto-Match Clicked Element & Morph Full FX/Icons
+    if (dom.chkAutoMatchEl) {
+      dom.chkAutoMatchEl.checked = state.autoMatchSelectedEl;
+      dom.chkAutoMatchEl.addEventListener('change', e => {
+        state.autoMatchSelectedEl = e.target.checked;
+        if (!state.autoMatchSelectedEl) {
+          state.autoDetectedCategory = null;
+          if (dom.uilibDetectedBanner) dom.uilibDetectedBanner.classList.add('hidden');
+        } else if (state.selectedEl) {
+          state.autoDetectedCategory = detectElementUiCategory(state.selectedEl);
+          if (state.autoDetectedCategory && dom.uilibDetectedBanner) {
+            dom.uilibDetectedBanner.classList.remove('hidden');
+          }
+        }
+        renderSidebarUiLibraries();
+      });
+    }
+    if (dom.chkMorphWithFx) {
+      dom.chkMorphWithFx.checked = state.morphWithFx;
+      dom.chkMorphWithFx.addEventListener('change', e => {
+        state.morphWithFx = e.target.checked;
+        showToast(
+          state.morphWithFx
+            ? 'Đã bật: Khi Áp Style sẽ áp dụng luônทั้ง Animation, Hover & Icon!'
+            : 'Đã tắt: Chỉ áp dụng màu sắc & viền cơ bản',
+          '✨'
+        );
+      });
+    }
+    if (dom.btnShowAllUilibs) {
+      dom.btnShowAllUilibs.addEventListener('click', () => {
+        state.autoDetectedCategory = null;
+        state.uilibCategory = 'all';
+        state.namethatCheckedSet.clear();
+        if (dom.uilibDetectedBanner) dom.uilibDetectedBanner.classList.add('hidden');
+        if (dom.uilibCatPills) {
+          dom.uilibCatPills.querySelectorAll('.uilib-cat-pill').forEach(p => {
+            p.classList.toggle('active', p.dataset.uicat === 'all');
+          });
+        }
+        renderNamethatChecklistUI();
+        renderSidebarUiLibraries();
+      });
+    }
 
     // Restore saved Studio Theme (tweakcn style)
     const savedTheme = localStorage.getItem('studio_ui_theme') || 'obsidian';
@@ -3126,6 +3885,12 @@
           dom.uilibCatPills.querySelectorAll('.uilib-cat-pill').forEach(p => p.classList.remove('active'));
           pill.classList.add('active');
           state.uilibCategory = pill.dataset.uicat;
+          state.namethatCheckedSet.clear();
+          if (state.uilibCategory !== 'all') {
+            state.autoDetectedCategory = null;
+            if (dom.uilibDetectedBanner) dom.uilibDetectedBanner.classList.add('hidden');
+          }
+          renderNamethatChecklistUI();
           renderSidebarUiLibraries();
         });
       });
@@ -3149,6 +3914,148 @@
         updateHistoryUI();
       });
     });
+
+    // Right Inspector: 1-Click Pro Animation, Hover FX & Icon Injector
+    const applyAnimFxToEl = (el, animType, isPreview = false) => {
+      if (!el) return;
+      syncLibraryCssEverywhere(el.ownerDocument);
+      ['uilib-anim-rainbow', 'uilib-anim-shimmer', 'uilib-anim-glow', 'uilib-anim-float'].forEach(c => el.classList.remove(c));
+      el.style.removeProperty('animation');
+      const rec = !isPreview ? ensureEditRecord(el) : null;
+      if (rec) delete rec.styles['animation'];
+
+      if (animType === 'rainbow') {
+        el.classList.add('uilib-comp', 'uilib-anim-rainbow');
+        el.style.setProperty('background-image', 'linear-gradient(90deg, #6366f1, #ec4899, #f59e0b, #10b981, #6366f1)', 'important');
+        el.style.setProperty('background-size', '300% 300%', 'important');
+        el.style.setProperty('animation', 'uilib-rainbow 2.6s linear infinite', 'important');
+        if (rec) {
+          rec.styles['background-image'] = 'linear-gradient(90deg, #6366f1, #ec4899, #f59e0b, #10b981, #6366f1)';
+          rec.styles['background-size'] = '300% 300%';
+          rec.styles['animation'] = 'uilib-rainbow 2.6s linear infinite';
+        }
+      } else if (animType === 'shimmer') {
+        el.classList.add('uilib-comp', 'uilib-anim-shimmer');
+        el.style.setProperty('background-image', 'linear-gradient(110deg, #09090b 40%, #52525b 50%, #09090b 60%)', 'important');
+        el.style.setProperty('background-size', '200% 100%', 'important');
+        el.style.setProperty('animation', 'uilib-shimmer 2.2s infinite linear', 'important');
+        if (rec) {
+          rec.styles['background-image'] = 'linear-gradient(110deg, #09090b 40%, #52525b 50%, #09090b 60%)';
+          rec.styles['background-size'] = '200% 100%';
+          rec.styles['animation'] = 'uilib-shimmer 2.2s infinite linear';
+        }
+      } else if (animType === 'glow') {
+        el.classList.add('uilib-comp', 'uilib-anim-glow');
+        el.style.setProperty('animation', 'uilib-pulse-glow 2.2s ease-in-out infinite', 'important');
+        if (rec) rec.styles['animation'] = 'uilib-pulse-glow 2.2s ease-in-out infinite';
+      } else if (animType === 'float') {
+        el.classList.add('uilib-comp', 'uilib-anim-float');
+        el.style.setProperty('animation', 'uilib-float 2.6s ease-in-out infinite', 'important');
+        if (rec) rec.styles['animation'] = 'uilib-float 2.6s ease-in-out infinite';
+      }
+      if (rec) rec.attrChanges['class'] = el.getAttribute('class') || '';
+    };
+
+    document.querySelectorAll('[data-fx-anim]').forEach(btn => {
+      btn.addEventListener('mouseenter', () => {
+        if (!state.selectedEl) return;
+        ensureHoverBackupBaseline(state.selectedEl);
+        applyAnimFxToEl(state.selectedEl, btn.dataset.fxAnim, true);
+        showLivePreviewIndicator(`Animation: ${btn.textContent}`);
+      });
+      btn.addEventListener('mouseleave', endHoverPreview);
+      btn.addEventListener('click', () => {
+        if (!state.selectedEl) return;
+        endHoverPreview();
+        const before = captureElementState(state.selectedEl);
+        applyAnimFxToEl(state.selectedEl, btn.dataset.fxAnim, false);
+        pushUndoAction({ type: 'snapshot', selector: before.selector, before, after: captureElementState(state.selectedEl) });
+        updateHistoryUI();
+        showToast(`Đã áp dụng hiệu ứng: ${btn.textContent} (Ctrl+Z để hủy)`, '🎬');
+      });
+    });
+
+    document.querySelectorAll('[data-fx-hover]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!state.selectedEl) return;
+        endHoverPreview();
+        const before = captureElementState(state.selectedEl);
+        syncLibraryCssEverywhere(state.selectedEl.ownerDocument);
+        ['uilib-btn-hover-lift', 'uilib-btn-brutal', 'uilib-btn-duolingo'].forEach(c => state.selectedEl.classList.remove(c));
+        state.selectedEl.classList.add('uilib-comp', btn.dataset.fxHover);
+        const rec = ensureEditRecord(state.selectedEl);
+        rec.attrChanges['class'] = state.selectedEl.getAttribute('class') || '';
+        pushUndoAction({ type: 'snapshot', selector: before.selector, before, after: captureElementState(state.selectedEl) });
+        updateHistoryUI();
+        showToast(`Đã gắn hiệu ứng Hover: ${btn.textContent}`, '🚀');
+      });
+    });
+
+    document.querySelectorAll('[data-fx-icon]').forEach(btn => {
+      const injectIconFn = (el, iconVal, pos, isPreview) => {
+        if (!el) return;
+        const userText = extractCleanUserText(el);
+        if (!userText) return;
+        if (!isPreview && !el.hasAttribute('data-ui-orig-text')) {
+          el.setAttribute('data-ui-orig-text', userText);
+        }
+        if (iconVal === 'clear') {
+          el.textContent = userText;
+          return;
+        }
+        if (pos === 'end') {
+          el.innerHTML = `<span>${userText}</span><span data-uilib-decor="true" style="margin-left:6px;">${iconVal}</span>`;
+        } else {
+          el.innerHTML = `<span data-uilib-decor="true" style="margin-right:6px;">${iconVal}</span><span>${userText}</span>`;
+        }
+        el.style.setProperty('display', 'inline-flex', 'important');
+        el.style.setProperty('align-items', 'center', 'important');
+      };
+
+      btn.addEventListener('mouseenter', () => {
+        if (!state.selectedEl) return;
+        ensureHoverBackupBaseline(state.selectedEl);
+        injectIconFn(state.selectedEl, btn.dataset.fxIcon, btn.dataset.fxPos, true);
+        showLivePreviewIndicator(`Icon: ${btn.dataset.fxIcon}`);
+      });
+      btn.addEventListener('mouseleave', endHoverPreview);
+      btn.addEventListener('click', () => {
+        if (!state.selectedEl) return;
+        endHoverPreview();
+        const before = captureElementState(state.selectedEl);
+        injectIconFn(state.selectedEl, btn.dataset.fxIcon, btn.dataset.fxPos, false);
+        const rec = ensureEditRecord(state.selectedEl);
+        rec.styles['display'] = 'inline-flex';
+        rec.styles['align-items'] = 'center';
+        pushUndoAction({ type: 'snapshot', selector: before.selector, before, after: captureElementState(state.selectedEl) });
+        updateHistoryUI();
+        showToast(btn.dataset.fxIcon === 'clear' ? 'Đã gỡ Icon khỏi phần tử' : `Đã gắn Icon ${btn.dataset.fxIcon} vào phần tử!`, '✨');
+      });
+    });
+
+    if (dom.btnFxReset) {
+      dom.btnFxReset.addEventListener('click', () => {
+        if (!state.selectedEl) return;
+        endHoverPreview();
+        const before = captureElementState(state.selectedEl);
+        Array.from(state.selectedEl.classList).forEach(c => {
+          if (c.startsWith('uilib-')) state.selectedEl.classList.remove(c);
+        });
+        state.selectedEl.style.removeProperty('animation');
+        const origText = state.selectedEl.getAttribute('data-ui-orig-text');
+        if (origText !== null) {
+          state.selectedEl.textContent = origText;
+        } else {
+          state.selectedEl.querySelectorAll('[data-uilib-decor="true"]').forEach(n => n.remove());
+        }
+        const rec = ensureEditRecord(state.selectedEl);
+        delete rec.styles['animation'];
+        rec.attrChanges['class'] = state.selectedEl.getAttribute('class') || '';
+        pushUndoAction({ type: 'snapshot', selector: before.selector, before, after: captureElementState(state.selectedEl) });
+        updateHistoryUI();
+        showToast('Đã gỡ Animation, Hover FX & Icon đã gắn thêm!', '↺');
+      });
+    }
 
     // Open Full-Screen Modal Explorer (Ctrl+K or Topbar Search or Expand Button)
     const openExplorerModal = (defaultTab = 'umtab-catalog') => {
@@ -3480,15 +4387,19 @@
       clone.removeAttribute('id');
       clone.setAttribute('data-ui-custom-id', uniqueId);
       state.selectedEl.insertAdjacentElement('afterend', clone);
-      state.addedNodes.push({
+      const nodeInfo = {
         id: uniqueId,
+        type: 'duplicate',
         parentSelector: getUniqueSelector(state.selectedEl.parentElement) || 'body',
         html: clone.outerHTML
-      });
+      };
+      state.addedNodes.push(nodeInfo);
+      state.undoStack.push({ type: 'add_node', nodeInfo });
+      state.redoStack = [];
       selectElement(clone);
       buildDomTree();
       updateHistoryUI();
-      showToast('Đã nhân bản phần tử! (Bấm 🗑️ Xóa nếu muốn hủy)', '📋');
+      showToast('Đã nhân bản phần tử! (Bấm Ctrl+Z hoặc 🗑️ Xóa nếu muốn hủy)', '📋');
     });
 
     dom.btnElReset.addEventListener('mouseenter', () => {
@@ -3519,11 +4430,15 @@
         if (!state.selectedEl) return;
         endHoverPreview();
         const el = state.selectedEl;
+        const beforeSnap = captureElementState(el);
         el.removeAttribute('data-ui-dx');
         el.removeAttribute('data-ui-dy');
         el.removeAttribute('data-ui-rot');
         el.removeAttribute('data-ui-scale');
         resetPropertiesGroup(el, ['translate', 'rotate', 'scale', 'width', 'height', 'margin-left', 'margin-top'], 'Đã đưa vị trí & kích thước về gốc!');
+        if (state.undoStack.length > 0 && state.undoStack[state.undoStack.length - 1].type === 'snapshot') {
+          state.undoStack[state.undoStack.length - 1].before = beforeSnap;
+        }
       });
     }
 
