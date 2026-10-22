@@ -1,22 +1,58 @@
 /**
- * VISUAL UI STUDIO PRO v6.3 — BILINGUAL I18N (EN ⇄ VI) & UNIFIED DARK/LIGHT MODE ENGINE
- * Terminology modeled after industry standards: Figma, Framer, Webflow, Shadcn Studio & ReactBits.dev
+ * VISUAL UI STUDIO PRO v6.4 — ORIGIN UI (COSS.COM) + SHADCN SONNER DESIGN SYSTEM,
+ * LUCIDE VECTOR SVG UPGRADE ENGINE, BILINGUAL I18N (EN ⇄ VI) & UNIFIED DARK/LIGHT MODE
  */
 (function () {
   let currentLang = localStorage.getItem('studio_lang') || 'vi';
   let lastDarkTheme = localStorage.getItem('studio_last_dark_theme') || 'obsidian';
   let canvasDarkActive = false;
+  let canvasOriginKitActive = false;
 
   window.getStudioLang = () => currentLang;
 
-  // Selector-based exact text / HTML / attribute translation table
+  // Official Lucide 13.5px Vector SVG Icons for Origin UI Controls (Zero Cartoon Emojis!)
+  const SVG = {
+    folder: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>',
+    upload: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>',
+    layout: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>',
+    search: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>',
+    sliders: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></svg>',
+    monitor: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>',
+    tablet: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><line x1="12" x2="12.01" y1="18" y2="18"/></svg>',
+    smartphone: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>',
+    pen: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/></svg>',
+    eye: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>',
+    moon: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>',
+    sun: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>',
+    sparkles: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>',
+    download: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>',
+    save: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg>',
+    grid: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>',
+    layers: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>',
+    plus: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14"/><path d="M12 5v14"/></svg>',
+    wand: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/><path d="m14 7 3 3"/></svg>',
+    clock: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+    checkSquare: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 12 2 2 4-4"/></svg>',
+    maximize: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" x2="14" y1="3" y2="10"/><line x1="3" x2="10" y1="21" y2="14"/></svg>',
+    code: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
+    external: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>',
+    arrowUp: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>',
+    copy: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>',
+    reset: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
+    trash: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>',
+    palette: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>',
+    move: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="15 19 12 22 9 19"/><polyline points="19 9 22 12 19 15"/><line x1="2" x2="22" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="22"/></svg>',
+    zap: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>'
+  };
+
+  // Selector-based exact text / HTML / attribute translation table (with Lucide SVGs!)
   const SELECTOR_TRANSLATIONS = [
     // ==================== TOPBAR ====================
     {
       sel: '#brand-home-logo',
       attr: 'title',
-      en: '🏠 Click Logo to return to Home Page',
-      vi: '🏠 Click vào Logo để quay về Trang Chủ'
+      en: 'Click Logo to return to Home Page',
+      vi: 'Click vào Logo để quay về Trang Chủ'
     },
     {
       sel: '#btn-change-folder',
@@ -32,66 +68,58 @@
     },
     {
       sel: '#btn-open-local-file',
-      text: { en: '📥 Open Web', vi: '📥 Mở Web' },
+      html: { en: SVG.upload + ' <span>Open Web</span>', vi: SVG.upload + ' <span>Mở Web</span>' },
       attr: 'title',
       en: 'Open or drop any HTML file or project folder from your computer',
       vi: 'Thả hoặc chọn file HTML / Thư mục bất kỳ từ máy tính'
     },
     {
       sel: '#btn-load-demo',
-      text: { en: '🎨 Demo Page', vi: '🎨 Trang Mẫu' },
+      html: { en: SVG.layout + ' <span>Demo UI</span>', vi: SVG.layout + ' <span>Trang Mẫu</span>' },
       attr: 'title',
-      en: 'Load interactive demo template',
-      vi: 'Mở giao diện mẫu để thử nghiệm'
+      en: 'Load Origin UI + Sonner interactive demo template',
+      vi: 'Mở giao diện mẫu chuẩn Origin UI + Sonner để thử nghiệm'
+    },
+    {
+      sel: '#btn-open-uilib-explorer .cmd-search-trigger__icon',
+      html: { en: SVG.search, vi: SVG.search }
     },
     {
       sel: '#btn-open-uilib-explorer .cmd-search-trigger__text',
       text: {
-        en: 'Search Components (Button, Card, Aceternity, Magic UI...)',
-        vi: 'Tìm Component (button, card, Aceternity, Magic UI...)'
+        en: 'Search Components (Button, Card, Origin UI, Magic UI...)',
+        vi: 'Tìm Component (button, card, Origin UI, Magic UI...)'
       }
     },
     {
-      sel: '#btn-open-uilib-explorer',
-      attr: 'title',
-      en: 'Quick Search across 38+ UI Libraries & 282+ Official .TSX Components (Ctrl+K)',
-      vi: 'Tìm kiếm nhanh Button, Card, Input từ 38+ Thư viện UI (Ctrl+K)'
-    },
-    {
       sel: '.topbar__center .btn-toggle-rb-dock',
-      text: { en: '🎛️ Customize (ReactBits)', vi: '🎛️ Customize (ReactBits)' },
+      html: { en: SVG.sliders + ' <span>Customize</span>', vi: SVG.sliders + ' <span>Customize</span>' },
       attr: 'title',
       en: 'Open 3-Column ReactBits.dev Customize Dock (218 Component Schemas & 3,960 Scrubber Controls)',
       vi: 'Mở Bảng Customize 3 cột chuẩn ReactBits.dev (218 Component Schemas & 3,960 thanh kéo Scrubber)'
     },
     {
-      sel: '#btn-zoom-out',
-      attr: 'title',
-      en: 'Zoom Out',
-      vi: 'Thu nhỏ'
+      sel: '#viewport-switcher [data-viewport="100%"]',
+      html: { en: SVG.monitor + ' <span>Desktop</span>', vi: SVG.monitor + ' <span>Desktop</span>' }
     },
     {
-      sel: '#btn-zoom-in',
-      attr: 'title',
-      en: 'Zoom In',
-      vi: 'Phóng to'
+      sel: '#viewport-switcher [data-viewport="768px"]',
+      html: { en: SVG.tablet + ' <span>Tablet</span>', vi: SVG.tablet + ' <span>Tablet</span>' }
     },
     {
-      sel: '#btn-zoom-reset',
-      attr: 'title',
-      en: 'Reset Zoom to 100%',
-      vi: 'Đặt lại 100%'
+      sel: '#viewport-switcher [data-viewport="390px"]',
+      html: { en: SVG.smartphone + ' <span>Mobile</span>', vi: SVG.smartphone + ' <span>Mobile</span>' }
     },
     {
       sel: '#mode-edit-btn',
-      text: { en: '✏️ Design', vi: '✏️ Sửa UI' },
+      html: { en: SVG.pen + ' <span>Design</span>', vi: SVG.pen + ' <span>Sửa UI</span>' },
       attr: 'title',
       en: 'Direct Visual Manipulation & Drag-and-Drop Mode',
       vi: 'Chế độ kéo thả & chỉnh sửa trực tiếp'
     },
     {
       sel: '#mode-preview-btn',
-      text: { en: '👁️ Preview', vi: '👁️ Xem Thử' },
+      html: { en: SVG.eye + ' <span>Preview</span>', vi: SVG.eye + ' <span>Xem Thử</span>' },
       attr: 'title',
       en: 'Interactive Live Preview Mode (test links, hover states & scrolling)',
       vi: 'Chế độ xem thử như trang web thật (bấm link, cuộn mượt)'
@@ -101,46 +129,10 @@
       text: { en: 'Bypass Loader', vi: 'Tắt Loader' }
     },
     {
-      sel: '#lbl-bypass-loader',
-      attr: 'title',
-      en: 'Automatically bypass page preloaders and reveal scroll-hidden sections for editing',
-      vi: 'Tự động ẩn màn hình chờ (Loader) và hiện đầy đủ các khối ẩn để dễ chỉnh sửa'
-    },
-    {
-      sel: '#btn-canvas-dark-mode',
-      attr: 'title',
-      en: 'Toggle Dark Mode simulation on the live webpage canvas',
-      vi: 'Bật/Tắt chế độ Dark Mode cho trang web đang chỉnh sửa trong khung Canvas'
-    },
-    {
-      sel: '#btn-dark-mode-toggle',
-      attr: 'title',
-      en: 'Toggle Dark Mode / Light Mode across Studio & ReactBits Customize Panel',
-      vi: 'Chuyển đổi nhanh chế độ Dark Mode / Light Mode cho toàn bộ Studio & Bảng Customize'
-    },
-    {
-      sel: '#studio-theme-select',
-      attr: 'title',
-      en: 'Switch Studio Workspace Theme (Inspired by tweakcn & Shadcn UI)',
-      vi: 'Đổi giao diện của công cụ Studio (Cảm hứng từ tweakcn & Shadcn)'
-    },
-    {
-      sel: '#btn-undo',
-      attr: 'title',
-      en: 'Undo (Ctrl+Z)',
-      vi: 'Hoàn tác (Ctrl+Z)'
-    },
-    {
-      sel: '#btn-redo',
-      attr: 'title',
-      en: 'Redo (Ctrl+Y)',
-      vi: 'Làm lại (Ctrl+Y)'
-    },
-    {
       sel: '#btn-ai-prompt',
       html: {
-        en: '🤖 AI Prompt <span id="change-count-badge" class="badge-count">0</span>',
-        vi: '🤖 Prompt AI <span id="change-count-badge" class="badge-count">0</span>'
+        en: SVG.sparkles + ' <span>AI Prompt</span> <span id="change-count-badge" class="badge-count">0</span>',
+        vi: SVG.sparkles + ' <span>Prompt AI</span> <span id="change-count-badge" class="badge-count">0</span>'
       },
       attr: 'title',
       en: 'Generate structured AI Prompt & CSS Patch for Cursor / Claude / ChatGPT',
@@ -148,14 +140,14 @@
     },
     {
       sel: '#btn-download-html',
-      text: { en: '⬇️ Export HTML', vi: '⬇️ Tải HTML' },
+      html: { en: SVG.download + ' <span>Export HTML</span>', vi: SVG.download + ' <span>Tải HTML</span>' },
       attr: 'title',
       en: 'Download edited standalone HTML file',
       vi: 'Tải file HTML đã chỉnh sửa về máy'
     },
     {
       sel: '#btn-save-direct',
-      text: { en: '💾 Save Source', vi: '💾 Lưu File Gốc' },
+      html: { en: SVG.save + ' <span>Save Source</span>', vi: SVG.save + ' <span>Lưu File Gốc</span>' },
       attr: 'title',
       en: 'Save changes directly to the source HTML file on disk (Ctrl+S)',
       vi: 'Lưu trực tiếp vào file gốc trên máy (Ctrl+S)'
@@ -165,63 +157,49 @@
     {
       sel: '.sidebar-tab[data-tab="tab-uilibs"]',
       html: {
-        en: '🌐 Assets <span class="tab-hot-dot"></span>',
-        vi: '🌐 Kho UI <span class="tab-hot-dot"></span>'
+        en: SVG.grid + ' <span>Assets</span> <span class="tab-hot-dot"></span>',
+        vi: SVG.grid + ' <span>Kho UI</span> <span class="tab-hot-dot"></span>'
       },
       attr: 'title',
-      en: 'Component Assets from 38+ UI Libraries (Aceternity, Magic UI, Shadcn, Origin UI...)',
-      vi: 'Kho Component từ 38+ Thư viện UI (Aceternity, Magic UI, Shadcn, Hover.dev...)'
+      en: 'Component Assets from 38+ UI Libraries (Origin UI, coss ui, Shadcn, Aceternity, Magic UI...)',
+      vi: 'Kho Component từ 38+ Thư viện UI (Origin UI, coss ui, Shadcn, Aceternity, Magic UI...)'
     },
     {
       sel: '.sidebar-tab[data-tab="tab-layers"]',
-      text: { en: '📑 Layers', vi: '📑 Cây UI' },
-      attr: 'title',
-      en: 'DOM Layer Hierarchy Tree',
-      vi: 'Cây cấu trúc các thẻ trên trang'
+      html: { en: SVG.layers + ' <span>Layers</span>', vi: SVG.layers + ' <span>Cây UI</span>' }
     },
     {
       sel: '.sidebar-tab[data-tab="tab-add"]',
-      text: { en: '➕ Elements', vi: '➕ Cơ Bản' },
-      attr: 'title',
-      en: 'Insert Basic UI Primitives & Layout Containers',
-      vi: 'Thêm nhanh các khối cơ bản'
+      html: { en: SVG.plus + ' <span>Elements</span>', vi: SVG.plus + ' <span>Cơ Bản</span>' }
     },
     {
       sel: '.sidebar-tab[data-tab="tab-magic"]',
-      text: { en: '✨ Styles', vi: '✨ Style' },
-      attr: 'title',
-      en: '1-Click Visual Style Presets & Live Hover Preview',
-      vi: 'Biến hình phong cách 1-Click'
+      html: { en: SVG.wand + ' <span>Styles</span>', vi: SVG.wand + ' <span>Style</span>' }
     },
     {
       sel: '.sidebar-tab[data-tab="tab-history"]',
-      text: { en: '🕒 History', vi: '🕒 Lịch Sử' },
-      attr: 'title',
-      en: 'Version History & Activity Log',
-      vi: 'Nhật ký chỉnh sửa & Khôi phục'
+      html: { en: SVG.clock + ' <span>History</span>', vi: SVG.clock + ' <span>Lịch Sử</span>' }
+    },
+    {
+      sel: '.uilib-search-icon',
+      html: { en: SVG.search, vi: SVG.search }
     },
     {
       sel: '#uilib-search-input',
       attr: 'placeholder',
-      en: 'Search: button, switch, card, magic...',
-      vi: 'Gõ: button, switch, card, magic...'
-    },
-    {
-      sel: '#btn-toggle-namethat-checklist',
-      attr: 'title',
-      en: 'Open UI Component Taxonomy Checklist (NameThat UI Standard)',
-      vi: 'Mở bảng Checklist các loại Component chuẩn NameThat UI (Button, Switch, Card, Checkbox, Modal, Tabs...)'
+      en: 'Search: button, switch, alert, toast, card...',
+      vi: 'Gõ: button, switch, alert, toast, card...'
     },
     {
       sel: '.namethat-panel__header > span',
       html: {
-        en: '📋 <strong>UI Taxonomy</strong> (NameThat Standard)',
-        vi: '📋 <strong>Checklist Loại UI</strong> (Chuẩn NameThat)'
+        en: '<strong>UI Taxonomy</strong> (NameThat Standard)',
+        vi: '<strong>Checklist Loại UI</strong> (Chuẩn NameThat)'
       }
     },
     {
       sel: '#btn-reset-namethat',
-      text: { en: '↺ Clear All', vi: '↺ Bỏ chọn hết' }
+      html: { en: SVG.reset + ' <span>Clear All</span>', vi: SVG.reset + ' <span>Bỏ chọn hết</span>' }
     },
     {
       sel: '#uilib-lib-filter option[value="all"]',
@@ -253,16 +231,17 @@
     },
     {
       sel: '#btn-expand-uilib-modal',
-      text: { en: '⤢ Explore', vi: '⤢ Mở rộng' },
-      attr: 'title',
-      en: 'Open Full-Screen Component Hub (Ctrl+K)',
-      vi: 'Mở kho thư viện toàn màn hình (Ctrl+K)'
+      html: { en: SVG.maximize + ' <span>Explore</span>', vi: SVG.maximize + ' <span>Mở rộng</span>' }
+    },
+    {
+      sel: '#btn-open-custom-import',
+      html: { en: SVG.code + ' <span>Import .TSX</span>', vi: SVG.code + ' <span>Import .TSX</span>' }
     },
     {
       sel: '.uilib-cdn-summary',
-      text: {
-        en: '⚡ Inject CDN Libraries (Tailwind, Bootstrap, GSAP, Swiper...)',
-        vi: '⚡ Nạp thư viện CDN (Tailwind, Bootstrap, GSAP, Swiper...)'
+      html: {
+        en: SVG.zap + ' <span>Inject CDN Libraries (Tailwind, Bootstrap, GSAP, Swiper...)</span>',
+        vi: SVG.zap + ' <span>Nạp thư viện CDN (Tailwind, Bootstrap, GSAP, Swiper...)</span>'
       }
     },
     {
@@ -272,16 +251,16 @@
     {
       sel: '#layer-search',
       attr: 'placeholder',
-      en: '🔍 Filter layers by tag, class, or text...',
-      vi: '🔍 Tìm thẻ, class, nội dung chữ...'
+      en: 'Filter layers by tag, class, or text...',
+      vi: 'Tìm thẻ, class, nội dung chữ...'
     },
 
     // ==================== LEFT SIDEBAR: ADD PRIMITIVES & MAGIC & HISTORY ====================
     {
       sel: '#tab-add .section-hint',
       html: {
-        en: '💡 <strong>Hover over any block</strong> to preview live on canvas, <strong>Click</strong> to insert! (Press <strong>🗑️ Delete</strong> or <strong>Ctrl+Z</strong> to undo):',
-        vi: '💡 <strong>Rê chuột vào khối</strong> để xem trước trực tiếp trên trang web, <strong>Bấm chuột</strong> để chèn vào! (Thêm nhầm có thể bấm <strong>🗑️ Xóa</strong> hoặc <strong>Ctrl+Z</strong>):'
+        en: '<strong>Hover over any block</strong> to preview live on canvas, <strong>Click</strong> to insert (Press <strong>Delete</strong> or <strong>Ctrl+Z</strong> to undo):',
+        vi: '<strong>Rê chuột vào khối</strong> để xem trước trực tiếp trên trang web, <strong>Bấm chuột</strong> để chèn vào (Bấm <strong>Delete</strong> hoặc <strong>Ctrl+Z</strong> để hoàn tác):'
       }
     },
     {
@@ -351,13 +330,13 @@
     {
       sel: '#tab-magic .section-hint',
       html: {
-        en: '✨ Select any element on canvas and <strong>hover over these presets</strong> for an instant live preview:',
-        vi: '✨ Chọn 1 phần tử trên web rồi <strong>rê chuột qua các phong cách dưới đây</strong> để xem trước hiệu ứng ngay lập tức!'
+        en: 'Select any element on canvas and <strong>hover over these Origin UI presets</strong> for an instant live preview:',
+        vi: 'Chọn 1 phần tử trên web rồi <strong>rê chuột qua các phong cách Origin UI dưới đây</strong> để xem trước ngay lập tức:'
       }
     },
     {
       sel: '#btn-clear-all-edits',
-      text: { en: '↺ Revert All', vi: '↺ Khôi phục tất cả' }
+      html: { en: SVG.reset + ' <span>Revert All</span>', vi: SVG.reset + ' <span>Khôi phục tất cả</span>' }
     },
     {
       sel: '#tab-history .section-hint',
@@ -371,13 +350,13 @@
     {
       sel: '.statusbar-center',
       html: {
-        en: '<span id="live-preview-badge" class="live-preview-badge hidden">👁️ Live Previewing...</span>' +
+        en: '<span id="live-preview-badge" class="live-preview-badge hidden">Live Previewing...</span>' +
             '<span class="shortcut-tip"><kbd>Drag</kbd> Move</span>' +
             '<span class="shortcut-tip"><kbd>← ↑ → ↓</kbd> Nudge 1px</span>' +
             '<span class="shortcut-tip"><kbd>Double-Click</kbd> Edit Text</span>' +
             '<span class="shortcut-tip"><kbd>Ctrl+K</kbd> Component Hub</span>' +
             '<span class="shortcut-tip"><kbd>Delete</kbd> Remove</span>',
-        vi: '<span id="live-preview-badge" class="live-preview-badge hidden">👁️ Đang xem thử trực tiếp...</span>' +
+        vi: '<span id="live-preview-badge" class="live-preview-badge hidden">Đang xem thử trực tiếp...</span>' +
             '<span class="shortcut-tip"><kbd>Click + Kéo</kbd> Di chuyển</span>' +
             '<span class="shortcut-tip"><kbd>← ↑ → ↓</kbd> Nhích 1px</span>' +
             '<span class="shortcut-tip"><kbd>Double-Click</kbd> Sửa chữ</span>' +
@@ -388,43 +367,36 @@
     {
       sel: '#dropzone-overlay h3',
       text: {
-        en: 'Drop HTML File or Web Project Folder Here!',
-        vi: 'Thả File HTML hoặc Thư Mục Web vào đây!'
-      }
-    },
-    {
-      sel: '#dropzone-overlay p',
-      html: {
-        en: 'Supports dropping a single <code>.html</code> file or an entire project directory with HTML, CSS &amp; assets',
-        vi: 'Hỗ trợ thả 1 file <code>.html</code> hoặc nguyên cả thư mục chứa HTML, CSS, Hình ảnh'
+        en: 'Drop HTML File or Web Project Folder Here',
+        vi: 'Thả File HTML hoặc Thư Mục Web vào đây'
       }
     },
 
     // ==================== RIGHT SIDEBAR: INSPECTOR HEADER & EMPTY STATE ====================
     {
       sel: '#btn-el-parent',
-      text: { en: '⬆️ Parent', vi: '⬆️ Khối Cha' },
+      html: { en: SVG.arrowUp + ' <span>Parent</span>', vi: SVG.arrowUp + ' <span>Khối Cha</span>' },
       attr: 'title',
       en: 'Select Parent Container Element',
       vi: 'Chọn phần tử cha (Bao ngoài)'
     },
     {
       sel: '#btn-el-duplicate',
-      text: { en: '📋 Duplicate', vi: '📋 Nhân Bản' },
+      html: { en: SVG.copy + ' <span>Duplicate</span>', vi: SVG.copy + ' <span>Nhân Bản</span>' },
       attr: 'title',
       en: 'Duplicate Selected Element (Ctrl+D)',
       vi: 'Nhân bản phần tử này (Ctrl+D)'
     },
     {
       sel: '#btn-el-reset',
-      text: { en: '↺ Reset', vi: '↺ Về Gốc' },
+      html: { en: SVG.reset + ' <span>Reset</span>', vi: SVG.reset + ' <span>Về Gốc</span>' },
       attr: 'title',
       en: 'Restore Element to Initial State',
       vi: 'Khôi phục phần tử này về nguyên trạng ban đầu'
     },
     {
       sel: '#btn-el-delete',
-      text: { en: '🗑️ Delete', vi: '🗑️ Xóa' },
+      html: { en: SVG.trash + ' <span>Delete</span>', vi: SVG.trash + ' <span>Xóa</span>' },
       attr: 'title',
       en: 'Remove Element from DOM (Delete Key)',
       vi: 'Xóa phần tử này khỏi trang (Phím Delete)'
@@ -439,49 +411,49 @@
     {
       sel: '#inspector-empty p',
       html: {
-        en: 'Click any button, heading, card, or image on the canvas — or open the <strong>🎛️ ReactBits Customize Dock</strong>:',
-        vi: 'Click vào nút bấm, dòng chữ, hình ảnh ở giữa màn hình hoặc mở <strong>🎛️ Bảng Customize (ReactBits.dev)</strong> để chỉnh sửa:'
+        en: 'Click any button, alert, toast, heading, card, or image on the canvas — or open the <strong>ReactBits Customize Dock</strong>:',
+        vi: 'Click vào nút bấm, thông báo, dòng chữ, hình ảnh ở giữa màn hình hoặc mở <strong>Bảng Customize (ReactBits.dev)</strong>:'
       }
     },
     {
       sel: '#inspector-empty .btn-toggle-rb-dock',
-      text: {
-        en: '🎛️ Open 3-Column Customize Dock (ReactBits.dev — 218 Schemas)',
-        vi: '🎛️ Mở Bảng Customize 3 Cột (ReactBits.dev — 218 Bộ)'
+      html: {
+        en: SVG.sliders + ' <span>Open 3-Column Customize Dock (ReactBits.dev — 218 Schemas)</span>',
+        vi: SVG.sliders + ' <span>Mở Bảng Customize 3 Cột (ReactBits.dev — 218 Bộ)</span>'
       }
     },
     {
       sel: '#inspector-empty .inspector-feature-list',
       html: {
-        en: '<li>🎛️ <strong>218 Official ReactBits.dev Customize Schemas</strong> (3,960 Scrubber Sliders, Switches, Selects &amp; Color Pickers like <em>Tear Ticket</em>, <em>Masked Heading</em>, <em>Tilted Card</em>, <em>Spotlight Card</em>...).</li>' +
-            '<li>🌐 <strong>247+ Official .TSX Registry Components</strong> from Origin UI, coss ui, Shadcn UI, Magic UI, Aceternity UI, KokonutUI.</li>' +
-            '<li>👁️ <strong>Real-Time Hover Preview</strong> across Fonts, Swatches, Gradients, Shadows &amp; Lucide Vector SVGs before committing!</li>' +
-            '<li>↺ <strong>Instant Property Reset</strong> or full Undo/Redo via <code>Ctrl+Z</code> / <code>Ctrl+Y</code> at any time.</li>',
-        vi: '<li>🎛️ <strong>218 Bộ Customize chính chủ từ ReactBits.dev</strong> (3,960 thanh kéo Scrubber, Switch, Dropdown, Color Picker như <em>Tear Ticket</em>, <em>Masked Heading</em>, <em>Tilted Card</em>, <em>Spotlight Card</em>...).</li>' +
-            '<li>🌐 <strong>247+ Component .TSX chính chủ</strong> từ Origin UI, coss ui, Shadcn UI, Magic UI, Aceternity UI, KokonutUI.</li>' +
-            '<li>👁️ <strong>Rê chuột xem trước tức thì (Live Hover Preview)</strong> trên mọi Font chữ, Màu sắc, Gradient, Đổ bóng trước khi chọn!</li>' +
-            '<li>↺ <strong>Quay lại Màu gốc / Vị trí gốc</strong> hoặc bấm <code>Ctrl+Z</code> / <code>Ctrl+Y</code> bất cứ lúc nào.</li>'
+        en: '<li><strong>Origin UI (coss.com) + Shadcn Sonner Design System</strong> — Unified specular buttons, Sonner stacked toasts, inline alerts, and Lucide vector SVGs.</li>' +
+            '<li><strong>218 Official ReactBits.dev Customize Schemas</strong> (3,960 Scrubber Sliders, Switches, Selects &amp; Color Pickers).</li>' +
+            '<li><strong>282+ Official .TSX Registry Components</strong> from Origin UI, coss ui, Shadcn UI, Magic UI, Aceternity UI, KokonutUI.</li>' +
+            '<li><strong>Instant Property Reset</strong> or full Undo/Redo via <code>Ctrl+Z</code> / <code>Ctrl+Y</code> at any time.</li>',
+        vi: '<li><strong>Hệ thống UI/UX chuẩn Origin UI (coss.com) + Shadcn Sonner</strong> — Đồng bộ hoàn toàn Button, Sonner Toast, Alert, Input và Vector SVG Lucide.</li>' +
+            '<li><strong>218 Bộ Customize chính chủ từ ReactBits.dev</strong> (3,960 thanh kéo Scrubber, Switch, Dropdown, Color Picker).</li>' +
+            '<li><strong>282+ Component .TSX chính chủ</strong> từ Origin UI, coss ui, Shadcn UI, Magic UI, Aceternity UI, KokonutUI.</li>' +
+            '<li><strong>Quay lại Màu gốc / Vị trí gốc</strong> hoặc bấm <code>Ctrl+Z</code> / <code>Ctrl+Y</code> bất cứ lúc nào.</li>'
       }
     },
 
     // ==================== RIGHT SIDEBAR: 3-TAB INSPECTOR ====================
     {
       sel: '.insp-mode-tab[data-insp-tab="insp-pane-reactbits"]',
-      text: { en: '🎛️ Customize', vi: '🎛️ Customize' },
+      html: { en: SVG.sliders + ' <span>Customize</span>', vi: SVG.sliders + ' <span>Customize</span>' },
       attr: 'title',
       en: 'Official ReactBits.dev Scrubber Controls (218 Schemas & 3,960 Parameters)',
       vi: 'Bảng thanh kéo Scrubber chuẩn ReactBits.dev (218 Bộ & 3,960 thông số)'
     },
     {
       sel: '.insp-mode-tab[data-insp-tab="insp-pane-design"]',
-      text: { en: '🎨 Design & Type', vi: '🎨 Giao Diện & Chữ' },
+      html: { en: SVG.palette + ' <span>Design &amp; Type</span>', vi: SVG.palette + ' <span>Giao Diện &amp; Chữ</span>' },
       attr: 'title',
       en: 'Typography, Fill & Stroke Swatches, Corner Radius, Shadows & Lucide Vector Icons',
       vi: 'Màu sắc, Kiểu chữ Live-Hover, Viền, Bóng & Icon SVG Lucide'
     },
     {
       sel: '.insp-mode-tab[data-insp-tab="insp-pane-layout"]',
-      text: { en: '📐 Layout & Pos', vi: '📐 Bố Cục & Tọa Độ' },
+      html: { en: SVG.move + ' <span>Layout &amp; Pos</span>', vi: SVG.move + ' <span>Bố Cục &amp; Tọa Độ</span>' },
       attr: 'title',
       en: 'Coordinates X/Y, Dimensions W/H, Transform, Padding, Margin & Auto Layout (Flexbox)',
       vi: 'Tọa độ X/Y, Kích thước W/H, Padding, Margin & Flexbox'
@@ -489,12 +461,16 @@
 
     // Pane 1: ReactBits Customize
     {
+      sel: '#insp-pane-reactbits .prop-group__header > span',
+      html: { en: SVG.sliders + ' <span>ReactBits Customize</span>', vi: SVG.sliders + ' <span>ReactBits Customize</span>' }
+    },
+    {
       sel: '#btn-sidebar-rb-dock',
-      text: { en: '⤢ 3-Col Dock', vi: '⤢ Bảng 3 Cột' }
+      html: { en: SVG.maximize + ' <span>3-Col Dock</span>', vi: SVG.maximize + ' <span>Bảng 3 Cột</span>' }
     },
     {
       sel: '#btn-sidebar-rb-insert',
-      text: { en: '➕ Insert', vi: '➕ Chèn' }
+      html: { en: SVG.plus + ' <span>Insert</span>', vi: SVG.plus + ' <span>Chèn</span>' }
     },
     {
       sel: '.rb-group-chip[data-rb-group="all"]',
@@ -502,21 +478,21 @@
     },
     {
       sel: '.rb-group-chip[data-rb-group="ticket"]',
-      text: { en: '🎫 Ticket & Frame', vi: '🎫 Ticket & Khung' }
+      text: { en: 'Ticket & Frame', vi: 'Ticket & Khung' }
     },
     {
       sel: '.rb-group-chip[data-rb-group="cinema"]',
-      text: { en: '🎬 Cinema & Type', vi: '🎬 Cinema & Chữ' }
+      text: { en: 'Cinema & Type', vi: 'Cinema & Chữ' }
     },
     {
       sel: '.rb-group-chip[data-rb-group="motion"]',
-      text: { en: '🌀 3D & Tilt', vi: '🌀 3D & Tilt' }
+      text: { en: '3D & Tilt', vi: '3D & Tilt' }
     },
 
     // Pane 2: Design & Typography
     {
       sel: '#insp-pane-design .prop-group:nth-of-type(1) .prop-group__header > span',
-      text: { en: '✍️ Content & Typography', vi: '✍️ Nội Dung & Kiểu Chữ' }
+      html: { en: SVG.pen + ' <span>Content &amp; Typography</span>', vi: SVG.pen + ' <span>Nội Dung &amp; Kiểu Chữ</span>' }
     },
     {
       sel: '#btn-font-reset',
@@ -566,7 +542,7 @@
     },
     {
       sel: '#insp-pane-design .prop-group:nth-of-type(2) .prop-group__header > span',
-      text: { en: '🎨 Fill, Text Color & Gradients', vi: '🎨 Màu Sắc & Gradient' }
+      html: { en: SVG.palette + ' <span>Fill, Text Color &amp; Gradients</span>', vi: SVG.palette + ' <span>Màu Sắc &amp; Gradient</span>' }
     },
     {
       sel: '#btn-all-colors-reset',
@@ -586,7 +562,7 @@
     },
     {
       sel: '#insp-pane-design .prop-group:nth-of-type(3) .prop-group__header > span',
-      text: { en: '🔲 Corner Radius, Stroke & Shadow', vi: '🔲 Bo Góc, Viền & Bóng' }
+      html: { en: SVG.layout + ' <span>Corner Radius, Stroke &amp; Shadow</span>', vi: SVG.layout + ' <span>Bo Góc, Viền &amp; Bóng</span>' }
     },
     {
       sel: '#btn-border-reset',
@@ -612,7 +588,7 @@
     // Pane 3: Layout & Coordinates
     {
       sel: '#insp-pane-layout .prop-group:nth-of-type(1) .prop-group__header > span',
-      text: { en: '📍 Position & Dimensions', vi: '📍 Tọa Độ & Kích Thước' }
+      html: { en: SVG.move + ' <span>Position &amp; Dimensions</span>', vi: SVG.move + ' <span>Tọa Độ &amp; Kích Thước</span>' }
     },
     {
       sel: '#btn-pos-reset',
@@ -640,39 +616,39 @@
     },
     {
       sel: '#insp-pane-layout .prop-group:nth-of-type(3) .prop-group__header > span',
-      text: { en: '⚡ Auto Layout (Flexbox)', vi: '⚡ Flexbox Alignment' }
+      html: { en: SVG.layout + ' <span>Auto Layout (Flexbox)</span>', vi: SVG.layout + ' <span>Flexbox Alignment</span>' }
     },
 
     // ==================== 3-COLUMN REACTBITS DOCK ====================
     {
       sel: '.rb-quick-pill[data-rb-quick-schema="rb-micro-tearticket"]',
-      text: { en: '🎫 Tear Ticket (Preset 1)', vi: '🎫 Tear Ticket (Ảnh 1)' }
+      text: { en: 'Tear Ticket (Preset 1)', vi: 'Tear Ticket (Ảnh 1)' }
     },
     {
       sel: '.rb-quick-pill[data-rb-quick-schema="rb-textanimations-maskedheading"]',
-      text: { en: '🎬 Masked Heading (Preset 2)', vi: '🎬 Masked Heading (Ảnh 2)' }
+      text: { en: 'Masked Heading (Preset 2)', vi: 'Masked Heading (Ảnh 2)' }
     },
     {
       sel: '.rb-quick-pill[data-rb-quick-schema="master-all"]',
-      text: { en: '⚡ All Master (50+)', vi: '⚡ All Master (50+)' }
+      text: { en: 'All Master (50+)', vi: 'All Master (50+)' }
     },
     {
       sel: '#rb-schema-search',
       attr: 'placeholder',
-      en: '🔍 Search 218 schemas...',
-      vi: '🔍 Tìm trong 218 bộ...'
+      en: 'Search 218 schemas...',
+      vi: 'Tìm trong 218 bộ...'
     },
     {
       sel: '#btn-dock-rb-insert',
-      text: { en: '➕ Insert to Canvas', vi: '➕ Chèn Lên Web' }
+      html: { en: SVG.plus + ' <span>Insert to Canvas</span>', vi: SVG.plus + ' <span>Chèn Lên Web</span>' }
     },
 
     // ==================== MODALS 1, 2, 3 ====================
     {
       sel: '#modal-open-web .modal-header h3',
       text: {
-        en: '📥 Import Web Page or Connect Project Workspace',
-        vi: '📥 Đưa Giao Diện Web Của Bạn Vào Studio'
+        en: 'Import Web Page or Connect Project Workspace',
+        vi: 'Đưa Giao Diện Web Của Bạn Vào Studio'
       }
     },
     {
@@ -712,45 +688,45 @@
     {
       sel: '#modal-ai-prompt .modal-header h3',
       text: {
-        en: '🤖 Structured AI Prompt & Generated CSS Patch',
-        vi: '🤖 Prompt Chuẩn Cho AI & Mã CSS Đã Tinh Chỉnh'
+        en: 'Structured AI Prompt & Generated CSS Patch',
+        vi: 'Prompt Chuẩn Cho AI & Mã CSS Đã Tinh Chỉnh'
       }
     },
     {
       sel: '.prompt-tab[data-ptab="ptab-prompt"]',
-      text: { en: '📋 AI Prompt Instructions', vi: '📋 Prompt Gửi Cho AI' }
+      text: { en: 'AI Prompt Instructions', vi: 'Prompt Gửi Cho AI' }
     },
     {
       sel: '.prompt-tab[data-ptab="ptab-css"]',
-      text: { en: '🎨 Generated CSS Patch', vi: '🎨 Mã CSS Đã Sinh Tự Động' }
+      text: { en: 'Generated CSS Patch', vi: 'Mã CSS Đã Sinh Tự Động' }
     },
     {
       sel: '#btn-copy-ai-prompt',
-      text: { en: '📋 Copy AI Prompt', vi: '📋 Copy Prompt Cho AI' }
+      html: { en: SVG.copy + ' <span>Copy AI Prompt</span>', vi: SVG.copy + ' <span>Copy Prompt Cho AI</span>' }
     },
     {
       sel: '#btn-copy-css-patch',
-      text: { en: '📋 Copy CSS Code', vi: '📋 Copy Mã CSS' }
+      html: { en: SVG.copy + ' <span>Copy CSS Code</span>', vi: SVG.copy + ' <span>Copy Mã CSS</span>' }
     },
     {
       sel: '#modal-uilib-explorer .uilib-modal-title h3',
       text: {
-        en: '🌐 UI Component Hub & Official .TSX Registry Importer',
-        vi: '🌐 Trung Tâm Thư Viện UI & Trình Import Component Thông Minh'
+        en: 'UI Component Hub & Official .TSX Registry Importer',
+        vi: 'Trung Tâm Thư Viện UI & Trình Import Component Thông Minh'
       }
     },
     {
       sel: '.uilib-mtab[data-umtab="umtab-catalog"]',
-      text: {
-        en: '🔍 Browse 282+ Official Components & 38 UI Libraries',
-        vi: '🔍 Kho Component & 38 Trang Chủ UI Library'
+      html: {
+        en: SVG.search + ' <span>Browse 282+ Official Components &amp; 38 UI Libraries</span>',
+        vi: SVG.search + ' <span>Kho Component &amp; 38 Trang Chủ UI Library</span>'
       }
     },
     {
       sel: '.uilib-mtab[data-umtab="umtab-import"]',
-      text: {
-        en: '📥 Import Code (.TSX / JSX / HTML / Tailwind / Registry JSON)',
-        vi: '📥 Tự Dán Code (HTML / React JSX / Tailwind) Từ Web Bất Kỳ'
+      html: {
+        en: SVG.code + ' <span>Import Code (.TSX / JSX / HTML / Tailwind / Registry JSON)</span>',
+        vi: SVG.code + ' <span>Tự Dán Code (HTML / React JSX / Tailwind) Từ Web Bất Kỳ</span>'
       }
     },
     {
@@ -763,53 +739,61 @@
     {
       sel: '#uilib-modal-search',
       attr: 'placeholder',
-      en: '🔍 Search components: button, card, badge, input, pricing, aceternity, magic ui, shadcn...',
-      vi: '🔍 Tìm kiếm: button, card, badge, input, pricing, aceternity, magic ui, hover.dev, shadcn...'
+      en: 'Search components: button, card, badge, input, pricing, aceternity, magic ui, shadcn...',
+      vi: 'Tìm kiếm: button, card, badge, input, pricing, aceternity, magic ui, hover.dev, shadcn...'
     },
     {
       sel: '#btn-save-and-insert-comp',
-      text: {
-        en: '✨ Save to Library & Insert to Canvas',
-        vi: '✨ Lưu Vào Kho UI & Chèn Ngay Lên Web'
+      html: {
+        en: SVG.sparkles + ' <span>Save to Library &amp; Insert to Canvas</span>',
+        vi: SVG.sparkles + ' <span>Lưu Vào Kho UI &amp; Chèn Ngay Lên Web</span>'
       }
     },
     {
       sel: '#btn-only-save-comp',
-      text: {
-        en: '💾 Save to Library Only (for Hover Preview)',
-        vi: '💾 Chỉ Lưu Vào Kho UI (Để Rê Chuột Xem Thử)'
+      html: {
+        en: SVG.save + ' <span>Save to Library Only (for Hover Preview)</span>',
+        vi: SVG.save + ' <span>Chỉ Lưu Vào Kho UI (Để Rê Chuột Xem Thử)</span>'
       }
     }
   ];
 
-  // Translate dynamic cards, counters, and lists rendered by studio.js
+  // Translate dynamic cards, counters, and lists rendered by studio.js with Origin UI SVG icons
   function translateDynamicDomNodes(lang) {
     // 1. Component Cards (.uilib-comp-card)
     document.querySelectorAll('.uilib-comp-card').forEach(card => {
       const btnMorph = card.querySelector('.btn-morph-comp');
       if (btnMorph) {
-        btnMorph.innerHTML = lang === 'en' ? '✨ Apply Style &amp; FX' : '✨ Áp Style &amp; FX';
+        btnMorph.innerHTML = lang === 'en'
+          ? SVG.wand + ' <span>Apply Style &amp; FX</span>'
+          : SVG.wand + ' <span>Áp Style &amp; FX</span>';
         btnMorph.title = lang === 'en'
           ? 'Hover to preview & click to apply Style, Animation, Hover FX & SVG Icon to selected element'
           : 'Rê chuột để xem thử & Áp cả Style, Animation, Hiệu ứng Hover + Icon vào thẻ đang chọn';
       }
       const btnInsert = card.querySelector('.btn-insert-comp');
       if (btnInsert) {
-        btnInsert.innerHTML = lang === 'en' ? '➕ Insert' : '➕ Chèn Mới';
+        btnInsert.innerHTML = lang === 'en'
+          ? SVG.plus + ' <span>Insert</span>'
+          : SVG.plus + ' <span>Chèn Mới</span>';
         btnInsert.title = lang === 'en'
           ? 'Hover to preview & click to insert this component onto the canvas'
           : 'Rê chuột để xem thử & Chèn Component này vào trang web';
       }
+      const btnTsx = card.querySelector('.btn-view-official-tsx');
+      if (btnTsx) {
+        btnTsx.innerHTML = SVG.code + ' <span>.TSX</span>';
+      }
       const siteLink = card.querySelector('.uilib-site-link');
       if (siteLink) {
-        siteLink.textContent = lang === 'en' ? '↗ Docs' : '↗ Web';
+        siteLink.innerHTML = lang === 'en' ? 'Docs ↗' : 'Web ↗';
       }
       const btnEdit = card.querySelector('.btn-edit-custom');
       if (btnEdit) {
-        btnEdit.textContent = lang === 'en' ? '✏️ Edit' : '✏️ Sửa';
+        btnEdit.innerHTML = lang === 'en' ? SVG.pen + ' <span>Edit</span>' : SVG.pen + ' <span>Sửa</span>';
       }
       card.querySelectorAll('.btn-del-custom, .btn-del-custom-bottom').forEach(btnDel => {
-        btnDel.textContent = lang === 'en' ? '🗑️ Delete' : '🗑️ Xóa';
+        btnDel.innerHTML = lang === 'en' ? SVG.trash + ' <span>Delete</span>' : SVG.trash + ' <span>Xóa</span>';
       });
     });
 
@@ -820,14 +804,14 @@
       if (lang === 'en') {
         resCount.textContent = txt
           .replace(/Tìm thấy (\d+) Component từ (\d+) Thư viện/, 'Showing $1 Components across $2 Libraries')
-          .replace(/🎯 Gợi ý theo thẻ chọn: (\d+) mẫu từ (\d+) Thư viện/, '🎯 Smart Match: $1 Components across $2 Libraries')
-          .replace(/☑️ Checklist \((\d+) loại\): (\d+) mẫu từ (\d+) Thư viện/, '☑️ Taxonomy ($1 types): $2 Components across $3 Libraries')
+          .replace(/🎯 Gợi ý theo thẻ chọn: (\d+) mẫu từ (\d+) Thư viện/, 'Smart Match: $1 Components across $2 Libraries')
+          .replace(/☑️ Checklist \((\d+) loại\): (\d+) mẫu từ (\d+) Thư viện/, 'Taxonomy ($1 types): $2 Components across $3 Libraries')
           .replace(/Danh bạ (\d+) Thư viện UI \(Click Logo mở Web\)/, 'Directory of $1 UI Libraries (Click Logo to open Docs)');
       } else {
         resCount.textContent = txt
           .replace(/Showing (\d+) Components across (\d+) Libraries/, 'Tìm thấy $1 Component từ $2 Thư viện')
-          .replace(/🎯 Smart Match: (\d+) Components across (\d+) Libraries/, '🎯 Gợi ý theo thẻ chọn: $1 mẫu từ $2 Thư viện')
-          .replace(/☑️ Taxonomy \((\d+) types\): (\d+) Components across (\d+) Libraries/, '☑️ Checklist ($1 loại): $2 mẫu từ $3 Thư viện')
+          .replace(/Smart Match: (\d+) Components across (\d+) Libraries/, 'Gợi ý theo thẻ chọn: $1 mẫu từ $2 Thư viện')
+          .replace(/Taxonomy \((\d+) types\): (\d+) Components across (\d+) Libraries/, 'Checklist ($1 loại): $2 mẫu từ $3 Thư viện')
           .replace(/Directory of (\d+) UI Libraries \(Click Logo to open Docs\)/, 'Danh bạ $1 Thư viện UI (Click Logo mở Web)');
       }
     }
@@ -876,7 +860,7 @@
     // 6. Modal All Libraries item
     const modalFirstDir = document.querySelector('#uilib-modal-sites-list .uilib-dir-item:first-child > span:first-child');
     if (modalFirstDir) {
-      modalFirstDir.textContent = lang === 'en' ? '🌐 All 38+ UI Libraries' : '🌐 Tất cả 38+ Thư viện';
+      modalFirstDir.textContent = lang === 'en' ? 'All 38+ UI Libraries' : 'Tất cả 38+ Thư viện';
     }
 
     // 7. Live-Hover Custom Select Triggers (Default vs Mặc định)
@@ -917,12 +901,20 @@
       });
     });
 
+    // Update #btn-change-folder icon while keeping #current-folder-label intact
+    const btnFolder = document.getElementById('btn-change-folder');
+    const folderLbl = document.getElementById('current-folder-label');
+    if (btnFolder && folderLbl) {
+      const currentPath = folderLbl.textContent;
+      btnFolder.innerHTML = SVG.folder + ' <span id="current-folder-label">' + currentPath + '</span>';
+    }
+
     // Update #btn-toggle-namethat-checklist text while preserving badge
     const chkBtn = document.getElementById('btn-toggle-namethat-checklist');
     if (chkBtn) {
       const badge = document.getElementById('namethat-checked-badge');
       const badgeHtml = badge ? badge.outerHTML : '<span id="namethat-checked-badge" class="namethat-badge hidden">0</span>';
-      chkBtn.innerHTML = (currentLang === 'en' ? '☑️ Taxonomy ' : '☑️ Checklist ') + badgeHtml;
+      chkBtn.innerHTML = SVG.checkSquare + ' <span>' + (currentLang === 'en' ? 'Taxonomy' : 'Checklist') + '</span> ' + badgeHtml;
     }
 
     // Update ReactBits Customize Panel labels & dropdowns
@@ -934,17 +926,13 @@
     translateDynamicDomNodes(currentLang);
     syncDarkModeButtonsUI();
 
-    if (showNotification) {
-      const toastContainer = document.getElementById('toast-container');
-      if (toastContainer) {
-        const t = document.createElement('div');
-        t.className = 'toast';
-        t.innerHTML = currentLang === 'en'
-          ? '<span>🌐</span><span>Switched Studio language to <strong>English (Industry Standard UI/UX)</strong></span>'
-          : '<span>🌐</span><span>Đã chuyển ngôn ngữ Studio sang <strong>Tiếng Việt</strong></span>';
-        toastContainer.appendChild(t);
-        setTimeout(() => t.remove(), 2600);
-      }
+    if (showNotification && window.showOriginToast) {
+      window.showOriginToast(
+        currentLang === 'en'
+          ? 'Switched Studio interface to English (Origin UI / Figma Standard)'
+          : 'Đã chuyển ngôn ngữ Studio sang Tiếng Việt (Chuẩn Origin UI)',
+        'info'
+      );
     }
   }
 
@@ -960,18 +948,27 @@
     const isDark = isStudioInDarkMode();
     const btnDarkToggle = document.getElementById('btn-dark-mode-toggle');
     if (btnDarkToggle) {
-      if (isDark) {
-        btnDarkToggle.textContent = '🌙 Dark';
-      } else {
-        btnDarkToggle.textContent = '☀️ Light';
-      }
+      btnDarkToggle.innerHTML = isDark
+        ? SVG.moon + ' <span>Dark</span>'
+        : SVG.sun + ' <span>Light</span>';
     }
     const btnCanvasDark = document.getElementById('btn-canvas-dark-mode');
     if (btnCanvasDark) {
       btnCanvasDark.classList.toggle('active', canvasDarkActive);
-      btnCanvasDark.textContent = currentLang === 'en'
-        ? (canvasDarkActive ? '🌙 Canvas: Dark' : '🌓 Canvas Dark')
-        : (canvasDarkActive ? '🌙 Web: Tối' : '🌓 Web Dark');
+      btnCanvasDark.innerHTML = (canvasDarkActive ? SVG.moon : SVG.sun) + ' <span>' + (
+        currentLang === 'en'
+          ? (canvasDarkActive ? 'Web: Dark' : 'Web Dark')
+          : (canvasDarkActive ? 'Web: Tối' : 'Web Dark')
+      ) + '</span>';
+    }
+    const btnOriginKit = document.getElementById('btn-apply-origin-system');
+    if (btnOriginKit) {
+      btnOriginKit.classList.toggle('active', canvasOriginKitActive);
+      btnOriginKit.innerHTML = SVG.sparkles + ' <span>' + (
+        currentLang === 'en'
+          ? (canvasOriginKitActive ? 'Origin UI: Active' : 'Origin UI Kit')
+          : (canvasOriginKitActive ? 'Origin UI: Bật' : 'Origin UI Kit')
+      ) + '</span>';
     }
   }
 
@@ -1001,6 +998,14 @@
     }
 
     syncDarkModeButtonsUI();
+    if (window.showOriginToast) {
+      window.showOriginToast(
+        currentLang === 'en'
+          ? `Switched workspace to ${enableDark ? 'Dark Mode (Obsidian Zinc)' : 'Light Mode (Daylight Zinc)'}`
+          : `Đã chuyển giao diện sang ${enableDark ? 'Chế độ Tối (Dark Mode)' : 'Chế độ Sáng (Light Mode)'}`,
+        'info'
+      );
+    }
   }
 
   // Apply or remove Dark Mode simulation inside the live Canvas Iframe
@@ -1056,6 +1061,77 @@
     `;
   }
 
+  // ==================== 1-CLICK ORIGIN UI + SONNER GLOBAL SYSTEM FOR WEBPAGE CANVAS ====================
+  function applyCanvasOriginDesignSystem() {
+    const iframe = document.getElementById('canvas-iframe');
+    if (!iframe || !iframe.contentDocument || !iframe.contentDocument.head) return;
+    const doc = iframe.contentDocument;
+    let styleEl = doc.getElementById('studio-origin-ui-global-system');
+
+    if (!canvasOriginKitActive) {
+      if (styleEl) styleEl.remove();
+      doc.documentElement.removeAttribute('data-origin-ui-system');
+      return;
+    }
+
+    doc.documentElement.setAttribute('data-origin-ui-system', 'true');
+    if (!styleEl) {
+      styleEl = doc.createElement('style');
+      styleEl.id = 'studio-origin-ui-global-system';
+      doc.head.appendChild(styleEl);
+    }
+
+    // Complete Origin UI (coss.com) + Shadcn Sonner UI/UX System for Buttons, Alerts, Toasts, Inputs, Badges & Cards
+    styleEl.textContent = `
+      /* Origin UI + Shadcn Geist Global UI/UX System */
+      html[data-origin-ui-system="true"] button:not([role="switch"]),
+      html[data-origin-ui-system="true"] .btn,
+      html[data-origin-ui-system="true"] input[type="submit"],
+      html[data-origin-ui-system="true"] input[type="button"],
+      html[data-origin-ui-system="true"] a.btn {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        letter-spacing: -0.012em !important;
+        border: 1px solid rgba(255, 255, 255, 0.14) !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
+        transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), filter 0.15s ease, box-shadow 0.15s ease !important;
+      }
+      html[data-origin-ui-system="true"] button:hover,
+      html[data-origin-ui-system="true"] .btn:hover,
+      html[data-origin-ui-system="true"] a.btn:hover {
+        transform: translateY(-1px) !important;
+        filter: brightness(1.06) !important;
+      }
+      html[data-origin-ui-system="true"] button:active,
+      html[data-origin-ui-system="true"] .btn:active {
+        transform: scale(0.98) !important;
+      }
+      html[data-origin-ui-system="true"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+      html[data-origin-ui-system="true"] select,
+      html[data-origin-ui-system="true"] textarea {
+        border-radius: 8px !important;
+        border: 1px solid rgba(161, 161, 170, 0.28) !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08) !important;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+      }
+      html[data-origin-ui-system="true"] input:focus,
+      html[data-origin-ui-system="true"] select:focus,
+      html[data-origin-ui-system="true"] textarea:focus {
+        outline: none !important;
+        border-color: #8b5cf6 !important;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.22) !important;
+      }
+      html[data-origin-ui-system="true"] .alert,
+      html[data-origin-ui-system="true"] [role="alert"] {
+        border-radius: 10px !important;
+        border: 1px solid rgba(161, 161, 170, 0.24) !important;
+        border-left: 3px solid #10b981 !important;
+        box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.25) !important;
+      }
+    `;
+  }
+
   function initI18nAndThemeSystem() {
     // 1. Bind Language Switcher (#lang-switcher)
     document.querySelectorAll('#lang-switcher [data-lang]').forEach(btn => {
@@ -1097,18 +1173,45 @@
         canvasDarkActive = !canvasDarkActive;
         applyCanvasDarkSimulation();
         syncDarkModeButtonsUI();
+        if (window.showOriginToast) {
+          window.showOriginToast(
+            currentLang === 'en'
+              ? (canvasDarkActive ? 'Enabled Dark Mode simulation on webpage canvas' : 'Disabled webpage canvas Dark Mode')
+              : (canvasDarkActive ? 'Đã bật chế độ Dark Mode cho trang web trên Canvas' : 'Đã tắt chế độ Dark Mode trên Canvas'),
+            'info'
+          );
+        }
       });
     }
 
-    // Re-apply Canvas Dark Mode if iframe reloads
+    // 5. Bind 1-Click Apply Origin UI + Sonner Design System to Webpage (#btn-apply-origin-system)
+    const btnOriginKit = document.getElementById('btn-apply-origin-system');
+    if (btnOriginKit) {
+      btnOriginKit.addEventListener('click', () => {
+        canvasOriginKitActive = !canvasOriginKitActive;
+        applyCanvasOriginDesignSystem();
+        syncDarkModeButtonsUI();
+        if (window.showOriginToast) {
+          window.showOriginToast(
+            currentLang === 'en'
+              ? (canvasOriginKitActive ? 'Applied Origin UI (coss.com) + Sonner Design System to all Buttons, Alerts, Inputs & Cards on page!' : 'Restored original webpage styles')
+              : (canvasOriginKitActive ? 'Đã đồng bộ chuẩn UI/UX Origin UI (coss.com) + Sonner lên toàn bộ Button, Alert, Input & Card của trang web!' : 'Đã tắt bộ đồng bộ Origin UI Kit trên trang web'),
+            canvasOriginKitActive ? 'success' : 'warning'
+          );
+        }
+      });
+    }
+
+    // Re-apply Canvas Dark Mode & Origin UI Kit if iframe reloads
     const iframe = document.getElementById('canvas-iframe');
     if (iframe) {
       iframe.addEventListener('load', () => {
         if (canvasDarkActive) applyCanvasDarkSimulation();
+        if (canvasOriginKitActive) applyCanvasOriginDesignSystem();
       });
     }
 
-    // 5. Observe dynamic DOM lists so newly rendered cards/history translate automatically when in EN mode
+    // 6. Observe dynamic DOM lists so newly rendered cards/history translate & upgrade to Lucide SVGs automatically
     const obsTargets = [
       document.getElementById('uilib-components-list'),
       document.getElementById('uilib-modal-grid'),

@@ -212,19 +212,72 @@
     toastContainer: document.getElementById('toast-container')
   };
 
-  // ==================== UTILITIES ====================
-  function showToast(message, icon = '✨') {
+  // ==================== UTILITIES (ORIGIN UI / SHADCN SONNER TOAST) ====================
+  function showToast(message, icon = 'info') {
+    if (!dom.toastContainer) return;
+    const rawMsg = String(message || '').replace(/^([\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}✦⚡✨🌈🚀🔥💎🟢🔐🎉💬⏳🌟🔘✓➕🗑️↺🏠🎨✏️👁️📋💾📥📂]+)\s*/u, '');
+    const lang = (window.getStudioLang && window.getStudioLang()) || localStorage.getItem('studio_lang') || 'vi';
+
+    // Determine Origin UI / Sonner toast variant
+    let variant = 'info';
+    const hint = (String(icon) + ' ' + rawMsg).toLowerCase();
+    if (icon === 'success' || /đã lưu|đã áp dụng|đã chèn|đã copy|thành công|saved|applied|inserted|copied/.test(hint) || ['✨', '✅', '💾', '➕', '📋'].includes(icon)) {
+      variant = 'success';
+    } else if (icon === 'warning' || /khôi phục|reset|hoàn tác|bỏ chọn|undo|revert|⚠️|↺|↩/.test(hint)) {
+      variant = 'warning';
+    } else if (icon === 'error' || /xóa|lỗi|không tìm thấy|delete|removed|error|🗑️|❌/.test(hint)) {
+      variant = 'error';
+    }
+
+    const svgMap = {
+      success: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+      warning: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
+      error: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>',
+      info: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>'
+    };
+
+    const titleMap = {
+      success: lang === 'en' ? 'Action Applied' : ' Đã áp dụng thay đổi',
+      warning: lang === 'en' ? 'State Restored' : 'Khôi phục trạng thái',
+      error: lang === 'en' ? 'Notice / Removed' : 'Đã gỡ bỏ / Cảnh báo',
+      info: lang === 'en' ? 'Visual UI Studio' : 'Visual UI Studio'
+    };
+
+    // Keep maximum 3 stacked Sonner toasts
+    while (dom.toastContainer.children.length >= 3) {
+      dom.toastContainer.firstElementChild.remove();
+    }
+
     const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
-    dom.toastContainer.appendChild(toast);
-    setTimeout(() => {
+    toast.className = `toast toast--${variant}`;
+    toast.innerHTML = `
+      <div class="toast__icon-badge">${svgMap[variant]}</div>
+      <div class="toast__content">
+        <div class="toast__header">
+          <span class="toast__title">${titleMap[variant]}</span>
+          <span class="toast__meta">Origin UI</span>
+        </div>
+        <div class="toast__desc">${rawMsg}</div>
+      </div>
+      <button type="button" class="toast__close" aria-label="Close">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+      <div class="toast__progress"></div>
+    `;
+
+    const closeBtn = toast.querySelector('.toast__close');
+    const dismiss = () => {
       toast.style.opacity = '0';
-      toast.style.transform = 'translateY(8px)';
-      toast.style.transition = 'all 0.2s ease';
-      setTimeout(() => toast.remove(), 220);
-    }, 2800);
+      toast.style.transform = 'translateY(8px) scale(0.97)';
+      toast.style.transition = 'all 0.18s ease';
+      setTimeout(() => toast.remove(), 190);
+    };
+    if (closeBtn) closeBtn.addEventListener('click', dismiss);
+
+    dom.toastContainer.appendChild(toast);
+    setTimeout(dismiss, 2800);
   }
+  window.showOriginToast = showToast;
 
   function rgbToHex(rgb) {
     if (!rgb || rgb === 'transparent' || rgb === 'rgba(0, 0, 0, 0)') return '#000000';
@@ -2268,136 +2321,199 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>Demo Landing Page</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <title>Origin UI — Flagship SaaS Workspace</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background: #0f172a;
-      color: #f8fafc;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #09090b;
+      color: #fafafa;
       min-height: 100vh;
-      padding: 48px 32px;
+      padding: 36px 28px 64px;
+      letter-spacing: -0.012em;
     }
-    .container {
-      max-width: 1040px;
-      margin: 0 auto;
-    }
+    .container { max-width: 1040px; margin: 0 auto; }
     .navbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 16px 24px;
-      background: rgba(30, 41, 59, 0.75);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 16px;
-      margin-bottom: 56px;
+      padding: 12px 20px;
+      background: #0c0c0f;
+      border: 1px solid #232329;
+      border-radius: 10px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+      margin-bottom: 24px;
     }
-    .logo { font-weight: 800; font-size: 20px; color: #38bdf8; }
-    .nav-btn {
-      background: #6366f1;
-      color: #ffffff;
-      padding: 10px 22px;
-      border-radius: 99px;
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       font-weight: 700;
+      font-size: 15px;
+      color: #fafafa;
+    }
+    .logo-mark {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: #fafafa;
+      color: #09090b;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .nav-actions { display: flex; gap: 8px; }
+    .btn-origin-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fafafa;
+      color: #09090b;
+      padding: 9px 16px;
+      border-radius: 7px;
+      font-weight: 600;
+      font-size: 13px;
       border: none;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.9);
       cursor: pointer;
+    }
+    .btn-origin-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #121216;
+      color: #fafafa;
+      padding: 9px 16px;
+      border-radius: 7px;
+      font-weight: 500;
+      font-size: 13px;
+      border: 1px solid #27272a;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
+      cursor: pointer;
+    }
+    .origin-alert {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 12px 16px;
+      background: #111114;
+      border: 1px solid #27272a;
+      border-left: 3px solid #10b981;
+      border-radius: 9px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: #e4e4e7;
     }
     .hero {
       display: grid;
       grid-template-columns: 1.2fr 0.8fr;
-      gap: 40px;
+      gap: 32px;
       align-items: center;
-      background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
-      border: 1px solid rgba(255,255,255,0.08);
-      padding: 48px;
-      border-radius: 28px;
+      background: #0c0c0f;
+      border: 1px solid #232329;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+      padding: 40px;
+      border-radius: 16px;
     }
     .badge {
-      display: inline-block;
-      background: rgba(99, 102, 241, 0.2);
-      color: #818cf8;
-      padding: 6px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #18181b;
+      color: #d4d4d8;
+      border: 1px solid #27272a;
+      padding: 5px 12px;
       border-radius: 99px;
-      font-size: 13px;
-      font-weight: 700;
-      margin-bottom: 18px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 16px;
     }
     h1 {
-      font-size: 44px;
-      line-height: 1.15;
-      margin-bottom: 18px;
+      font-size: 40px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.12;
+      margin-bottom: 16px;
     }
     p.lead {
-      font-size: 17px;
-      color: #94a3b8;
+      font-size: 15.5px;
+      color: #a1a1aa;
       line-height: 1.6;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
     }
-    .btn-row {
-      display: flex;
-      gap: 14px;
-    }
-    .btn-primary-demo {
-      background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
-      color: #fff;
-      padding: 14px 28px;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 15px;
-      border: none;
-    }
-    .btn-outline-demo {
-      background: #1e293b;
-      color: #e2e8f0;
-      padding: 14px 26px;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 15px;
-      border: 1px solid #334155;
-    }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; }
     .hero-card {
-      background: #0b1120;
-      border: 1px solid #334155;
-      border-radius: 20px;
-      padding: 28px;
-      text-align: center;
+      background: #111114;
+      border: 1px solid #27272a;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 20px 45px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
     }
     .hero-card img {
       width: 100%;
-      height: 220px;
+      height: 190px;
       object-fit: cover;
-      border-radius: 14px;
-      margin-bottom: 16px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+      border: 1px solid #27272a;
+    }
+    .sonner-preview {
+      margin-top: 14px;
+      padding: 12px 14px;
+      background: #16161b;
+      border: 1px solid #32323b;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 12px;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <nav class="navbar">
-      <div class="logo">✦ KHOA.STUDIO</div>
-      <button class="nav-btn">Liên Hệ Ngay</button>
+      <div class="logo"><span class="logo-mark">✦</span> ORIGIN.STUDIO</div>
+      <div class="nav-actions">
+        <button class="btn-origin-secondary">Documentation</button>
+        <button class="btn-origin-primary">Deploy Project</button>
+      </div>
     </nav>
+
+    <div class="origin-alert" role="alert">
+      <span><strong>Origin UI + Sonner v6.4 Active</strong> — Click any Button, Alert, Toast, or Card below to customize with ReactBits Scrubbers or 282+ .TSX Components.</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#10b981;font-weight:600;">READY</span>
+    </div>
+
     <section class="hero">
       <div class="hero-left">
-        <span class="badge">⚡ KÉO THẢ TỰ DO REALTIME</span>
-        <h1>Click vào bất kỳ nút nào và kéo thử sang trái!</h1>
-        <p class="lead">Bạn không cần gõ câu lệnh bảo AI dịch từng nút nữa. Hãy click chuột kéo thả, đổi màu nền, bo góc hoặc nhấp đúp để sửa chữ trực tiếp ngay tại đây.</p>
+        <span class="badge">Origin UI • Shadcn Sonner • ReactBits.dev</span>
+        <h1>Precision UI/UX Design System for Modern Web</h1>
+        <p class="lead">Click any element to drag, resize, morph with 38+ UI libraries, or scrub 3,960 official ReactBits parameters in real time.</p>
         <div class="btn-row">
-          <button class="btn-primary-demo">Kéo Thử Nút Này Sang Trái</button>
-          <button class="btn-outline-demo">Đổi Màu Nút Này</button>
+          <button class="btn-origin-primary">Primary Specular Action</button>
+          <button class="btn-origin-secondary">Secondary Surface Button</button>
         </div>
       </div>
       <div class="hero-card">
-        <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80" alt="Demo Artwork" />
-        <h3>Thẻ Giao Diện Mẫu</h3>
-        <p style="color:#94a3b8;font-size:14px;margin-top:6px;">Kéo 8 điểm neo quanh khung để đổi kích thước</p>
+        <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80" alt="Origin Studio Preview" />
+        <h3 style="font-size:16px;font-weight:700;">Interactive Bento Surface</h3>
+        <p style="color:#a1a1aa;font-size:13px;margin-top:4px;">Drag handles to resize or apply 3D Tilt from the Customize tab.</p>
+        <div class="sonner-preview">
+          <span>✓ Sonner Toast Component Ready</span>
+          <span style="color:#a1a1aa;font-family:'JetBrains Mono',monospace;font-size:11px;">⌘K</span>
+        </div>
       </div>
     </section>
   </div>
 </body>
 </html>`;
-    loadRawHtmlString(demoHtml, 'demo-landing.html');
+    loadRawHtmlString(demoHtml, 'origin-ui-showcase.html');
   }
 
   // ==================== FOLDER / FILE DRAG & DROP FROM COMPUTER ====================
