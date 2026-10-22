@@ -38707,7 +38707,8 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
 
   const rbState = {
     theme: localStorage.getItem('studio_rb_theme') || 'dark',
-    activeSchemaId: 'rb-micro-tearticket',
+    activeSchemaId: 'context-text',
+    activeContextType: 'text',
     filterGroup: 'all',
     searchQuery: '',
     valuesBySchema: {},
@@ -38720,14 +38721,19 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
     'Reveal': 'Hiệu ứng xuất hiện',
     'Trigger': 'Kích hoạt (Trigger)',
     'Text': 'Nội dung chữ',
+    'Placeholder': 'Chữ gợi ý (Placeholder)',
     'Media': 'Loại Media',
+    'Object Fit': 'Co giãn ảnh (Object Fit)',
     'Align': 'Căn lề chữ',
     'Background': 'Màu nền (Fill)',
     'Color': 'Màu chữ (Text)',
-    'Tint Color': 'Màu phủ (Tint)',
+    'Tint Color': 'Màu phủ Gradient',
     'Outline Color': 'Màu viền chữ',
+    'Border Color': 'Màu viền (Stroke)',
     'Width': 'Chiều rộng (Width)',
     'Height': 'Chiều cao (Height)',
+    'Padding X': 'Đệm ngang (Padding X)',
+    'Padding Y': 'Đệm dọc (Padding Y)',
     'Stub Size': 'Cỡ cuống vé (Stub)',
     'Radius': 'Bo góc (Radius)',
     'Border Radius': 'Bo góc (Radius)',
@@ -38752,19 +38758,23 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
     'Fill Scale': 'Tỷ lệ lấp đầy (Scale)',
     'Brightness': 'Độ sáng (Brightness)',
     'Saturation': 'Độ bão hòa (Saturation)',
+    'Contrast': 'Độ tương phản (Contrast)',
     'Text Size': 'Cỡ chữ (Text Size)',
     'Font Size': 'Cỡ chữ (Font Size)',
     'Weight': 'Độ đậm (Weight)',
     'Tracking': 'Giãn chữ (Tracking)',
     'Line Height': 'Chiều cao dòng',
     'Outline Width': 'Độ dày viền chữ',
+    'Text Glow': 'Bóng phát sáng chữ',
+    'Glow': 'Độ phát sáng (Glow)',
+    'Backdrop Blur': 'Kính mờ (Glass Blur)',
     'Scrim': 'Phủ bóng tối (Scrim)',
     'Tilt': 'Nghiêng 3D (Tilt)',
     'Border': 'Hiển thị viền (Border)',
     'Recenter': 'Tự cân bằng tâm',
     'Disabled': 'Vô hiệu hóa (Disabled)',
     'Spotlight': 'Tâm sáng (Spotlight)',
-    'Tint': 'Phủ màu (Tint)',
+    'Tint': 'Chữ phủ Gradient',
     'Grayscale': 'Đen trắng (Grayscale)',
     'Outline': 'Viền chữ (Outline)',
     'Speed': 'Tốc độ (Speed)',
@@ -38782,6 +38792,251 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
     'Show Cursor': 'Hiện con trỏ'
   };
 
+  // Dedicated Context-Aware Schemas so selecting a Text, Button, Image, Input, or Container ONLY shows relevant controls
+  const CONTEXT_SCHEMAS = {
+    text: {
+      id: 'context-text',
+      compName: 'ContextText',
+      title: '🔤 Tùy chỉnh Văn bản & Kiểu chữ (Text & Typography)',
+      enTitle: '🔤 Text & Typography Controls',
+      category: 'TextAnimations',
+      docsUrl: 'https://reactbits.dev/text-animations/split-text',
+      controls: [
+        { key: 'text', title: 'Text', type: 'input', value: 'Designed in the details', placeholder: 'Nhập nội dung văn bản...' },
+        { key: 'preset', title: 'Preset', type: 'select', options: ['Default', 'Cinema', 'Spotlight', 'Stencil', 'Duotone'], value: 'Default' },
+        { key: 'fontSize', title: 'Font Size', type: 'slider', min: 8, max: 140, step: 1, value: 18, valueUnit: 'px' },
+        { key: 'weight', title: 'Weight', type: 'slider', min: 100, max: 900, step: 100, value: 500 },
+        { key: 'lineHeight', title: 'Line Height', type: 'slider', min: 0.8, max: 2.5, step: 0.05, value: 1.4 },
+        { key: 'tracking', title: 'Tracking', type: 'slider', min: -0.1, max: 0.5, step: 0.01, value: 0, valueUnit: 'em' },
+        { key: 'align', title: 'Align', type: 'select', options: ['left', 'center', 'right', 'justify'], value: 'left' },
+        { key: 'color', title: 'Color', type: 'color', value: '#fafafa' },
+        { key: 'tinted', title: 'Tint', type: 'switch', value: false },
+        { key: 'tintColor', title: 'Tint Color', type: 'color', value: '#a855f7' },
+        { key: 'outline', title: 'Outline', type: 'switch', value: false },
+        { key: 'outlineWidth', title: 'Outline Width', type: 'slider', min: 0.5, max: 8, step: 0.5, value: 1, valueUnit: 'px' },
+        { key: 'outlineColor', title: 'Outline Color', type: 'color', value: '#6366f1' },
+        { key: 'textGlow', title: 'Text Glow', type: 'slider', min: 0, max: 40, step: 1, value: 0, valueUnit: 'px' },
+        { key: 'reveal', title: 'Reveal', type: 'select', options: ['none', 'scale', 'rise', 'wipe', 'blur'], value: 'none' },
+        { key: 'duration', title: 'Duration', type: 'slider', min: 0.2, max: 3, step: 0.1, value: 1.0, valueUnit: 's' },
+        { key: 'opacity', title: 'Opacity', type: 'slider', min: 0.1, max: 1, step: 0.05, value: 1 },
+        { key: 'blur', title: 'Blur', type: 'slider', min: 0, max: 20, step: 0.5, value: 0, valueUnit: 'px' },
+        { key: 'rotate', title: 'Rotate', type: 'slider', min: -45, max: 45, step: 1, value: 0, valueUnit: '°' }
+      ]
+    },
+    button: {
+      id: 'context-button',
+      compName: 'ContextButton',
+      title: '🔘 Tùy chỉnh Nút bấm & Tương tác (Button & Action)',
+      enTitle: '🔘 Button, Link & Badge Controls',
+      category: 'Animations',
+      docsUrl: 'https://reactbits.dev',
+      controls: [
+        { key: 'text', title: 'Text', type: 'input', value: 'Click Me', placeholder: 'Nhãn nút bấm...' },
+        { key: 'background', title: 'Background', type: 'color', value: '#18181b' },
+        { key: 'color', title: 'Color', type: 'color', value: '#fafafa' },
+        { key: 'radius', title: 'Radius', type: 'slider', min: 0, max: 99, step: 1, value: 10, valueUnit: 'px' },
+        { key: 'paddingX', title: 'Padding X', type: 'slider', min: 0, max: 64, step: 1, value: 18, valueUnit: 'px' },
+        { key: 'paddingY', title: 'Padding Y', type: 'slider', min: 0, max: 40, step: 1, value: 10, valueUnit: 'px' },
+        { key: 'fontSize', title: 'Font Size', type: 'slider', min: 10, max: 48, step: 1, value: 14, valueUnit: 'px' },
+        { key: 'weight', title: 'Weight', type: 'slider', min: 300, max: 900, step: 100, value: 600 },
+        { key: 'border', title: 'Border', type: 'switch', value: true },
+        { key: 'borderWidth', title: 'Border Width', type: 'slider', min: 0, max: 10, step: 1, value: 1, valueUnit: 'px' },
+        { key: 'borderColor', title: 'Border Color', type: 'color', value: '#3f3f46' },
+        { key: 'glow', title: 'Glow', type: 'slider', min: 0, max: 40, step: 1, value: 0, valueUnit: 'px' },
+        { key: 'hoverZoom', title: 'Hover Zoom', type: 'slider', min: 0, max: 0.25, step: 0.01, value: 0.04 },
+        { key: 'spotlight', title: 'Spotlight', type: 'switch', value: false },
+        { key: 'spotlightRadius', title: 'Spotlight Radius', type: 'slider', min: 60, max: 360, step: 10, value: 160, valueUnit: 'px' },
+        { key: 'tilt', title: 'Tilt', type: 'switch', value: false },
+        { key: 'opacity', title: 'Opacity', type: 'slider', min: 0.1, max: 1, step: 0.05, value: 1 },
+        { key: 'disabled', title: 'Disabled', type: 'switch', value: false }
+      ]
+    },
+    image: {
+      id: 'context-image',
+      compName: 'ContextImage',
+      title: '🖼️ Tùy chỉnh Hình ảnh & Media (Image & Visuals)',
+      enTitle: '🖼️ Image, Avatar & Media Controls',
+      category: 'Components',
+      docsUrl: 'https://reactbits.dev',
+      controls: [
+        { key: 'width', title: 'Width', type: 'slider', min: 24, max: 1200, step: 4, value: 320, valueUnit: 'px' },
+        { key: 'height', title: 'Height', type: 'slider', min: 24, max: 900, step: 4, value: 240, valueUnit: 'px' },
+        { key: 'objectFit', title: 'Object Fit', type: 'select', options: ['cover', 'contain', 'fill', 'scale-down'], value: 'cover' },
+        { key: 'radius', title: 'Radius', type: 'slider', min: 0, max: 200, step: 1, value: 12, valueUnit: 'px' },
+        { key: 'brightness', title: 'Brightness', type: 'slider', min: 0.2, max: 2, step: 0.05, value: 1 },
+        { key: 'saturation', title: 'Saturation', type: 'slider', min: 0, max: 2.5, step: 0.05, value: 1 },
+        { key: 'contrast', title: 'Contrast', type: 'slider', min: 0.4, max: 2, step: 0.05, value: 1 },
+        { key: 'grayscale', title: 'Grayscale', type: 'switch', value: false },
+        { key: 'blur', title: 'Blur', type: 'slider', min: 0, max: 24, step: 0.5, value: 0, valueUnit: 'px' },
+        { key: 'opacity', title: 'Opacity', type: 'slider', min: 0.1, max: 1, step: 0.05, value: 1 },
+        { key: 'fillScale', title: 'Scale', type: 'slider', min: 0.5, max: 2, step: 0.05, value: 1 },
+        { key: 'hoverZoom', title: 'Hover Zoom', type: 'slider', min: 0, max: 0.3, step: 0.01, value: 0 },
+        { key: 'border', title: 'Border', type: 'switch', value: false },
+        { key: 'borderWidth', title: 'Border Width', type: 'slider', min: 0, max: 16, step: 1, value: 1, valueUnit: 'px' },
+        { key: 'borderColor', title: 'Border Color', type: 'color', value: '#3f3f46' },
+        { key: 'glow', title: 'Glow', type: 'slider', min: 0, max: 50, step: 1, value: 0, valueUnit: 'px' },
+        { key: 'tilt', title: 'Tilt', type: 'switch', value: false },
+        { key: 'rotate', title: 'Rotate', type: 'slider', min: -45, max: 45, step: 1, value: 0, valueUnit: '°' }
+      ]
+    },
+    input: {
+      id: 'context-input',
+      compName: 'ContextInput',
+      title: '⌨️ Tùy chỉnh Ô nhập liệu & Form (Input & Field)',
+      enTitle: '⌨️ Input, Select & Form Controls',
+      category: 'Components',
+      docsUrl: 'https://reactbits.dev',
+      controls: [
+        { key: 'placeholder', title: 'Placeholder', type: 'input', value: 'Nhập thông tin...', placeholder: 'Placeholder...' },
+        { key: 'width', title: 'Width', type: 'slider', min: 80, max: 800, step: 4, value: 280, valueUnit: 'px' },
+        { key: 'radius', title: 'Radius', type: 'slider', min: 0, max: 48, step: 1, value: 8, valueUnit: 'px' },
+        { key: 'paddingX', title: 'Padding X', type: 'slider', min: 4, max: 40, step: 1, value: 14, valueUnit: 'px' },
+        { key: 'paddingY', title: 'Padding Y', type: 'slider', min: 2, max: 32, step: 1, value: 10, valueUnit: 'px' },
+        { key: 'background', title: 'Background', type: 'color', value: '#18181b' },
+        { key: 'color', title: 'Color', type: 'color', value: '#fafafa' },
+        { key: 'fontSize', title: 'Font Size', type: 'slider', min: 11, max: 28, step: 1, value: 14, valueUnit: 'px' },
+        { key: 'border', title: 'Border', type: 'switch', value: true },
+        { key: 'borderWidth', title: 'Border Width', type: 'slider', min: 0, max: 6, step: 1, value: 1, valueUnit: 'px' },
+        { key: 'borderColor', title: 'Border Color', type: 'color', value: '#3f3f46' },
+        { key: 'glow', title: 'Glow', type: 'slider', min: 0, max: 30, step: 1, value: 0, valueUnit: 'px' },
+        { key: 'opacity', title: 'Opacity', type: 'slider', min: 0.1, max: 1, step: 0.05, value: 1 },
+        { key: 'disabled', title: 'Disabled', type: 'switch', value: false }
+      ]
+    },
+    container: {
+      id: 'context-container',
+      compName: 'ContextContainer',
+      title: '📦 Tùy chỉnh Khung, Thẻ & Bố cục (Card & Container)',
+      enTitle: '📦 Card, Section & Container Controls',
+      category: 'Components',
+      docsUrl: 'https://reactbits.dev',
+      controls: [
+        { key: 'width', title: 'Width', type: 'slider', min: 60, max: 1400, step: 4, value: 420, valueUnit: 'px' },
+        { key: 'height', title: 'Height', type: 'slider', min: 40, max: 1000, step: 4, value: 240, valueUnit: 'px' },
+        { key: 'radius', title: 'Radius', type: 'slider', min: 0, max: 64, step: 1, value: 16, valueUnit: 'px' },
+        { key: 'paddingX', title: 'Padding X', type: 'slider', min: 0, max: 80, step: 2, value: 24, valueUnit: 'px' },
+        { key: 'paddingY', title: 'Padding Y', type: 'slider', min: 0, max: 80, step: 2, value: 24, valueUnit: 'px' },
+        { key: 'gap', title: 'Gap', type: 'slider', min: 0, max: 64, step: 2, value: 12, valueUnit: 'px' },
+        { key: 'background', title: 'Background', type: 'color', value: '#18181b' },
+        { key: 'border', title: 'Border', type: 'switch', value: true },
+        { key: 'borderWidth', title: 'Border Width', type: 'slider', min: 0, max: 12, step: 1, value: 1, valueUnit: 'px' },
+        { key: 'borderColor', title: 'Border Color', type: 'color', value: '#27272a' },
+        { key: 'backdropBlur', title: 'Backdrop Blur', type: 'slider', min: 0, max: 32, step: 1, value: 0, valueUnit: 'px' },
+        { key: 'glow', title: 'Glow', type: 'slider', min: 0, max: 60, step: 1, value: 0, valueUnit: 'px' },
+        { key: 'scrim', title: 'Scrim', type: 'switch', value: false },
+        { key: 'spotlight', title: 'Spotlight', type: 'switch', value: false },
+        { key: 'spotlightRadius', title: 'Spotlight Radius', type: 'slider', min: 80, max: 420, step: 10, value: 200, valueUnit: 'px' },
+        { key: 'tilt', title: 'Tilt', type: 'switch', value: false },
+        { key: 'tiltMax', title: 'Tilt Max', type: 'slider', min: 2, max: 25, step: 1, value: 9, valueUnit: '°' },
+        { key: 'perspective', title: 'Perspective', type: 'slider', min: 400, max: 2000, step: 50, value: 1000, valueUnit: 'px' },
+        { key: 'opacity', title: 'Opacity', type: 'slider', min: 0.1, max: 1, step: 0.05, value: 1 }
+      ]
+    }
+  };
+
+  function cssRgbToHex(rgb, fallback = '#fafafa') {
+    if (!rgb || typeof rgb !== 'string') return fallback;
+    if (rgb.startsWith('#')) return rgb.length === 7 ? rgb : fallback;
+    const m = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+    if (!m) return fallback;
+    const r = Number(m[1]);
+    const g = Number(m[2]);
+    const b = Number(m[3]);
+    if (r === 0 && g === 0 && b === 0 && rgb.includes('0)')) return fallback;
+    return '#' + [r, g, b].map(n => n.toString(16).padStart(2, '0')).join('');
+  }
+
+  function extractLiveElementValuesForContext(el, contextType) {
+    const schema = CONTEXT_SCHEMAS[contextType] || CONTEXT_SCHEMAS.text;
+    const vals = {};
+    schema.controls.forEach(c => { vals[c.key] = c.value; });
+    if (!el || !el.ownerDocument || !el.ownerDocument.defaultView) return vals;
+
+    const comp = el.ownerDocument.defaultView.getComputedStyle(el);
+    const rect = el.getBoundingClientRect();
+    const px = v => {
+      const n = parseFloat(v);
+      return Number.isFinite(n) ? Math.round(n) : 0;
+    };
+
+    if ('text' in vals) {
+      vals.text = (el.innerText || el.textContent || '').trim().slice(0, 140) || vals.text;
+    }
+    if ('placeholder' in vals) {
+      vals.placeholder = el.getAttribute('placeholder') || vals.placeholder;
+    }
+    if ('fontSize' in vals) {
+      vals.fontSize = clamp(px(comp.fontSize) || 16, 8, 140);
+    }
+    if ('weight' in vals) {
+      const fw = parseInt(comp.fontWeight, 10);
+      vals.weight = Number.isFinite(fw) ? clamp(Math.round(fw / 100) * 100, 100, 900) : 500;
+    }
+    if ('lineHeight' in vals) {
+      const fs = parseFloat(comp.fontSize) || 16;
+      const lhPx = parseFloat(comp.lineHeight);
+      vals.lineHeight = Number.isFinite(lhPx) && fs > 0
+        ? clamp(Number((lhPx / fs).toFixed(2)), 0.8, 2.5)
+        : 1.4;
+    }
+    if ('tracking' in vals) {
+      const fs = parseFloat(comp.fontSize) || 16;
+      const lsPx = parseFloat(comp.letterSpacing);
+      vals.tracking = Number.isFinite(lsPx) && fs > 0
+        ? clamp(Number((lsPx / fs).toFixed(2)), -0.1, 0.5)
+        : 0;
+    }
+    if ('align' in vals) {
+      const ta = (comp.textAlign || 'left').toLowerCase();
+      vals.align = ['left', 'center', 'right', 'justify'].includes(ta) ? ta : 'left';
+    }
+    if ('color' in vals) {
+      vals.color = cssRgbToHex(comp.color, '#fafafa');
+    }
+    if ('background' in vals) {
+      vals.background = cssRgbToHex(comp.backgroundColor, '#18181b');
+    }
+    if ('radius' in vals) {
+      vals.radius = clamp(px(comp.borderRadius), 0, 200);
+    }
+    if ('paddingX' in vals) {
+      vals.paddingX = clamp(px(comp.paddingLeft), 0, 80);
+    }
+    if ('paddingY' in vals) {
+      vals.paddingY = clamp(px(comp.paddingTop), 0, 80);
+    }
+    if ('gap' in vals) {
+      vals.gap = clamp(px(comp.gap), 0, 64);
+    }
+    if ('width' in vals) {
+      vals.width = clamp(Math.round(rect.width) || vals.width, 24, 1400);
+    }
+    if ('height' in vals) {
+      vals.height = clamp(Math.round(rect.height) || vals.height, 24, 1000);
+    }
+    if ('border' in vals) {
+      const bw = px(comp.borderTopWidth);
+      vals.border = bw > 0 && comp.borderTopStyle !== 'none';
+      if ('borderWidth' in vals) vals.borderWidth = bw > 0 ? bw : 1;
+      if ('borderColor' in vals) vals.borderColor = cssRgbToHex(comp.borderTopColor, '#3f3f46');
+    }
+    if ('opacity' in vals) {
+      const op = parseFloat(comp.opacity);
+      vals.opacity = Number.isFinite(op) ? clamp(Number(op.toFixed(2)), 0.1, 1) : 1;
+    }
+    if ('objectFit' in vals) {
+      const of = (comp.objectFit || 'cover').toLowerCase();
+      vals.objectFit = ['cover', 'contain', 'fill', 'scale-down'].includes(of) ? of : 'cover';
+    }
+    if ('tilt' in vals) {
+      vals.tilt = el.getAttribute('data-rb-tilt') === 'true';
+    }
+    if ('spotlight' in vals) {
+      vals.spotlight = el.getAttribute('data-rb-spotlight') === 'true';
+    }
+    return vals;
+  }
+
   function getCtrlTitle(ctrl) {
     const lang = (window.getStudioLang && window.getStudioLang()) || localStorage.getItem('studio_lang') || 'vi';
     if (lang === 'en') return ctrl.title;
@@ -38789,6 +39044,10 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
   }
 
   function getActiveSchema() {
+    if (rbState.activeSchemaId && rbState.activeSchemaId.startsWith('context-')) {
+      const ctxKey = rbState.activeSchemaId.replace('context-', '');
+      if (CONTEXT_SCHEMAS[ctxKey]) return CONTEXT_SCHEMAS[ctxKey];
+    }
     const catalog = window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG || [];
     if (rbState.activeSchemaId === 'master-all') {
       const master = window.STUDIO_REACTBITS_MASTER_CONTROLS || [];
@@ -38804,7 +39063,7 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
         controls: filtered
       };
     }
-    return catalog.find(c => c.id === rbState.activeSchemaId) || catalog[0];
+    return catalog.find(c => c.id === rbState.activeSchemaId) || CONTEXT_SCHEMAS[rbState.activeContextType] || CONTEXT_SCHEMAS.text;
   }
 
   function getValuesForSchema(schema) {
@@ -39150,6 +39409,12 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
     if (changedKey === 'height' || (values.height !== undefined && schema && schema.compName === 'TearTicket')) {
       if (values.height) setS('min-height', values.height + 'px');
     }
+    if (changedKey === 'objectFit' && values.objectFit) {
+      setS('object-fit', values.objectFit);
+    }
+    if (changedKey === 'gap' && values.gap !== undefined) {
+      setS('gap', values.gap + 'px');
+    }
     if (values.radius !== undefined && (changedKey === 'radius' || changedKey === 'borderRadius')) {
       setS('border-radius', (values.radius ?? values.borderRadius) + 'px');
     } else if (values.borderRadius !== undefined && changedKey === 'borderRadius') {
@@ -39183,7 +39448,7 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
       }
     }
 
-    // 3. Typography & Outline & Align
+    // 3. Typography & Outline & Align & Text Glow
     if (changedKey === 'weight' && values.weight !== undefined) {
       setS('font-weight', String(values.weight));
     }
@@ -39212,38 +39477,68 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
         setS('-webkit-text-stroke', '0px transparent');
       }
     }
+    if (changedKey === 'textGlow') {
+      const tg = Number(values.textGlow) || 0;
+      const glowCol = values.tintColor || values.color || '#a855f7';
+      setS('text-shadow', tg > 0 ? '0 0 ' + tg + 'px ' + glowCol : 'none');
+    }
     if ((changedKey === 'text' || changedKey === 'textPreset') && el.children.length === 0) {
       const txtMap = {
         Details: 'Designed in the details',
         Location: 'Shot on location',
         Web: 'Made for the web'
       };
-      const newTxt = values.text || txtMap[values.textPreset];
-      if (newTxt) el.textContent = newTxt;
+      const newTxt = values.text !== undefined ? values.text : txtMap[values.textPreset];
+      if (newTxt !== undefined) el.textContent = newTxt;
+    }
+    if (changedKey === 'placeholder' && values.placeholder !== undefined) {
+      el.setAttribute('placeholder', values.placeholder);
     }
 
-    // 4. Optical Filters (Brightness, Saturation, Grayscale, Blur, Opacity)
-    if (['brightness', 'saturation', 'grayscale', 'blur', 'preset'].includes(changedKey)) {
+    // 4. Optical Filters (Brightness, Saturation, Contrast, Grayscale, Blur, Backdrop Blur)
+    if (['brightness', 'saturation', 'contrast', 'grayscale', 'blur', 'preset'].includes(changedKey)) {
       const filters = [];
       if (values.brightness !== undefined && values.brightness !== 1) filters.push('brightness(' + values.brightness + ')');
       if (values.saturation !== undefined && values.saturation !== 1) filters.push('saturate(' + values.saturation + ')');
+      if (values.contrast !== undefined && values.contrast !== 1) filters.push('contrast(' + values.contrast + ')');
       if (values.grayscale) filters.push('grayscale(1)');
       if (values.blur) filters.push('blur(' + values.blur + 'px)');
       setS('filter', filters.length > 0 ? filters.join(' ') : 'none');
+    }
+    if (changedKey === 'backdropBlur') {
+      const bb = Number(values.backdropBlur) || 0;
+      setS('backdrop-filter', bb > 0 ? 'blur(' + bb + 'px)' : 'none');
+      setS('-webkit-backdrop-filter', bb > 0 ? 'blur(' + bb + 'px)' : 'none');
     }
     if (changedKey === 'disabled') {
       setS('opacity', values.disabled ? '0.45' : '1');
       setS('pointer-events', values.disabled ? 'none' : 'auto');
     }
 
-    // 5. Tint & Scrim
+    // 5. Tint (Gradient Text for Text elements, Box Tint for Containers) & Scrim
     if (['tinted', 'tintColor', 'scrim', 'preset'].includes(changedKey)) {
-      if (values.tinted && values.tintColor) {
-        setS('box-shadow', 'inset 0 0 0 9999px ' + values.tintColor + '44');
-      } else if (values.scrim) {
-        setS('box-shadow', 'inset 0 -60px 80px rgba(0,0,0,0.45)');
-      } else if (changedKey === 'tinted' || changedKey === 'scrim') {
-        setS('box-shadow', 'none');
+      const isTextContext = (schema && schema.id === 'context-text') || rbState.activeContextType === 'text';
+      if (isTextContext) {
+        if (values.tinted && values.tintColor) {
+          const baseCol = values.color || '#ffffff';
+          setS('background-image', 'linear-gradient(135deg, ' + baseCol + ' 0%, ' + values.tintColor + ' 100%)');
+          setS('-webkit-background-clip', 'text');
+          setS('background-clip', 'text');
+          setS('-webkit-text-fill-color', 'transparent');
+        } else if (changedKey === 'tinted') {
+          el.style.removeProperty('background-image');
+          el.style.removeProperty('-webkit-background-clip');
+          el.style.removeProperty('background-clip');
+          el.style.removeProperty('-webkit-text-fill-color');
+        }
+      } else {
+        if (values.tinted && values.tintColor) {
+          setS('box-shadow', 'inset 0 0 0 9999px ' + values.tintColor + '44');
+        } else if (values.scrim) {
+          setS('box-shadow', 'inset 0 -60px 80px rgba(0,0,0,0.45)');
+        } else if (changedKey === 'tinted' || changedKey === 'scrim') {
+          setS('box-shadow', 'none');
+        }
       }
     }
 
@@ -39503,21 +39798,34 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
     const searchInput = document.getElementById('rb-schema-search');
     const catalog = window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG || [];
 
+    const CONTEXT_ALLOWED_CATEGORIES = {
+      text: ['TextAnimations'],
+      button: ['Animations'],
+      image: ['Animations', 'Components'],
+      input: ['Components'],
+      container: ['Components', 'Backgrounds', 'Animations']
+    };
+
     const populateSelect = (selEl, filterText = '') => {
       if (!selEl) return;
       const lang = (window.getStudioLang && window.getStudioLang()) || localStorage.getItem('studio_lang') || 'vi';
       const q = (filterText || '').trim().toLowerCase();
+      const ctx = rbState.activeContextType || 'text';
+      const activeCtxSchema = CONTEXT_SCHEMAS[ctx] || CONTEXT_SCHEMAS.text;
       selEl.innerHTML = '';
 
-      const masterOpt = document.createElement('option');
-      masterOpt.value = 'master-all';
-      masterOpt.textContent = lang === 'en'
-        ? '⚡ Universal Live Element Controls (50+ Master Props)'
-        : '⚡ Tất cả thông số Chỉnh Trực Tiếp (50+ Master Controls)';
-      selEl.appendChild(masterOpt);
+      // 1. Primary Context-Specific Schema (Auto-selected for the clicked element!)
+      const ctxOpt = document.createElement('option');
+      ctxOpt.value = activeCtxSchema.id;
+      ctxOpt.textContent = (lang === 'en' ? activeCtxSchema.enTitle : activeCtxSchema.title) +
+        ' (' + activeCtxSchema.controls.length + (lang === 'en' ? ' props)' : ' thông số)');
+      selEl.appendChild(ctxOpt);
 
+      // 2. Only list ReactBits component schemas relevant to the selected element type
+      const allowedCats = CONTEXT_ALLOWED_CATEGORIES[ctx] || ['TextAnimations'];
       const groups = {};
       catalog.forEach(item => {
+        if (!q && !allowedCats.includes(item.category)) return;
         if (q && !item.title.toLowerCase().includes(q) && !item.compName.toLowerCase().includes(q) && !item.category.toLowerCase().includes(q)) {
           return;
         }
@@ -39539,14 +39847,59 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
       });
 
       selEl.value = rbState.activeSchemaId;
+      if (selEl.value !== rbState.activeSchemaId) {
+        selEl.value = activeCtxSchema.id;
+      }
+    };
+
+    const updateContextGroupPills = (el, contextType) => {
+      const bar = document.getElementById('rb-sidebar-group-pills');
+      if (!bar) return;
+      const lang = (window.getStudioLang && window.getStudioLang()) || localStorage.getItem('studio_lang') || 'vi';
+      const ctx = contextType || rbState.activeContextType || 'text';
+      const tag = el && el.tagName ? '<' + el.tagName.toLowerCase() + '>' : '';
+      const labelsVi = {
+        text: '🔤 Chế độ Văn bản (Chỉ hiện thông số Text)',
+        button: '🔘 Chế độ Nút bấm & Link (Button Controls)',
+        image: '🖼️ Chế độ Hình ảnh & Media (Image Controls)',
+        input: '⌨️ Chế độ Ô nhập liệu (Input Controls)',
+        container: '📦 Chế độ Khung & Bố cục (Container Controls)'
+      };
+      const labelsEn = {
+        text: '🔤 Text Mode (Typography Controls Only)',
+        button: '🔘 Button & Link Mode (Action Controls Only)',
+        image: '🖼️ Image & Media Mode (Visual Controls Only)',
+        input: '⌨️ Input & Field Mode (Form Controls Only)',
+        container: '📦 Container & Card Mode (Box Controls Only)'
+      };
+      const badgeText = (lang === 'en' ? labelsEn[ctx] : labelsVi[ctx]) || labelsVi.text;
+      bar.innerHTML =
+        '<span class="rb-group-chip active" style="cursor:default;pointer-events:none;flex:1;justify-content:center;">' +
+        badgeText + (tag ? ' • ' + tag.replace(/</g, '&lt;').replace(/>/g, '&gt;') : '') +
+        '</span>';
     };
 
     populateSelect(schemaSelect);
     populateSelect(sidebarSchemaSelect);
+    updateContextGroupPills(null, rbState.activeContextType);
+
+    window.syncReactBitsToSelectedElement = (el, contextType) => {
+      const ctx = CONTEXT_SCHEMAS[contextType] ? contextType : 'text';
+      rbState.activeContextType = ctx;
+      rbState.activeSchemaId = 'context-' + ctx;
+      if (el) {
+        rbState.valuesBySchema[rbState.activeSchemaId] = extractLiveElementValuesForContext(el, ctx);
+      }
+      populateSelect(schemaSelect, searchInput ? searchInput.value : '');
+      populateSelect(sidebarSchemaSelect);
+      updateContextGroupPills(el, ctx);
+      renderReactBitsGrids();
+    };
 
     window.refreshReactBitsLang = () => {
       populateSelect(schemaSelect, searchInput ? searchInput.value : '');
       populateSelect(sidebarSchemaSelect);
+      updateContextGroupPills(null, rbState.activeContextType);
       syncRbThemeUI();
       renderReactBitsGrids();
     };

@@ -1697,6 +1697,157 @@
     return null;
   }
 
+  // Classify selected DOM element into 1 of 5 strict Inspector Contexts ('text' | 'button' | 'image' | 'input' | 'container')
+  function detectInspectorContextType(el) {
+    if (!el || !el.tagName) return 'text';
+    const tag = el.tagName.toLowerCase();
+    const cls = typeof el.className === 'string' ? el.className.toLowerCase() : '';
+    const role = (el.getAttribute('role') || '').toLowerCase();
+    const type = (el.getAttribute('type') || '').toLowerCase();
+
+    // 1. Image / Media / SVG
+    if (['img', 'svg', 'video', 'canvas', 'picture'].includes(tag)) {
+      return 'image';
+    }
+    if (el.children.length === 1 && el.children[0].tagName && ['img', 'svg', 'video'].includes(el.children[0].tagName.toLowerCase()) && !(el.textContent || '').trim()) {
+      return 'image';
+    }
+
+    // 2. Form Inputs & Switches
+    if (['textarea', 'select'].includes(tag) || (tag === 'input' && !['button', 'submit', 'reset'].includes(type)) || role === 'switch' || role === 'checkbox') {
+      return 'input';
+    }
+
+    // 3. Buttons, Action Links & Badges
+    if (tag === 'button' || (tag === 'input' && ['button', 'submit', 'reset'].includes(type)) || role === 'button' || /\b(btn|button|cta|badge|pill|chip|tag)\b/.test(cls)) {
+      return 'button';
+    }
+    if (tag === 'a') {
+      const comp = el.ownerDocument && el.ownerDocument.defaultView ? el.ownerDocument.defaultView.getComputedStyle(el) : null;
+      const hasBoxBg = comp && comp.backgroundColor && comp.backgroundColor !== 'rgba(0, 0, 0, 0)' && comp.backgroundColor !== 'transparent';
+      const hasBorder = comp && parseFloat(comp.borderTopWidth) > 0 && comp.borderTopStyle !== 'none';
+      if (hasBoxBg || hasBorder || el.children.length > 0) return 'button';
+      return 'text';
+    }
+
+    // 4. Pure Text & Typography Elements
+    const TEXT_TAGS = new Set(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'label', 'strong', 'em', 'b', 'i', 'small', 'blockquote', 'code', 'pre', 'li', 'dt', 'dd', 'figcaption']);
+    if (TEXT_TAGS.has(tag)) {
+      return 'text';
+    }
+    if (el.children.length === 0 && (el.textContent || '').trim().length > 0 && !/\b(card|bento|box|container|section|grid|row|col|panel|wrapper)\b/.test(cls)) {
+      return 'text';
+    }
+
+    // 5. Containers, Cards, Sections & Layout Wrappers
+    return 'container';
+  }
+
+  // Dynamically show ONLY the controls relevant to the selected element's Context Type across all 3 Inspector tabs
+  function syncInspectorPanesByContext(el, contextType) {
+    // 1. Sync Tab 1: ReactBits Customize Panel
+    if (window.syncReactBitsToSelectedElement && typeof window.syncReactBitsToSelectedElement === 'function') {
+      window.syncReactBitsToSelectedElement(el, contextType);
+    }
+
+    // 2. Sync Tab 2: Design, Typography, Colors & Shaders (#insp-pane-design)
+    const designPane = document.getElementById('insp-pane-design');
+    if (designPane) {
+      const designGroups = designPane.querySelectorAll(':scope > .prop-group');
+      const typoGroup = designGroups[0];
+      const colorGroup = designGroups[1];
+      const borderGroup = designGroups[2];
+      const shaderGroup = designGroups[3];
+
+      // A. Content & Typography Group
+      if (typoGroup) {
+        const textField = document.getElementById('text-content-group');
+        const imgField = document.getElementById('image-src-group');
+        const typoRows = typoGroup.querySelectorAll('.prop-row-2col, .slider-row');
+        const isLeafText = el && (el.children.length === 0 || ['text', 'button'].includes(contextType));
+
+        if (contextType === 'image') {
+          if (textField) textField.classList.add('hidden');
+          if (imgField) imgField.classList.remove('hidden');
+          typoRows.forEach(r => r.classList.add('hidden'));
+        } else if (contextType === 'container') {
+          if (textField) textField.classList.toggle('hidden', !isLeafText);
+          if (imgField) imgField.classList.add('hidden');
+          typoRows.forEach(r => r.classList.remove('hidden'));
+        } else if (contextType === 'input') {
+          if (textField) textField.classList.add('hidden');
+          if (imgField) imgField.classList.add('hidden');
+          typoRows.forEach(r => r.classList.remove('hidden'));
+        } else {
+          // 'text' or 'button'
+          if (textField) textField.classList.remove('hidden');
+          if (imgField) imgField.classList.add('hidden');
+          typoRows.forEach(r => r.classList.remove('hidden'));
+        }
+      }
+
+      // B. Colors & Gradients Group
+      if (colorGroup) {
+        const colorBlocks = colorGroup.querySelectorAll('.color-control-block');
+        const textColorBlock = colorBlocks[0];
+        const bgColorBlock = colorBlocks[1];
+        const gradBlock = document.getElementById('gradient-swatches') ? document.getElementById('gradient-swatches').parentElement : null;
+
+        if (contextType === 'text') {
+          if (textColorBlock) textColorBlock.classList.remove('hidden');
+          if (bgColorBlock) bgColorBlock.classList.add('hidden');
+          if (gradBlock) gradBlock.classList.add('hidden');
+        } else if (contextType === 'image') {
+          if (textColorBlock) textColorBlock.classList.add('hidden');
+          if (bgColorBlock) bgColorBlock.classList.remove('hidden');
+          if (gradBlock) gradBlock.classList.add('hidden');
+        } else {
+          if (textColorBlock) textColorBlock.classList.remove('hidden');
+          if (bgColorBlock) bgColorBlock.classList.remove('hidden');
+          if (gradBlock) gradBlock.classList.remove('hidden');
+        }
+      }
+
+      // C. Border, Radius & Box Shadow Group (Hidden for pure text elements!)
+      if (borderGroup) {
+        borderGroup.classList.toggle('hidden', contextType === 'text');
+      }
+
+      // D. Lucide Vector SVG Icons & Shaders Group
+      if (shaderGroup) {
+        const iconGrid = document.getElementById('fx-icon-pills');
+        if (contextType === 'image' || contextType === 'input') {
+          shaderGroup.classList.add('hidden');
+        } else {
+          shaderGroup.classList.remove('hidden');
+          if (iconGrid) {
+            // Only show Button SVG Icon picker for buttons/links!
+            iconGrid.classList.toggle('hidden', contextType !== 'button');
+          }
+        }
+      }
+    }
+
+    // 3. Sync Tab 3: Layout, Coordinates & Flexbox (#insp-pane-layout)
+    const layoutPane = document.getElementById('insp-pane-layout');
+    if (layoutPane) {
+      const layoutGroups = layoutPane.querySelectorAll(':scope > .prop-group');
+      const coordGroup = layoutGroups[0];
+      const flexGroup = layoutGroups[2];
+      if (coordGroup) {
+        const whRow = document.getElementById('prop-width') ? document.getElementById('prop-width').closest('.prop-row-2col') : null;
+        if (whRow) {
+          // Pure text flows naturally; hide box Width/Height inputs for text
+          whRow.classList.toggle('hidden', contextType === 'text');
+        }
+      }
+      if (flexGroup) {
+        // Flexbox alignment only applies to containers & buttons
+        flexGroup.classList.toggle('hidden', contextType !== 'container' && contextType !== 'button');
+      }
+    }
+  }
+
   // ==================== ELEMENT SELECTION & INSPECTOR SYNC ====================
   function selectElement(el) {
     state.selectedEl = el;
@@ -1746,7 +1897,15 @@
       }
     }
 
-    dom.selectedTagBadge.textContent = tag.toUpperCase();
+    const contextType = detectInspectorContextType(el);
+    const contextBadgeLabels = {
+      text: 'TEXT',
+      button: 'BUTTON',
+      image: 'MEDIA',
+      input: 'INPUT',
+      container: 'BOX'
+    };
+    dom.selectedTagBadge.textContent = `${tag.toUpperCase()} • ${contextBadgeLabels[contextType] || 'EL'}`;
     dom.selectedSelectorLabel.textContent = getFriendlyElementLabel(el);
     dom.selectedSelectorLabel.title = selector;
 
@@ -1849,6 +2008,9 @@
     dom.propMarRight.value = parsePx(comp.marginRight);
     dom.propMarBottom.value = parsePx(comp.marginBottom);
     dom.propMarLeft.value = parsePx(comp.marginLeft);
+
+    // Filter all 3 Inspector Panes (ReactBits Customize, Design & Colors, Layout & Coords) strictly by element contextType!
+    syncInspectorPanesByContext(el, contextType);
 
     updateOverlayPosition();
     updateLiveCoordsReadout(el);
