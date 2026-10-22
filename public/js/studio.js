@@ -3555,7 +3555,7 @@
       dom.btnToggleNamethatChecklist.classList.toggle('active', checkedCount > 0 || (dom.namethatChecklistPanel && !dom.namethatChecklistPanel.classList.contains('hidden')));
     }
 
-    // Show which UI Libraries have built the checked component types!
+    // Show which UI Libraries have built the checked component types (both Pre-built in Studio & Web Ecosystem)!
     if (dom.namethatMatchingLibs) {
       if (checkedCount === 0) {
         dom.namethatMatchingLibs.classList.add('hidden');
@@ -3568,10 +3568,45 @@
         const uniqueLibIds = Array.from(new Set(matchingComps.map(c => c.libId)));
         const badgesHtml = uniqueLibIds.map(lid => {
           const lMeta = libs.find(l => l.id === lid) || { id: lid, name: lid, url: 'https://21st.dev', accent: '#6366f1' };
-          return `<a href="${lMeta.url}" target="_blank" rel="noopener" class="uilib-lib-badge" title="Click mở trang chủ ${lMeta.name} (${lMeta.url})" style="border-color:${lMeta.accent}55;color:${lMeta.accent};background:${lMeta.accent}18;">${lMeta.name} ↗</a>`;
+          const isSelectedLib = state.uilibSelectedLib === lid;
+          return `<span class="uilib-lib-badge" data-filter-lib="${lid}" title="Click để lọc mẫu của ${lMeta.name} (hoặc bấm ↗ mở trang chủ ${lMeta.url})" style="cursor:pointer;border-color:${lMeta.accent}${isSelectedLib ? 'ff' : '55'};color:${isSelectedLib ? '#fff' : lMeta.accent};background:${lMeta.accent}${isSelectedLib ? 'aa' : '18'};"><span>${lMeta.name}</span><a href="${lMeta.url}" target="_blank" rel="noopener" title="Mở trang chủ ${lMeta.name}" style="color:inherit;text-decoration:none;margin-left:3px;" onclick="event.stopPropagation();">↗</a></span>`;
         }).join('');
-        dom.namethatMatchingLibs.innerHTML = `<span>Thư viện có sẵn (${uniqueLibIds.length}):</span> ${badgesHtml}`;
+
+        // Also list other full-stack UI libraries from the 38+ collection that provide this component on their official docs
+        const utilityOnlyIds = new Set(['fontawesome', 'swiper', 'gsap', 'venobox', 'tweakcn', 'namethatui']);
+        const extraWebLibs = libs.filter(l => !uniqueLibIds.includes(l.id) && !utilityOnlyIds.has(l.id));
+        const extraHtml = extraWebLibs.length > 0
+          ? `<div style="width:100%;margin-top:4px;padding-top:4px;border-top:1px dashed rgba(255,255,255,0.08);display:flex;flex-wrap:wrap;align-items:center;gap:4px;"><span style="font-size:10px;color:#94a3b8;">🌐 Mở web lấy thêm (${extraWebLibs.length} lib khác):</span>${extraWebLibs.map(l => `<a href="${l.url}" target="_blank" rel="noopener" class="uilib-lib-badge" title="Mở ${l.name} (${l.url}) để copy thêm mẫu rồi bấm Import Code" style="opacity:0.8;border-color:${l.accent}44;color:${l.accent};background:${l.accent}10;font-size:9.5px;">${l.name} ↗</a>`).join('')}</div>`
+          : '';
+
+        dom.namethatMatchingLibs.innerHTML = `
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:4px;width:100%;">
+            <span style="color:#a5b4fc;font-weight:700;">⚡ Nhúng sẵn dùng ngay (${matchingComps.length} mẫu / ${uniqueLibIds.length} lib):</span>
+            ${state.uilibSelectedLib !== 'all' ? `<button type="button" id="btn-clear-lib-subfilter" style="padding:1px 6px;background:#ef4444;color:#fff;border:none;border-radius:4px;font-size:10px;cursor:pointer;">✕ Bỏ lọc 1 lib</button>` : ''}
+            ${badgesHtml}
+          </div>
+          ${extraHtml}
+        `;
         dom.namethatMatchingLibs.classList.remove('hidden');
+
+        dom.namethatMatchingLibs.querySelectorAll('[data-filter-lib]').forEach(badge => {
+          badge.addEventListener('click', () => {
+            const lid = badge.getAttribute('data-filter-lib');
+            state.uilibSelectedLib = state.uilibSelectedLib === lid ? 'all' : lid;
+            if (dom.uilibLibFilter) dom.uilibLibFilter.value = state.uilibSelectedLib;
+            renderNamethatChecklistUI();
+            renderSidebarUiLibraries();
+          });
+        });
+        const btnClearSub = dom.namethatMatchingLibs.querySelector('#btn-clear-lib-subfilter');
+        if (btnClearSub) {
+          btnClearSub.addEventListener('click', () => {
+            state.uilibSelectedLib = 'all';
+            if (dom.uilibLibFilter) dom.uilibLibFilter.value = 'all';
+            renderNamethatChecklistUI();
+            renderSidebarUiLibraries();
+          });
+        }
       }
     }
   }
