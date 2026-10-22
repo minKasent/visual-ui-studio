@@ -5190,6 +5190,86 @@
       navigator.clipboard.writeText(dom.cssPatchOutput.value);
       showToast('Đã copy mã CSS vào bộ nhớ tạm!', '🎨');
     });
+
+    // ==================== REACTBITS.DEV CUSTOMIZE STUDIO BRIDGE ====================
+    let rbUndoTimer = null;
+    let rbBeforeSnapshot = null;
+
+    window.studioApplyReactBitsCustom = (values, changedKey, schema) => {
+      if (!state.selectedEl) {
+        if (window.getReactBitsActiveHtml) {
+          const html = window.getReactBitsActiveHtml();
+          if (html) {
+            insertLibComponentToPage({
+              id: (schema && schema.id) || 'rb-live-comp',
+              libId: 'reactbits',
+              libName: 'React Bits Customize',
+              name: (schema && schema.title) || 'ReactBits Component',
+              html
+            });
+          }
+        }
+        return;
+      }
+
+      const el = state.selectedEl;
+      if (!rbBeforeSnapshot) {
+        rbBeforeSnapshot = captureElementState(el);
+      }
+
+      if (window.applyReactBitsPropsToElement) {
+        window.applyReactBitsPropsToElement(el, values, changedKey, schema);
+      }
+
+      const rec = ensureEditRecord(el);
+      if (rec) {
+        const inlineStr = el.getAttribute('style') || '';
+        inlineStr.split(';').forEach(pair => {
+          const idx = pair.indexOf(':');
+          if (idx > 0) {
+            const k = pair.slice(0, idx).trim();
+            const v = pair.slice(idx + 1).replace(/!important/gi, '').trim();
+            if (k && v) rec.styles[k] = v;
+          }
+        });
+      }
+
+      updateOverlayPosition();
+
+      if (rbUndoTimer) clearTimeout(rbUndoTimer);
+      rbUndoTimer = setTimeout(() => {
+        if (rbBeforeSnapshot && state.selectedEl === el) {
+          const afterSnap = captureElementState(el);
+          pushUndoAction({
+            type: 'snapshot',
+            selector: rbBeforeSnapshot.selector,
+            before: rbBeforeSnapshot,
+            after: afterSnap
+          });
+          rbBeforeSnapshot = null;
+          updateHistoryUI();
+        }
+      }, 280);
+    };
+
+    window.studioResetSelectedElement = () => {
+      if (state.selectedEl && dom.btnElReset) {
+        dom.btnElReset.click();
+      } else {
+        showToast('Đã đặt lại toàn bộ thanh kéo Customize về mặc định!', '↺');
+      }
+    };
+
+    window.studioInsertCustomReactBitsHtml = (html, title) => {
+      if (!html) return;
+      insertLibComponentToPage({
+        id: 'rb-custom-' + Date.now(),
+        libId: 'reactbits',
+        libName: 'React Bits Customize',
+        name: title || 'ReactBits Custom Component',
+        html
+      });
+    };
   }
 
   // ==================== INITIALIZATION ====================

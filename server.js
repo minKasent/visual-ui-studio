@@ -1,25 +1,6 @@
 const http = require('http');
-const https = require('https');
 const fs = require('fs');
 const path = require('path');
-let compileOfficialTsxToHtml = null;
-try {
-  ({ compileOfficialTsxToHtml } = require('./tsx-ssr-engine.js'));
-} catch (e) {}
-
-function fetchRemoteText(urlStr, redirects = 4) {
-  return new Promise((resolve, reject) => {
-    const client = urlStr.startsWith('https') ? https : http;
-    client.get(urlStr, { headers: { 'User-Agent': 'Mozilla/5.0 VisualUIStudio/6.0' } }, res => {
-      if ([301, 302, 307, 308].includes(res.statusCode) && res.headers.location && redirects > 0) {
-        return resolve(fetchRemoteText(new URL(res.headers.location, urlStr).href, redirects - 1));
-      }
-      let data = '';
-      res.on('data', c => (data += c));
-      res.on('end', () => resolve({ status: res.statusCode, body: data }));
-    }).on('error', reject);
-  });
-}
 
 const PORT = process.env.PORT || 4567;
 const PUBLIC_DIR = path.join(__dirname, 'public');
@@ -220,51 +201,6 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, {
         success: true,
         restoredPath: targetPath
-      });
-    }
-
-    // API: Compile official React/TSX component code via SSR Engine (Sucrase + Lucide Static + Shadcn/Origin Primitives)
-    if (req.method === 'POST' && pathname === '/api/compile-tsx') {
-      const body = await readJsonBody(req);
-      const rawCode = body.code || '';
-      const compiledHtml = compileOfficialTsxToHtml ? compileOfficialTsxToHtml(rawCode) : null;
-      return sendJson(res, 200, {
-        success: Boolean(compiledHtml),
-        compiledHtml: compiledHtml || ''
-      });
-    }
-
-    // API: Fetch live component JSON/TSX directly from official UI Library Registry URL
-    if (req.method === 'POST' && pathname === '/api/fetch-registry-url') {
-      const body = await readJsonBody(req);
-      const targetUrl = (body.url || '').trim();
-      if (!targetUrl || !/^https?:\/\//i.test(targetUrl)) {
-        return sendJson(res, 400, { error: 'Hãy nhập URL hợp lệ (https://...)' });
-      }
-      const remote = await fetchRemoteText(targetUrl);
-      if (remote.status !== 200 || !remote.body) {
-        return sendJson(res, 404, { error: `Không tải được từ URL (HTTP ${remote.status})` });
-      }
-      let code = remote.body;
-      let name = path.basename(targetUrl).replace(/\.(json|tsx|jsx)$/i, '');
-      let desc = '';
-      if (targetUrl.endsWith('.json') || remote.body.trim().startsWith('{')) {
-        try {
-          const parsed = JSON.parse(remote.body);
-          name = parsed.title || parsed.description || parsed.name || name;
-          desc = parsed.description || '';
-          if (parsed.files && parsed.files[0] && parsed.files[0].content) {
-            code = parsed.files[0].content;
-          }
-        } catch (e) {}
-      }
-      const compiledHtml = compileOfficialTsxToHtml ? compileOfficialTsxToHtml(code) : null;
-      return sendJson(res, 200, {
-        success: true,
-        name,
-        desc,
-        rawCode: code,
-        compiledHtml: compiledHtml || ''
       });
     }
 

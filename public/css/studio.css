@@ -2519,3 +2519,510 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
   font-size: 10.5px;
   color: var(--text-muted);
 }
+
+/* =========================================================================
+   OFFICIAL REACTBITS.DEV CUSTOMIZE PANEL & SCRUBBER CONTROLS (v6.1)
+   Ported 1:1 from DavidHDev/react-bits/src/css/preview-slider.css & category.css
+   ========================================================================= */
+
+.rb-customize-scope,
+.rb-customize-scope[data-rb-theme="light"] {
+  --rb-bg-frame: #fafafa;
+  --rb-bg-options: #ffffff;
+  --rb-border-frame: #e7e7e9;
+  --rb-border-options: rgba(24, 24, 27, 0.12);
+  --rb-surface-track: rgba(24, 24, 27, 0.055);
+  --rb-surface-ghost: rgba(24, 24, 27, 0.07);
+  --rb-surface-hover: rgba(24, 24, 27, 0.11);
+  --rb-slider-fill: rgba(24, 24, 27, 0.09);
+  --rb-slider-thumb: #71717a;
+  --rb-tick-color: #d1d1d4;
+  --rb-text-primary: #18181b;
+  --rb-text-muted: #52525b;
+  --rb-heading-color: #3f3f46;
+  --rb-switch-track: #d4d4d8;
+  --rb-switch-track-checked: #52525b;
+  --rb-switch-knob: #ffffff;
+  --rb-switch-knob-checked: #ffffff;
+  --rb-dropdown-bg: #ffffff;
+  --rb-dropdown-border: #e7e7e9;
+  --rb-dropdown-hover: #f4f4f5;
+}
+
+.rb-customize-scope[data-rb-theme="dark"] {
+  --rb-bg-frame: #16131d;
+  --rb-bg-options: #120f17;
+  --rb-border-frame: rgba(255, 255, 255, 0.08);
+  --rb-border-options: rgba(255, 255, 255, 0.06);
+  --rb-surface-track: rgba(255, 255, 255, 0.05);
+  --rb-surface-ghost: rgba(255, 255, 255, 0.08);
+  --rb-surface-hover: rgba(255, 255, 255, 0.12);
+  --rb-slider-fill: rgba(255, 255, 255, 0.08);
+  --rb-slider-thumb: rgba(255, 255, 255, 0.9);
+  --rb-tick-color: #2f293a;
+  --rb-text-primary: #ffffff;
+  --rb-text-muted: #a1a1aa;
+  --rb-heading-color: #f4f4f5;
+  --rb-switch-track: #37313f;
+  --rb-switch-track-checked: #d4d4d8;
+  --rb-switch-knob: #a1a1aa;
+  --rb-switch-knob-checked: #27222e;
+  --rb-dropdown-bg: #1b1722;
+  --rb-dropdown-border: #2f293a;
+  --rb-dropdown-hover: #2d2638;
+}
+
+/* Floating / Bottom 3-Column ReactBits Customize Dock */
+.rb-customize-dock {
+  position: fixed;
+  left: 336px;
+  right: 346px;
+  bottom: 14px;
+  z-index: 950;
+  max-height: 54vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  transition: all 0.22s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@media (max-width: 1280px) {
+  .rb-customize-dock {
+    left: 16px;
+    right: 16px;
+  }
+}
+
+.rb-customize-frame {
+  padding: 5px;
+  border: 1px solid var(--rb-border-frame);
+  border-radius: 14px;
+  background: var(--rb-bg-frame);
+  display: flex;
+  flex-direction: column;
+  max-height: 54vh;
+  overflow: hidden;
+}
+
+.rb-customize-heading {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px 12px 8px 14px;
+}
+
+.rb-customize-heading-left {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.rb-customize-heading h2 {
+  margin: 0;
+  color: var(--rb-heading-color);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.rb-schema-select {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 7px;
+  border: 1px solid var(--rb-border-options);
+  background: var(--rb-bg-options);
+  color: var(--rb-text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  max-width: 270px;
+}
+
+.rb-schema-search {
+  height: 28px;
+  width: 150px;
+  padding: 0 9px;
+  border-radius: 7px;
+  border: 1px solid var(--rb-border-options);
+  background: var(--rb-bg-options);
+  color: var(--rb-text-primary);
+  font-size: 11.5px;
+  outline: none;
+}
+
+.rb-quick-pill {
+  height: 26px;
+  padding: 0 9px;
+  border-radius: 7px;
+  border: 1px solid var(--rb-border-options);
+  background: var(--rb-surface-track);
+  color: var(--rb-text-muted);
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.rb-quick-pill:hover,
+.rb-quick-pill.active {
+  background: var(--rb-text-primary);
+  color: var(--rb-bg-options);
+  border-color: var(--rb-text-primary);
+}
+
+.rb-customize-heading-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.rb-customize-action-btn {
+  display: inline-flex;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 10px;
+  border: 1px solid var(--rb-border-options);
+  border-radius: 7px;
+  background: var(--rb-bg-options);
+  color: var(--rb-text-muted);
+  cursor: pointer;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+.rb-customize-action-btn:hover {
+  background: var(--rb-surface-hover);
+  color: var(--rb-text-primary);
+}
+.rb-customize-action-btn--primary {
+  background: #18181b;
+  color: #ffffff;
+  border-color: #18181b;
+}
+.rb-customize-action-btn--primary:hover {
+  background: #3f3f46;
+  color: #ffffff;
+}
+
+/* 3-Column ReactBits Options Grid */
+.rb-preview-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 14px 12px;
+  border: 1px solid var(--rb-border-options);
+  border-radius: 10px;
+  background: var(--rb-bg-options);
+  overflow-y: auto;
+  max-height: calc(54vh - 58px);
+}
+
+/* 1-Column Sidebar Variant inside Right Inspector */
+.rb-preview-options--sidebar {
+  grid-template-columns: 1fr;
+  max-height: none;
+  padding: 10px;
+}
+
+/* Official ReactBits Scrubber Track */
+.rb-customize-scope .scrubber {
+  position: relative;
+  width: 100%;
+  user-select: none;
+}
+
+.rb-customize-scope .scrubber-track {
+  position: relative;
+  height: 40px;
+  border-radius: 7px;
+  background: var(--rb-surface-track);
+  border: 1px solid transparent;
+  cursor: pointer;
+  overflow: hidden;
+  touch-action: pan-y;
+  outline: none;
+}
+
+.rb-customize-scope .scrubber-track--select {
+  overflow: visible;
+}
+
+.rb-customize-scope .scrubber-track[data-disabled="true"] {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.rb-customize-scope .scrubber-fill {
+  position: absolute;
+  inset: 0;
+  right: auto;
+  border-radius: 7px;
+  background: var(--rb-slider-fill);
+  pointer-events: none;
+}
+
+.rb-customize-scope .scrubber-ticks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.rb-customize-scope .scrubber-tick {
+  position: absolute;
+  top: 50%;
+  width: 1px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--rb-tick-color);
+  transform: translateX(-50%) translateY(-50%);
+}
+
+.rb-customize-scope .scrubber-thumb-wrapper {
+  position: absolute;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  margin-left: -6px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.rb-customize-scope .scrubber-thumb {
+  width: 5px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--rb-slider-thumb);
+  opacity: 0.38;
+  transform: scaleX(0.75) scaleY(0.75);
+  transition: opacity 0.18s cubic-bezier(0.23, 1, 0.32, 1), transform 0.18s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.rb-customize-scope .scrubber-track[data-active="true"] .scrubber-thumb {
+  opacity: 0.92;
+  transform: scaleX(1) scaleY(1);
+}
+
+.rb-customize-scope .scrubber-label {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  color: var(--rb-text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.rb-customize-scope .scrubber-value {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  color: var(--rb-text-primary);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  font-weight: 500;
+  pointer-events: none;
+  z-index: 4;
+}
+
+/* Switch Variant */
+.rb-customize-scope .scrubber-track--switch {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  padding: 0;
+  transition: transform 0.12s ease, background 0.2s ease;
+}
+
+.rb-customize-scope .scrubber-switch-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--rb-switch-track);
+  border: 1px solid rgba(24, 24, 27, 0.08);
+  z-index: 4;
+  transition: background 0.2s ease;
+}
+
+.rb-customize-scope .scrubber-track--switch[data-checked="true"] .scrubber-switch-toggle {
+  background: var(--rb-switch-track-checked);
+}
+
+.rb-customize-scope .scrubber-switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--rb-switch-knob);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.24);
+  transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1), background 0.2s ease;
+}
+
+.rb-customize-scope .scrubber-track--switch[data-checked="true"] .scrubber-switch-knob {
+  transform: translateX(16px);
+  background: var(--rb-switch-knob-checked);
+}
+
+/* Select Variant */
+.rb-customize-scope .scrubber-track--select {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  padding: 0;
+}
+
+.rb-customize-scope .scrubber-track--select .scrubber-value {
+  position: static;
+  transform: none;
+  font-weight: 400;
+}
+
+.rb-customize-scope .scrubber-select-right {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.rb-customize-scope .scrubber-caret {
+  color: var(--rb-text-muted);
+  transition: transform 0.2s ease;
+}
+
+.rb-customize-scope .scrubber-caret--open {
+  transform: rotate(180deg);
+}
+
+.rb-customize-scope .scrubber-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 80;
+  background: var(--rb-dropdown-bg);
+  border: 1px solid var(--rb-dropdown-border);
+  border-radius: 8px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 12px 30px rgba(24, 24, 27, 0.14);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.rb-customize-scope .scrubber-dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 7px 11px;
+  border: none;
+  background: none;
+  color: var(--rb-text-muted);
+  font-size: 12.5px;
+  text-align: left;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.rb-customize-scope .scrubber-dropdown-item:hover,
+.rb-customize-scope .scrubber-dropdown-item--active {
+  background: var(--rb-dropdown-hover);
+  color: var(--rb-text-primary);
+  font-weight: 600;
+}
+
+/* Color Picker Variant */
+.rb-customize-scope .scrubber-track--color {
+  cursor: default;
+}
+
+.rb-customize-scope .scrubber-color-controls {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 4;
+}
+
+.rb-customize-scope .scrubber-color-swatch {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--rb-tick-color);
+  border-radius: 6px;
+  cursor: pointer;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.rb-customize-scope .scrubber-color-swatch::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.rb-customize-scope .scrubber-color-swatch::-webkit-color-swatch {
+  border: none;
+  border-radius: 5px;
+}
+
+.rb-customize-scope .scrubber-color-text {
+  width: 72px;
+  height: 24px;
+  background: var(--rb-surface-ghost);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--rb-text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  padding: 0 8px;
+  text-transform: lowercase;
+  outline: none;
+}
+
+/* Input Variant */
+.rb-customize-scope .scrubber-track--input {
+  cursor: default;
+}
+
+.rb-customize-scope .scrubber-input {
+  position: absolute;
+  inset: 0;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--rb-text-primary);
+  font-size: 13px;
+  padding: 0 12px 0 42%;
+  text-align: right;
+  z-index: 4;
+}
+
