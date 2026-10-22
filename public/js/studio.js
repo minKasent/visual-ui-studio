@@ -64,6 +64,7 @@
     uilibHoverMode: document.getElementById('uilib-hover-mode'),
     btnExpandUilibModal: document.getElementById('btn-expand-uilib-modal'),
     btnOpenCustomImport: document.getElementById('btn-open-custom-import'),
+    btnClearCustomImports: document.getElementById('btn-clear-custom-imports'),
     uilibResultsCount: document.getElementById('uilib-results-count'),
     uilibComponentsList: document.getElementById('uilib-components-list'),
 
@@ -187,6 +188,7 @@
     importCompCss: document.getElementById('import-comp-css'),
     btnSaveAndInsertComp: document.getElementById('btn-save-and-insert-comp'),
     btnOnlySaveComp: document.getElementById('btn-only-save-comp'),
+    btnClearCustomImportsModal: document.getElementById('btn-clear-custom-imports-modal'),
     importLivePreviewStage: document.getElementById('import-live-preview-stage'),
 
     toastContainer: document.getElementById('toast-container')
@@ -2523,29 +2525,139 @@
   }
 
   // ==================== 38+ UI LIBRARIES HUB, LIVE HOVER SEARCH & SMART JSX/TAILWIND IMPORTER ====================
+  function isCustomImportedComp(comp) {
+    if (!comp) return false;
+    return Boolean(comp.isCustom || (comp.id && String(comp.id).startsWith('custom-')) || comp.libName === 'Custom Import');
+  }
+
+  function convertJsxToCleanHtml(rawCode) {
+    if (!rawCode) return '';
+    let code = String(rawCode)
+      .replace(/\{\/\*[\s\S]*?\*\/\}/g, '')
+      .replace(/^\s*["']use client["']\s*;?/gm, '')
+      .replace(/^\s*import\s+[\s\S]*?from\s+["'][^"']+["']\s*;?/gm, '')
+      .replace(/^\s*import\s+["'][^"']+["']\s*;?/gm, '')
+      .trim();
+
+    // Also strip inline "import { ... } from '...'" if it was flattened onto a single line
+    code = code.replace(/import\s+\{[^}]*\}\s+from\s+["'][^"']+["']\s*;?/g, '');
+    code = code.replace(/import\s+[A-Za-z0-9_$]+\s+from\s+["'][^"']+["']\s*;?/g, '');
+
+    // Extract JSX inside return (...) or export function ... { return ( ... ) }
+    const returnMatch = code.match(/\breturn\s*\(\s*([\s\S]*)\)\s*;?\s*\}\s*$/);
+    if (returnMatch && returnMatch[1]) {
+      code = returnMatch[1].trim();
+    } else {
+      // Fallback: strip leading export function / const wrapper and trailing ) }
+      code = code
+        .replace(/^[\s\S]*?\breturn\s*\(\s*/, '')
+        .replace(/^\s*export\s+(?:default\s+)?(?:function|const)\s+[^{]*\{\s*/, '')
+        .replace(/\s*\)\s*;?\s*\}\s*$/, '')
+        .trim();
+    }
+
+    // Strip React Fragments <> and </>
+    code = code.replace(/<\s*>/g, '').replace(/<\/\s*>/g, '');
+
+    // Convert Shadcn UI / Radix / React PascalCase components into clean HTML elements
+    code = code
+      .replace(/<Checkbox\b([^>]*?)\/>/g, '<input type="checkbox" checked class="uilib-shadcn-checkbox"$1 />')
+      .replace(/<Checkbox\b([^>]*?)><\/Checkbox>/g, '<input type="checkbox" checked class="uilib-shadcn-checkbox"$1 />')
+      .replace(/<Switch\b([^>]*?)\/>/g, '<input type="checkbox" checked class="uilib-shadcn-switch"$1 />')
+      .replace(/<Switch\b([^>]*?)><\/Switch>/g, '<input type="checkbox" checked class="uilib-shadcn-switch"$1 />')
+      .replace(/<Input\b([^>]*?)\/>/g, '<input class="uilib-shadcn-input"$1 />')
+      .replace(/<Textarea\b([^>]*?)\/>/g, '<textarea class="uilib-shadcn-textarea"$1></textarea>')
+      .replace(/<Textarea\b([^>]*?)>([\s\S]*?)<\/Textarea>/g, '<textarea class="uilib-shadcn-textarea"$1>$2</textarea>')
+      .replace(/<Button\b([^>]*?)>([\s\S]*?)<\/Button>/g, '<button type="button" class="uilib-shadcn-btn"$1>$2</button>')
+      .replace(/<Badge\b([^>]*?)>([\s\S]*?)<\/Badge>/g, '<span class="uilib-shadcn-badge"$1>$2</span>')
+      .replace(/<Label\b([^>]*?)>([\s\S]*?)<\/Label>/g, '<label$1>$2</label>')
+      .replace(/<Card\b([^>]*?)>([\s\S]*?)<\/Card>/g, '<div class="uilib-shadcn-card"$1>$2</div>')
+      .replace(/<(CardHeader|CardContent|CardFooter)\b([^>]*?)>([\s\S]*?)<\/\1>/g, '<div$2>$3</div>')
+      .replace(/<CardTitle\b([^>]*?)>([\s\S]*?)<\/CardTitle>/g, '<h4 style="margin:0 0 4px;font-weight:700;"$1>$2</h4>')
+      .replace(/<CardDescription\b([^>]*?)>([\s\S]*?)<\/CardDescription>/g, '<p class="text-sm text-muted-foreground" style="margin:0;"$1>$2</p>')
+      .replace(/<Separator\b([^>]*?)\/>/g, '<hr style="border-color:#27272a;margin:10px 0;"$1 />');
+
+    return code
+      .replace(/\bclassName=/g, 'class=')
+      .replace(/\bhtmlFor=/g, 'for=')
+      .replace(/<(div|span|i|button|a|section|nav|header|footer|p|h1|h2|h3|h4|label)([^>]*?)\s*\/>/gi, '<$1$2></$1>')
+      .trim();
+  }
+
+  function syncCustomImportButtonsVisibility() {
+    const customComps = (window.STUDIO_LIB_COMPONENTS || []).filter(isCustomImportedComp);
+    const count = customComps.length;
+    if (dom.btnClearCustomImports) {
+      dom.btnClearCustomImports.classList.toggle('hidden', count === 0);
+      dom.btnClearCustomImports.textContent = `🗑️ Xóa Import (${count})`;
+    }
+    if (dom.btnClearCustomImportsModal) {
+      dom.btnClearCustomImportsModal.classList.toggle('hidden', count === 0);
+      dom.btnClearCustomImportsModal.textContent = `🗑️ Xóa hết mẫu đã Import (${count})`;
+    }
+  }
+
   function loadSavedCustomComponents() {
     try {
       const saved = JSON.parse(localStorage.getItem('studio_custom_uilib_comps') || '[]');
       const savedCss = localStorage.getItem('studio_custom_uilib_css') || '';
       if (savedCss) state.customExtraCss = savedCss;
       if (Array.isArray(saved) && saved.length > 0 && window.STUDIO_LIB_COMPONENTS) {
-        saved.forEach(comp => {
+        let needsResave = false;
+        saved.slice().reverse().forEach(comp => {
+          comp.isCustom = true;
+          const reCleaned = convertJsxToCleanHtml(comp.rawCode || comp.html);
+          if (reCleaned && reCleaned !== comp.html) {
+            comp.html = reCleaned;
+            needsResave = true;
+          }
           if (!window.STUDIO_LIB_COMPONENTS.some(c => c.id === comp.id)) {
             window.STUDIO_LIB_COMPONENTS.unshift(comp);
           }
         });
+        if (needsResave) {
+          localStorage.setItem('studio_custom_uilib_comps', JSON.stringify(saved));
+        }
       }
     } catch (_) {}
+    syncCustomImportButtonsVisibility();
   }
 
-  function convertJsxToCleanHtml(rawCode) {
-    if (!rawCode) return '';
-    return rawCode
-      .replace(/\{\/\*[\s\S]*?\*\/\}/g, '')
-      .replace(/\bclassName=/g, 'class=')
-      .replace(/\bhtmlFor=/g, 'for=')
-      .replace(/<(div|span|i|button|a|section|nav|header|footer|p|h1|h2|h3|h4)([^>]*?)\s*\/>/gi, '<$1$2></$1>')
-      .trim();
+  function deleteCustomComponent(compId) {
+    if (!compId) return;
+    clearComponentHoverPreview();
+    const targetComp = (window.STUDIO_LIB_COMPONENTS || []).find(c => c.id === compId);
+    const compName = targetComp ? targetComp.name : 'Component';
+
+    if (window.STUDIO_LIB_COMPONENTS) {
+      window.STUDIO_LIB_COMPONENTS = window.STUDIO_LIB_COMPONENTS.filter(c => c.id !== compId);
+    }
+    try {
+      const saved = JSON.parse(localStorage.getItem('studio_custom_uilib_comps') || '[]');
+      const updated = saved.filter(c => c.id !== compId);
+      localStorage.setItem('studio_custom_uilib_comps', JSON.stringify(updated));
+    } catch (_) {}
+
+    syncCustomImportButtonsVisibility();
+    renderSidebarUiLibraries();
+    renderModalUiLibrariesExplorer('all', dom.uilibModalSearch ? dom.uilibModalSearch.value : '');
+    showToast(`Đã xóa mẫu Import "${compName}" khỏi Kho UI!`, '🗑️');
+  }
+
+  function clearAllCustomComponents() {
+    clearComponentHoverPreview();
+    if (window.STUDIO_LIB_COMPONENTS) {
+      window.STUDIO_LIB_COMPONENTS = window.STUDIO_LIB_COMPONENTS.filter(c => !isCustomImportedComp(c));
+    }
+    try {
+      localStorage.removeItem('studio_custom_uilib_comps');
+      localStorage.removeItem('studio_custom_uilib_css');
+    } catch (_) {}
+    state.customExtraCss = '';
+    syncCustomImportButtonsVisibility();
+    renderSidebarUiLibraries();
+    renderModalUiLibrariesExplorer('all', dom.uilibModalSearch ? dom.uilibModalSearch.value : '');
+    showToast('Đã xóa toàn bộ các mẫu tự Import khỏi Kho UI!', '🗑️');
   }
 
   function looksLikeTailwind(htmlStr) {
@@ -2653,18 +2765,51 @@
     clearPreviewAddBlock();
   }
 
+  function openEditCustomComponent(comp) {
+    if (!comp || !dom.modalUilibExplorer) return;
+    state.editingCustomCompId = comp.id;
+    dom.modalUilibExplorer.classList.remove('hidden');
+    document.querySelectorAll('.uilib-mtab').forEach(b => {
+      b.classList.toggle('active', b.dataset.umtab === 'umtab-import');
+    });
+    document.querySelectorAll('.uilib-mtab-pane').forEach(p => {
+      p.classList.toggle('hidden', p.id !== 'umtab-import');
+      p.classList.toggle('active', p.id === 'umtab-import');
+    });
+    if (dom.importCompName) dom.importCompName.value = comp.name || '';
+    if (dom.importCompCat) dom.importCompCat.value = comp.category || 'button';
+    if (dom.importCompCode) {
+      dom.importCompCode.value = comp.rawCode || comp.html || '';
+      dom.importCompCode.dispatchEvent(new Event('input'));
+      dom.importCompCode.focus();
+    }
+    showToast(`Đang chỉnh sửa mẫu "${comp.name}" — bấm Lưu để cập nhật!`, '✏️');
+  }
+
   function createComponentCardElement(comp, isModalView = false) {
     const libs = window.STUDIO_UI_LIBRARIES || [];
-    const libMeta = libs.find(l => l.id === comp.libId) || {
-      name: comp.libName || 'Custom UI',
-      url: 'https://21st.dev',
-      accent: '#8b5cf6'
-    };
+    const isCustom = isCustomImportedComp(comp);
+    const libMeta = isCustom
+      ? { name: '📥 Tự Import', url: 'https://21st.dev', accent: '#ec4899' }
+      : (libs.find(l => l.id === comp.libId) || {
+          name: comp.libName || 'Custom UI',
+          url: 'https://21st.dev',
+          accent: '#8b5cf6'
+        });
 
     const card = document.createElement('div');
     card.className = 'uilib-comp-card';
 
     const isLargeBlock = comp.category === 'card' || comp.category === 'pricing' || comp.category === 'hero' || comp.category === 'nav';
+
+    const topRightHtml = isCustom
+      ? `
+        <div class="uilib-card-top-actions">
+          <button type="button" class="uilib-card-mini-btn uilib-card-mini-btn--edit btn-edit-custom" title="Sửa lại code hoặc tên của mẫu tự Import này">✏️ Sửa</button>
+          <button type="button" class="uilib-card-mini-btn uilib-card-mini-btn--del btn-del-custom" title="Xóa mẫu tự Import này khỏi Kho UI">🗑️ Xóa</button>
+        </div>
+      `
+      : `<a href="${libMeta.url}" target="_blank" rel="noopener" class="uilib-site-link" title="Mở trang chủ ${libMeta.name} (${libMeta.url})">↗ Web</a>`;
 
     card.innerHTML = `
       <div class="uilib-comp-card__top">
@@ -2672,20 +2817,40 @@
           <span class="uilib-lib-badge" style="border-color:${libMeta.accent}55;color:${libMeta.accent};background:${libMeta.accent}18;">${libMeta.name}</span>
           <span class="uilib-comp-title" title="${comp.name}">${comp.name}</span>
         </div>
-        <a href="${libMeta.url}" target="_blank" rel="noopener" class="uilib-site-link" title="Mở trang chủ ${libMeta.name} (${libMeta.url})">↗ Web</a>
+        ${topRightHtml}
       </div>
       <div class="uilib-comp-stage ${isLargeBlock ? 'uilib-comp-stage--scaled' : ''}">
         ${comp.html}
       </div>
-      <div class="uilib-comp-card__actions">
+      <div class="uilib-comp-card__actions ${isCustom ? 'uilib-comp-card__actions--3col' : ''}">
         <button type="button" class="uilib-act-btn btn-morph-comp" title="Rê chuột để xem thử biến hình phần tử đang chọn theo phong cách của ${libMeta.name}">
           ✨ Áp Style
         </button>
         <button type="button" class="uilib-act-btn uilib-act-btn--primary btn-insert-comp" title="Rê chuột để xem thử & Chèn Component này vào trang web">
           ➕ Chèn Mới
         </button>
+        ${isCustom ? `<button type="button" class="uilib-act-btn uilib-act-btn--danger btn-del-custom-bottom" title="Xóa mẫu tự Import này khỏi Kho UI">🗑️ Xóa</button>` : ''}
       </div>
     `;
+
+    // Bind Edit & Delete buttons for custom imported components
+    if (isCustom) {
+      const btnEdit = card.querySelector('.btn-edit-custom');
+      if (btnEdit) {
+        btnEdit.addEventListener('click', e => {
+          e.preventDefault();
+          e.stopPropagation();
+          openEditCustomComponent(comp);
+        });
+      }
+      card.querySelectorAll('.btn-del-custom, .btn-del-custom-bottom').forEach(btnDel => {
+        btnDel.addEventListener('click', e => {
+          e.preventDefault();
+          e.stopPropagation();
+          deleteCustomComponent(comp.id);
+        });
+      });
+    }
 
     // Prevent links/buttons inside the preview stage from navigating away
     const stageEl = card.querySelector('.uilib-comp-stage');
@@ -2744,11 +2909,17 @@
     const q = (queryStr || '').trim().toLowerCase();
 
     return allComps.filter(comp => {
-      if (libFilter && libFilter !== 'all' && comp.libId !== libFilter) {
-        return false;
+      if (libFilter && libFilter !== 'all') {
+        if (libFilter === 'custom') {
+          if (!isCustomImportedComp(comp)) return false;
+        } else if (comp.libId !== libFilter) {
+          return false;
+        }
       }
       if (categoryFilter && categoryFilter !== 'all' && categoryFilter !== 'directory') {
-        if (categoryFilter === 'hero') {
+        if (categoryFilter === 'custom') {
+          if (!isCustomImportedComp(comp)) return false;
+        } else if (categoryFilter === 'hero') {
           if (comp.category !== 'hero' && comp.category !== 'nav') return false;
         } else if (comp.category !== categoryFilter) {
           return false;
@@ -3005,7 +3176,16 @@
       dom.btnExpandUilibModal.addEventListener('click', () => openExplorerModal('umtab-catalog'));
     }
     if (dom.btnOpenCustomImport) {
-      dom.btnOpenCustomImport.addEventListener('click', () => openExplorerModal('umtab-import'));
+      dom.btnOpenCustomImport.addEventListener('click', () => {
+        state.editingCustomCompId = null;
+        openExplorerModal('umtab-import');
+      });
+    }
+    if (dom.btnClearCustomImports) {
+      dom.btnClearCustomImports.addEventListener('click', () => clearAllCustomComponents());
+    }
+    if (dom.btnClearCustomImportsModal) {
+      dom.btnClearCustomImportsModal.addEventListener('click', () => clearAllCustomComponents());
     }
 
     // Modal internal tabs
@@ -3063,33 +3243,48 @@
         syncLibraryCssEverywhere();
       }
 
+      const compId = state.editingCustomCompId || `custom-${Date.now()}`;
       const newComp = {
-        id: `custom-${Date.now()}`,
+        id: compId,
+        isCustom: true,
         name,
         libId: '21stdev',
         libName: 'Custom Import',
         category,
-        tags: [category, 'custom', 'import', name.toLowerCase()],
+        tags: [category, 'custom', 'import', 'tu import', name.toLowerCase()],
         morphStyles: {},
+        rawCode,
         html: cleanHtml
       };
 
       if (!window.STUDIO_LIB_COMPONENTS) window.STUDIO_LIB_COMPONENTS = [];
-      window.STUDIO_LIB_COMPONENTS.unshift(newComp);
+      const existingIdx = window.STUDIO_LIB_COMPONENTS.findIndex(c => c.id === compId);
+      if (existingIdx >= 0) {
+        window.STUDIO_LIB_COMPONENTS[existingIdx] = newComp;
+      } else {
+        window.STUDIO_LIB_COMPONENTS.unshift(newComp);
+      }
 
       try {
-        const existingSaved = JSON.parse(localStorage.getItem('studio_custom_uilib_comps') || '[]');
+        const existingSaved = JSON.parse(localStorage.getItem('studio_custom_uilib_comps') || '[]').filter(c => c.id !== compId);
         existingSaved.unshift(newComp);
         localStorage.setItem('studio_custom_uilib_comps', JSON.stringify(existingSaved.slice(0, 50)));
       } catch (_) {}
 
+      state.editingCustomCompId = null;
+      if (dom.importCompName) dom.importCompName.value = '';
+      if (dom.importCompCode) dom.importCompCode.value = '';
+      updateCustomImportPreview();
+
+      syncCustomImportButtonsVisibility();
       renderSidebarUiLibraries();
+      renderModalUiLibrariesExplorer();
 
       if (alsoInsertToPage) {
         insertLibComponentToPage(newComp);
         if (dom.modalUilibExplorer) dom.modalUilibExplorer.classList.add('hidden');
       } else {
-        showToast(`Đã lưu "${name}" vào Kho UI! Hãy rê chuột vào để xem thử trên web.`, '💾');
+        showToast(`Đã lưu "${name}" vào Kho UI! (Có nút ✏️ Sửa & 🗑️ Xóa ngay trên thẻ)`, '💾');
         openExplorerModal('umtab-catalog');
       }
     };
@@ -3101,6 +3296,7 @@
       dom.btnOnlySaveComp.addEventListener('click', () => handleSaveImportedComponent(false));
     }
 
+    syncCustomImportButtonsVisibility();
     renderSidebarUiLibraries();
     renderModalUiLibrariesExplorer();
   }

@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Dancing+Script:wght@600;700&family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto:wght@300;400;500;700;900&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/studio.css?v=4.2" />
+  <link rel="stylesheet" href="./css/studio.css?v=4.3" />
 </head>
 <body>
   <!-- TOP NAVIGATION BAR (Shadcn + Luxe + Origin UI Aesthetic) -->
@@ -135,6 +135,7 @@
           <!-- Category Filter Pills -->
           <div class="uilib-cat-bar" id="uilib-cat-pills">
             <button type="button" class="uilib-cat-pill active" data-uicat="all">Tất cả</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="custom" title="Chỉ hiện các mẫu Component do bạn tự Import từ code">📥 Đã Import</button>
             <button type="button" class="uilib-cat-pill" data-uicat="button">🔘 Button</button>
             <button type="button" class="uilib-cat-pill" data-uicat="card">🃏 Card &amp; Bento</button>
             <button type="button" class="uilib-cat-pill" data-uicat="badge">🏷️ Badge</button>
@@ -148,6 +149,7 @@
           <div class="uilib-controls-row">
             <select id="uilib-lib-filter" class="uilib-select-sm" title="Lọc theo Thư viện UI trong ảnh của bạn">
               <option value="all">🌐 Tất cả 38+ Thư viện UI</option>
+              <option value="custom">📥 Chỉ mẫu Tự Import từ Code</option>
             </select>
             <select id="uilib-hover-mode" class="uilib-select-sm" title="Khi rê chuột vào Component sẽ xem thử theo cách nào?">
               <option value="auto">👁️ Hover: Tự động thông minh</option>
@@ -156,13 +158,16 @@
             </select>
           </div>
 
-          <!-- Quick Action Toolbar: Expand Modal & Import Code from External Site -->
+          <!-- Quick Action Toolbar: Expand Modal, Import Code & Clear Custom Imports -->
           <div class="uilib-quick-bar">
             <button type="button" id="btn-expand-uilib-modal" class="uilib-action-pill" title="Mở kho thư viện UI toàn màn hình (Ctrl+K)">
-              ⤢ Mở Rộng Kho UI
+              ⤢ Mở Rộng
             </button>
             <button type="button" id="btn-open-custom-import" class="uilib-action-pill uilib-action-pill--accent" title="Copy code HTML / React JSX / Tailwind từ trang chủ Aceternity, 21st.dev, Magic UI... và dán vào đây!">
-              📥 Import Code Từ Web
+              📥 Import Code
+            </button>
+            <button type="button" id="btn-clear-custom-imports" class="uilib-action-pill uilib-action-pill--danger hidden" title="Xóa toàn bộ các mẫu Component bạn đã tự Import từ code">
+              🗑️ Xóa Import
             </button>
           </div>
 
@@ -878,6 +883,9 @@
                 <button type="button" id="btn-only-save-comp" class="btn-secondary">
                   💾 Chỉ Lưu Vào Kho UI (Để Rê Chuột Xem Thử)
                 </button>
+                <button type="button" id="btn-clear-custom-imports-modal" class="btn-secondary btn-danger-outline hidden" title="Xóa tất cả các mẫu bạn đã tự Import từ Code">
+                  🗑️ Xóa hết mẫu đã Import
+                </button>
               </div>
             </div>
             <div class="custom-import-preview-box">
@@ -898,8 +906,8 @@
   <!-- TOAST NOTIFICATION -->
   <div id="toast-container" class="toast-container"></div>
 
-  <script src="./js/ui-libs-registry.js?v=4.2"></script>
-  <script src="./js/templates.js?v=4.2"></script>
-  <script src="./js/studio.js?v=4.2"></script>
+  <script src="./js/ui-libs-registry.js?v=4.3"></script>
+  <script src="./js/templates.js?v=4.3"></script>
+  <script src="./js/studio.js?v=4.3"></script>
 </body>
 </html>
