@@ -1,23 +1,23 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-studio-theme="obsidian">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Visual UI Studio Pro v3.1 — Kéo Thả &amp; Xem Trước Giao Diện Web Tức Thì</title>
+  <title>Visual UI Studio Pro v4.0 — Kéo Thả &amp; Kho 38+ Thư Viện UI Hàng Đầu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Dancing+Script:wght@600;700&family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto:wght@300;400;500;700;900&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./css/studio.css" />
 </head>
 <body>
-  <!-- TOP NAVIGATION BAR -->
+  <!-- TOP NAVIGATION BAR (Shadcn + Luxe + Origin UI Aesthetic) -->
   <header class="topbar">
     <div class="topbar__left">
       <div class="brand">
         <div class="brand__logo">✦</div>
         <div class="brand__text">
-          <span class="brand__title">Visual UI Studio <span class="pro-tag">v3.1</span></span>
-          <span class="brand__badge">Live Hover Preview WYSIWYG</span>
+          <span class="brand__title">Visual UI Studio <span class="pro-tag">v4.0</span></span>
+          <span class="brand__badge">38+ UI Libraries &amp; Live Hover</span>
         </div>
       </div>
 
@@ -32,7 +32,7 @@
           <option value="">-- Chọn trang web --</option>
         </select>
         <button id="btn-open-local-file" class="btn-ghost btn-sm" title="Thả hoặc chọn file HTML / Thư mục bất kỳ từ máy tính">
-          📥 Thả Web / Mở File
+          📥 Mở Web
         </button>
         <button id="btn-load-demo" class="btn-ghost btn-sm" title="Mở giao diện mẫu để thử nghiệm">
           🎨 Trang Mẫu
@@ -40,8 +40,15 @@
       </div>
     </div>
 
-    <!-- Center Viewport Controls -->
+    <!-- Center: Command Search + Viewport & Mode Controls -->
     <div class="topbar__center">
+      <!-- 21st.dev / Origin UI Command Search Button -->
+      <button type="button" id="btn-open-uilib-explorer" class="cmd-search-trigger" title="Tìm kiếm nhanh Button, Card, Input từ 38+ Thư viện UI (Ctrl+K)">
+        <span class="cmd-search-trigger__icon">🔍</span>
+        <span class="cmd-search-trigger__text">Tìm Component (button, card, Aceternity, Magic UI...)</span>
+        <kbd class="cmd-search-trigger__kbd">Ctrl+K</kbd>
+      </button>
+
       <div class="segmented-group" id="viewport-switcher">
         <button class="seg-btn active" data-viewport="100%" title="Màn hình máy tính (Desktop)">🖥️ Desktop</button>
         <button class="seg-btn" data-viewport="768px" title="Máy tính bảng (Tablet 768px)">📱 Tablet</button>
@@ -49,18 +56,16 @@
       </div>
 
       <div class="zoom-controls">
-        <button id="btn-zoom-out" class="btn-icon" title="Thu nhỏ">-</button>
+        <button id="btn-zoom-out" class="btn-icon" title="Thu nhỏ">−</button>
         <span id="zoom-label" class="zoom-value">100%</span>
         <button id="btn-zoom-in" class="btn-icon" title="Phóng to">+</button>
-        <button id="btn-zoom-reset" class="btn-ghost btn-xs" title="Đặt lại 100%">Reset</button>
+        <button id="btn-zoom-reset" class="btn-ghost btn-xs" title="Đặt lại 100%">1:1</button>
       </div>
-
-      <div class="divider-v"></div>
 
       <!-- Mode Switcher: Edit vs Preview -->
       <div class="segmented-group">
         <button id="mode-edit-btn" class="seg-btn active" title="Chế độ kéo thả & chỉnh sửa trực tiếp">
-          ✏️ Chế độ Sửa
+          ✏️ Sửa UI
         </button>
         <button id="mode-preview-btn" class="seg-btn" title="Chế độ xem thử như trang web thật (bấm link, cuộn mượt)">
           👁️ Xem Thử
@@ -70,19 +75,27 @@
       <!-- Freeze Preloader / Animations Checkbox -->
       <label class="toggle-pill" title="Tự động ẩn màn hình chờ (Loader) và hiện đầy đủ các khối ẩn để dễ chỉnh sửa">
         <input type="checkbox" id="chk-bypass-loader" checked />
-        <span>Bỏ qua Loader &amp; Hiện phần tử ẩn</span>
+        <span>Tắt Loader</span>
       </label>
     </div>
 
-    <!-- Right Actions: Undo/Redo, AI Prompt, Save -->
+    <!-- Right Actions: Studio Theme, Undo/Redo, AI Prompt, Save -->
     <div class="topbar__right">
+      <!-- tweakcn Studio Theme Switcher -->
+      <select id="studio-theme-select" class="select-control select-theme" title="Đổi giao diện của công cụ Studio (Cảm hứng từ tweakcn & Shadcn)">
+        <option value="obsidian">🖤 Obsidian Luxe</option>
+        <option value="aurora">🌌 Aceternity Aurora</option>
+        <option value="claude">🧡 Claude Warm</option>
+        <option value="daylight">☀️ AlignUI Daylight</option>
+      </select>
+
       <div class="history-btns">
         <button id="btn-undo" class="btn-icon" title="Hoàn tác (Ctrl+Z)" disabled>↩</button>
         <button id="btn-redo" class="btn-icon" title="Làm lại (Ctrl+Y)" disabled>↪</button>
       </div>
 
       <button id="btn-ai-prompt" class="btn-secondary btn-sm" title="Tự động tạo câu lệnh Prompt chi tiết mọi thay đổi để gửi cho AI">
-        🤖 Xuất Prompt AI <span id="change-count-badge" class="badge-count">0</span>
+        🤖 Prompt AI <span id="change-count-badge" class="badge-count">0</span>
       </button>
 
       <button id="btn-download-html" class="btn-secondary btn-sm" title="Tải file HTML đã chỉnh sửa về máy">
@@ -90,24 +103,94 @@
       </button>
 
       <button id="btn-save-direct" class="btn-primary btn-sm" title="Lưu trực tiếp vào file gốc trên máy (Ctrl+S)">
-        💾 Lưu Vào File Gốc
+        💾 Lưu File Gốc
       </button>
     </div>
   </header>
 
   <!-- MAIN WORKSPACE -->
   <div class="studio-body">
-    <!-- LEFT SIDEBAR: Layers, Add Elements, Magic Presets, Change History -->
+    <!-- LEFT SIDEBAR: UI Libraries Hub, DOM Tree, Quick Blocks, Magic Presets, History -->
     <aside class="sidebar sidebar--left">
-      <div class="sidebar-tabs sidebar-tabs--4">
-        <button class="sidebar-tab active" data-tab="tab-layers">📑 Cây UI</button>
-        <button class="sidebar-tab" data-tab="tab-add">➕ Thêm</button>
-        <button class="sidebar-tab" data-tab="tab-magic">✨ Phép Thuật</button>
-        <button class="sidebar-tab" data-tab="tab-history">🕒 Lịch Sử</button>
+      <div class="sidebar-tabs sidebar-tabs--5">
+        <button class="sidebar-tab active" data-tab="tab-uilibs" title="Kho Component từ 38+ Thư viện UI (Aceternity, Magic UI, Shadcn, Hover.dev...)">
+          🌐 Kho UI <span class="tab-hot-dot"></span>
+        </button>
+        <button class="sidebar-tab" data-tab="tab-layers" title="Cây cấu trúc các thẻ trên trang">📑 Cây UI</button>
+        <button class="sidebar-tab" data-tab="tab-add" title="Thêm nhanh các khối cơ bản">➕ Cơ Bản</button>
+        <button class="sidebar-tab" data-tab="tab-magic" title="Biến hình phong cách 1-Click">✨ Style</button>
+        <button class="sidebar-tab" data-tab="tab-history" title="Nhật ký chỉnh sửa & Khôi phục">🕒 Lịch Sử</button>
+      </div>
+
+      <!-- TAB 0 (DEFAULT ACTIVE): 38+ UI LIBRARIES & COMPONENT SEARCH ENGINE -->
+      <div class="sidebar-panel active" id="tab-uilibs">
+        <div class="uilib-hub-header">
+          <!-- Instant Search Bar -->
+          <div class="uilib-search-box">
+            <span class="uilib-search-icon">🔍</span>
+            <input type="text" id="uilib-search-input" placeholder="Gõ: button, card, input, aceternity, magic..." autocomplete="off" />
+            <button type="button" id="btn-clear-uilib-search" class="uilib-clear-btn hidden" title="Xóa tìm kiếm">✕</button>
+          </div>
+
+          <!-- Category Filter Pills -->
+          <div class="uilib-cat-bar" id="uilib-cat-pills">
+            <button type="button" class="uilib-cat-pill active" data-uicat="all">Tất cả</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="button">🔘 Button</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="card">🃏 Card &amp; Bento</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="badge">🏷️ Badge</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="input">⌨️ Input</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="pricing">💎 Pricing/KPI</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="hero">🚀 Hero &amp; Nav</button>
+            <button type="button" class="uilib-cat-pill" data-uicat="directory">📚 38 Web Libs</button>
+          </div>
+
+          <!-- Library Filter + Hover Preview Mode Row -->
+          <div class="uilib-controls-row">
+            <select id="uilib-lib-filter" class="uilib-select-sm" title="Lọc theo Thư viện UI trong ảnh của bạn">
+              <option value="all">🌐 Tất cả 38+ Thư viện UI</option>
+            </select>
+            <select id="uilib-hover-mode" class="uilib-select-sm" title="Khi rê chuột vào Component sẽ xem thử theo cách nào?">
+              <option value="auto">👁️ Hover: Tự động thông minh</option>
+              <option value="morph">✨ Hover: Biến hình phần tử đang chọn</option>
+              <option value="insert">➕ Hover: Xem thử chèn khối mới</option>
+            </select>
+          </div>
+
+          <!-- Quick Action Toolbar: Expand Modal & Import Code from External Site -->
+          <div class="uilib-quick-bar">
+            <button type="button" id="btn-expand-uilib-modal" class="uilib-action-pill" title="Mở kho thư viện UI toàn màn hình (Ctrl+K)">
+              ⤢ Mở Rộng Kho UI
+            </button>
+            <button type="button" id="btn-open-custom-import" class="uilib-action-pill uilib-action-pill--accent" title="Copy code HTML / React JSX / Tailwind từ trang chủ Aceternity, 21st.dev, Magic UI... và dán vào đây!">
+              📥 Import Code Từ Web
+            </button>
+          </div>
+
+          <!-- 1-Click CDN Injector Bar -->
+          <div class="uilib-cdn-bar">
+            <span class="uilib-cdn-label" title="Bấm để nạp trực tiếp thư viện CDN vào trang web đang sửa">⚡ Nạp CDN:</span>
+            <button type="button" class="cdn-chip" data-inject-cdn="tailwind" title="Nạp Tailwind CSS Play CDN vào trang web để dùng mọi class Tailwind">Tailwind</button>
+            <button type="button" class="cdn-chip" data-inject-cdn="bootstrap5" title="Nạp Bootstrap 5.3 CSS/JS vào trang web">Bootstrap 5</button>
+            <button type="button" class="cdn-chip" data-inject-cdn="fontawesome" title="Nạp Font Awesome 6.5 Icons vào trang web">FontAwesome</button>
+            <button type="button" class="cdn-chip" data-inject-cdn="gsap" title="Nạp Animate.css + GSAP 3 vào trang web">GSAP/Animate</button>
+            <button type="button" class="cdn-chip" data-inject-cdn="swiper" title="Nạp Swiper 11 Carousel vào trang web">Swiper</button>
+          </div>
+        </div>
+
+        <!-- Status Count & Hint -->
+        <div class="uilib-results-meta">
+          <span id="uilib-results-count">Đang hiển thị 30+ Component</span>
+          <span class="uilib-results-hint">Rê chuột để xem trên Web!</span>
+        </div>
+
+        <!-- Scrollable Component Cards List -->
+        <div id="uilib-components-list" class="uilib-components-list">
+          <!-- Populated dynamically from window.STUDIO_LIB_COMPONENTS -->
+        </div>
       </div>
 
       <!-- TAB 1: DOM Layers Tree -->
-      <div class="sidebar-panel active" id="tab-layers">
+      <div class="sidebar-panel" id="tab-layers">
         <div class="panel-search">
           <input type="text" id="layer-search" placeholder="🔍 Tìm thẻ, class, nội dung chữ..." />
           <button id="btn-refresh-tree" class="btn-icon" title="Làm mới cây giao diện">⟳</button>
@@ -117,7 +200,7 @@
         </div>
       </div>
 
-      <!-- TAB 2: Add New UI Elements -->
+      <!-- TAB 2: Add Basic UI Elements -->
       <div class="sidebar-panel" id="tab-add">
         <div class="panel-section">
           <p class="section-hint">💡 <strong>Rê chuột vào khối</strong> để xem trước trực tiếp trên trang web, <strong>Bấm chuột</strong> để chèn vào! (Thêm nhầm có thể bấm <strong>🗑️ Xóa</strong> hoặc <strong>Ctrl+Z</strong>):</p>
@@ -202,8 +285,8 @@
           <span class="shortcut-tip"><kbd>Click + Kéo</kbd> Di chuyển</span>
           <span class="shortcut-tip"><kbd>← ↑ → ↓</kbd> Nhích 1px</span>
           <span class="shortcut-tip"><kbd>Double-Click</kbd> Sửa chữ</span>
+          <span class="shortcut-tip"><kbd>Ctrl+K</kbd> Kho 38 Lib UI</span>
           <span class="shortcut-tip"><kbd>Delete</kbd> Xóa</span>
-          <span class="shortcut-tip"><kbd>Ctrl+Z</kbd> Hoàn tác</span>
         </div>
         <div class="statusbar-right">
           <span id="live-coords-readout" class="coords-pill">X: 0px | Y: 0px | W: -- | H: --</span>
@@ -246,14 +329,14 @@
 
       <!-- Empty State when nothing is selected -->
       <div id="inspector-empty" class="inspector-empty">
-        <div class="inspector-empty__icon">👆</div>
+        <div class="inspector-empty__icon">✦</div>
         <h3>Chọn bất kỳ phần tử nào trên trang web</h3>
-        <p>Click vào nút bấm, dòng chữ, hình ảnh hoặc khung giao diện ở giữa màn hình để:</p>
+        <p>Click vào nút bấm, dòng chữ, hình ảnh ở giữa màn hình hoặc mở tab <strong>🌐 Kho UI</strong> bên trái để:</p>
         <ul class="inspector-feature-list">
+          <li>🌐 <strong>Tìm kiếm 38+ Thư viện UI</strong> (Aceternity, Magic UI, Shadcn, 21st.dev, Hover.dev, Luxe...): gõ <code>button</code> và rê chuột qua để xem nút hiện ngay trên web!</li>
           <li>✨ <strong>Kéo thả tự do</strong> sang trái/phải/lên/xuống với tọa độ Realtime</li>
           <li>👁️ <strong>Rê chuột xem trước tức thì (Live Hover Preview)</strong> trên mọi Font chữ, Màu sắc, Gradient, Đổ bóng trước khi chọn!</li>
           <li>↺ <strong>Quay lại Màu gốc / Vị trí gốc</strong> bất cứ lúc nào chỉ với 1 nút bấm</li>
-          <li>🗑️ <strong>Thêm nút mới hoặc Xóa phần tử</strong> cực nhanh ngay trên thanh nổi</li>
         </ul>
       </div>
 
@@ -401,7 +484,7 @@
           <div class="mt-10">
             <div class="label-row-between">
               <label class="sub-label">Màu nền chuyển sắc (Rê chuột xem thử Gradient)</label>
-              <button type="button" id="btn-grad-reset" class="btn-reset-pill" title="Gỡ Gradient, quay về màu nền gốc">↺ Bỏ Gradient / Về gốc</button>
+              <button type="button" id="btn-grad-reset" class="btn-reset-pill" title="Gỡ Gradient, quay về màu nền gốc">↺ Bỏ Gradient</button>
             </div>
             <div class="gradient-swatches" id="gradient-swatches">
               <button class="grad-swatch" style="background:linear-gradient(135deg,#6366f1 0%,#a855f7 50%,#ec4899 100%)" data-bg-gradient="linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%)" title="Aurora Purple"></button>
@@ -643,7 +726,6 @@
       </div>
       <div class="modal-body">
         <div class="import-grid">
-          <!-- Option 1: Select HTML file from computer -->
           <div class="import-option" id="card-pick-html">
             <div class="import-option__icon">📄</div>
             <h4>1. Chọn File <code>.html</code> từ máy</h4>
@@ -652,7 +734,6 @@
             <input type="file" id="input-html-file" accept=".html,.htm" hidden />
           </div>
 
-          <!-- Option 2: Select an entire project folder from browser -->
           <div class="import-option" id="card-pick-folder">
             <div class="import-option__icon">📁</div>
             <h4>2. Thả Nguyên Thư Mục Web</h4>
@@ -664,7 +745,6 @@
           </div>
         </div>
 
-        <!-- Option 3: Connect local directory path via Studio Server -->
         <div class="import-box mt-12">
           <label>🔗 <strong>3. Hoặc nhập đường dẫn thư mục dự án trên máy tính (Hỗ trợ lưu trực tiếp Ctrl+S):</strong></label>
           <div class="folder-path-row mt-6">
@@ -673,7 +753,6 @@
           </div>
         </div>
 
-        <!-- Option 4: Paste raw HTML code -->
         <div class="import-box mt-12">
           <label>📋 <strong>4. Hoặc dán trực tiếp mã HTML / Giao diện vào đây:</strong></label>
           <textarea id="textarea-paste-html" rows="5" class="mt-6" placeholder="Dán code <html>...</html> hoặc một đoạn giao diện vào đây..."></textarea>
@@ -692,8 +771,8 @@
       </div>
       <div class="modal-body">
         <p class="modal-desc">
-          Bạn có thể bấm <strong>"💾 Lưu Vào File Gốc"</strong> ở góc trên bên phải để áp dụng ngay mà không cần hỏi AI!
-          Tuy nhiên, nếu bạn đang làm việc trên dự án phức tạp (React, Next.js, Vue, hoặc muốn AI đồng bộ vào file CSS riêng), hãy copy đoạn Prompt tự động bên dưới gửi cho AI:
+          Bạn có thể bấm <strong>"💾 Lưu File Gốc"</strong> ở góc trên bên phải để áp dụng ngay mà không cần hỏi AI!
+          Hoặc nếu bạn muốn gửi cho AI (Cursor, Antigravity, ChatGPT, Claude) đồng bộ vào dự án React/Next.js/Vue, hãy copy bản Prompt chi tiết bên dưới:
         </p>
         <div class="prompt-tabs">
           <button class="prompt-tab active" data-ptab="ptab-prompt">📋 Prompt Gửi Cho AI</button>
@@ -715,9 +794,111 @@
     </div>
   </div>
 
+  <!-- MODAL 3: 38+ UI LIBRARIES FULL-SCREEN HUB & SMART COMPONENT IMPORTER (Ctrl+K) -->
+  <div id="modal-uilib-explorer" class="modal-backdrop hidden">
+    <div class="modal-card modal-card--xl">
+      <div class="modal-header">
+        <div class="uilib-modal-title">
+          <span class="uilib-modal-badge">38+ UI LIBS</span>
+          <h3>🌐 Trung Tâm Thư Viện UI &amp; Trình Import Component Thông Minh</h3>
+        </div>
+        <button class="btn-icon modal-close" data-close="modal-uilib-explorer">✕</button>
+      </div>
+      <div class="modal-body uilib-explorer-body">
+        <!-- Top Switcher inside Modal: Browse 38 Libraries vs Custom Code Import -->
+        <div class="uilib-modal-tabs">
+          <button type="button" class="uilib-mtab active" data-umtab="umtab-catalog">
+            🔍 Kho Component &amp; 38 Trang Chủ UI Library
+          </button>
+          <button type="button" class="uilib-mtab" data-umtab="umtab-import">
+            📥 Tự Dán Code (HTML / React JSX / Tailwind) Từ Web Bất Kỳ
+          </button>
+        </div>
+
+        <!-- TAB A: Full Directory of 38 Libraries + Searchable Component Grid -->
+        <div id="umtab-catalog" class="uilib-mtab-pane active">
+          <div class="uilib-explorer-layout">
+            <!-- Left Directory of all 38 Libraries extracted from screenshot -->
+            <div class="uilib-directory-col">
+              <div class="uilib-dir-header">Danh sách 38 Thư viện từ ảnh của bạn</div>
+              <div id="uilib-modal-sites-list" class="uilib-modal-sites-list">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+
+            <!-- Right Search & Live Component Grid -->
+            <div class="uilib-catalog-col">
+              <div class="uilib-modal-search-bar">
+                <input type="text" id="uilib-modal-search" placeholder="🔍 Tìm kiếm: button, card, badge, input, pricing, aceternity, magic ui, hover.dev, shadcn..." />
+              </div>
+              <div id="uilib-modal-grid" class="uilib-modal-grid">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB B: Smart HTML / JSX / Tailwind Component Importer -->
+        <div id="umtab-import" class="uilib-mtab-pane hidden">
+          <div class="custom-import-layout">
+            <div class="custom-import-form">
+              <h4>📥 Import Bất Kỳ Component Nào Từ Trang Chủ Các Thư Viện UI</h4>
+              <p class="section-hint">
+                Bạn có thể mở trang chủ <strong>Aceternity UI, Magic UI, 21st.dev, Shadcn UI, Hover.dev, Origin UI, KokonutUI, Uiverse...</strong>, copy đoạn code HTML hoặc React JSX (có <code>className="..."</code> hoặc Tailwind CSS) rồi dán vào ô dưới đây. Studio sẽ <strong>tự động chuyển đổi JSX sang HTML và tự nạp Tailwind CDN</strong> vào trang web của bạn!
+              </p>
+              <div class="prop-row-2col mt-8">
+                <div class="prop-field">
+                  <label>Tên Component (ví dụ: Neon Cyber Button)</label>
+                  <input type="text" id="import-comp-name" placeholder="VD: Nút bấm phát sáng 21st.dev" />
+                </div>
+                <div class="prop-field">
+                  <label>Phân loại</label>
+                  <select id="import-comp-cat">
+                    <option value="button">🔘 Button (Nút bấm)</option>
+                    <option value="card">🃏 Card / Bento Box</option>
+                    <option value="badge">🏷️ Badge / Pill</option>
+                    <option value="input">⌨️ Input / Form</option>
+                    <option value="pricing">💎 Pricing / KPI</option>
+                    <option value="hero">🚀 Hero / Navbar</option>
+                  </select>
+                </div>
+              </div>
+              <div class="prop-field mt-8">
+                <label>Dán mã HTML hoặc React JSX / Tailwind vào đây:</label>
+                <textarea id="import-comp-code" rows="7" placeholder='<button className="px-6 py-3 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold shadow-lg hover:scale-105 transition">Nút bấm từ 21st.dev</button>'></textarea>
+              </div>
+              <div class="prop-field mt-8">
+                <label>CSS bổ sung (Tùy chọn — nếu có <code>@keyframes</code> hoặc class riêng):</label>
+                <textarea id="import-comp-css" rows="3" placeholder="/* Không bắt buộc — dán CSS riêng nếu có */"></textarea>
+              </div>
+              <div class="custom-import-actions mt-10">
+                <button type="button" id="btn-save-and-insert-comp" class="btn-primary">
+                  ✨ Lưu Vào Kho UI &amp; Chèn Ngay Lên Web
+                </button>
+                <button type="button" id="btn-only-save-comp" class="btn-secondary">
+                  💾 Chỉ Lưu Vào Kho UI (Để Rê Chuột Xem Thử)
+                </button>
+              </div>
+            </div>
+            <div class="custom-import-preview-box">
+              <div class="label-row-between">
+                <label>👁️ Xem Trước Trực Tiếp Component Sắp Import:</label>
+                <span class="badge-count">Hỗ trợ tự dịch JSX &amp; Tailwind</span>
+              </div>
+              <div id="import-live-preview-stage" class="import-live-preview-stage">
+                <span style="color:#71717a;font-size:13px;">Hãy dán code vào ô bên trái để xem trước ngay tại đây...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST NOTIFICATION -->
   <div id="toast-container" class="toast-container"></div>
 
+  <script src="./js/ui-libs-registry.js"></script>
   <script src="./js/templates.js"></script>
   <script src="./js/studio.js"></script>
 </body>

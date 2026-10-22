@@ -21,7 +21,12 @@
     hoveredEl: null,
     // Map of selector -> { selector, tagName, label, styles: {}, textChanged: null, attrChanges: {}, deleted: false }
     editsMap: new Map(),
-    addedNodes: [], // { parentSelector, html, id }
+    addedNodes: [], // { parentSelector, html, id, libName, compName }
+    injectedCdns: new Set(), // 'tailwind' | 'bootstrap5' | 'fontawesome' | 'gsap' | 'swiper' | 'venobox'
+    customExtraCss: '',
+    uilibCategory: 'all',
+    uilibSelectedLib: 'all',
+    uilibSearchQuery: '',
     undoStack: [],
     redoStack: [],
     blobUrlMap: new Map() // for dropped folders
@@ -34,6 +39,8 @@
     btnChangeFolder: document.getElementById('btn-change-folder'),
     btnOpenLocalFile: document.getElementById('btn-open-local-file'),
     btnLoadDemo: document.getElementById('btn-load-demo'),
+    btnOpenUilibExplorer: document.getElementById('btn-open-uilib-explorer'),
+    studioThemeSelect: document.getElementById('studio-theme-select'),
     viewportSwitcher: document.getElementById('viewport-switcher'),
     btnZoomIn: document.getElementById('btn-zoom-in'),
     btnZoomOut: document.getElementById('btn-zoom-out'),
@@ -49,7 +56,17 @@
     btnDownloadHtml: document.getElementById('btn-download-html'),
     btnSaveDirect: document.getElementById('btn-save-direct'),
 
-    // Left Sidebar
+    // Left Sidebar: UI Libraries Hub + Layers + Add + Magic + History
+    uilibSearchInput: document.getElementById('uilib-search-input'),
+    btnClearUilibSearch: document.getElementById('btn-clear-uilib-search'),
+    uilibCatPills: document.getElementById('uilib-cat-pills'),
+    uilibLibFilter: document.getElementById('uilib-lib-filter'),
+    uilibHoverMode: document.getElementById('uilib-hover-mode'),
+    btnExpandUilibModal: document.getElementById('btn-expand-uilib-modal'),
+    btnOpenCustomImport: document.getElementById('btn-open-custom-import'),
+    uilibResultsCount: document.getElementById('uilib-results-count'),
+    uilibComponentsList: document.getElementById('uilib-components-list'),
+
     layerSearch: document.getElementById('layer-search'),
     btnRefreshTree: document.getElementById('btn-refresh-tree'),
     domTreeContainer: document.getElementById('dom-tree-container'),
@@ -159,6 +176,18 @@
     cssPatchOutput: document.getElementById('css-patch-output'),
     btnCopyAiPrompt: document.getElementById('btn-copy-ai-prompt'),
     btnCopyCssPatch: document.getElementById('btn-copy-css-patch'),
+
+    modalUilibExplorer: document.getElementById('modal-uilib-explorer'),
+    uilibModalSitesList: document.getElementById('uilib-modal-sites-list'),
+    uilibModalSearch: document.getElementById('uilib-modal-search'),
+    uilibModalGrid: document.getElementById('uilib-modal-grid'),
+    importCompName: document.getElementById('import-comp-name'),
+    importCompCat: document.getElementById('import-comp-cat'),
+    importCompCode: document.getElementById('import-comp-code'),
+    importCompCss: document.getElementById('import-comp-css'),
+    btnSaveAndInsertComp: document.getElementById('btn-save-and-insert-comp'),
+    btnOnlySaveComp: document.getElementById('btn-only-save-comp'),
+    importLivePreviewStage: document.getElementById('import-live-preview-stage'),
 
     toastContainer: document.getElementById('toast-container')
   };
@@ -524,24 +553,23 @@
     updateOverlayPosition();
   }
 
-  function previewAddBlockOnHover(type, labelText) {
+  function previewRawHtmlBlockOnHover(rawHtml, labelText) {
     clearPreviewAddBlock();
     const doc = dom.iframe.contentDocument;
-    if (!doc || !doc.body || !ELEMENT_TEMPLATES[type] || state.mode !== 'edit') return;
+    if (!doc || !doc.body || !rawHtml || state.mode !== 'edit') return;
 
     const container = state.selectedEl && state.selectedEl !== doc.body
       ? state.selectedEl.parentElement || doc.body
       : doc.body;
 
     const temp = doc.createElement('div');
-    temp.innerHTML = ELEMENT_TEMPLATES[type];
+    temp.innerHTML = rawHtml;
     const ghostEl = temp.firstElementChild;
     if (!ghostEl) return;
 
     ghostEl.setAttribute('data-studio-ignore', 'true');
-    ghostEl.style.setProperty('outline', '2px dashed #06b6d4', 'important');
+    ghostEl.style.setProperty('outline', '2px dashed #a855f7', 'important');
     ghostEl.style.setProperty('outline-offset', '4px', 'important');
-    ghostEl.style.setProperty('opacity', '0.82', 'important');
     ghostEl.style.setProperty('pointer-events', 'none', 'important');
 
     if (state.selectedEl && state.selectedEl.parentElement === container) {
@@ -555,6 +583,11 @@
     updateOverlayPosition();
   }
 
+  function previewAddBlockOnHover(type, labelText) {
+    if (!ELEMENT_TEMPLATES[type]) return;
+    previewRawHtmlBlockOnHover(ELEMENT_TEMPLATES[type], labelText);
+  }
+
   function clearPreviewAddBlock() {
     if (activeGhostBlockEl) {
       activeGhostBlockEl.remove();
@@ -562,6 +595,80 @@
       showLivePreviewIndicator('');
       updateOverlayPosition();
     }
+  }
+
+  const CDN_DEFINITIONS = {
+    tailwind: {
+      name: 'Tailwind CSS Play CDN',
+      js: 'https://cdn.tailwindcss.com'
+    },
+    bootstrap5: {
+      name: 'Bootstrap 5.3',
+      css: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css',
+      js: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js'
+    },
+    fontawesome: {
+      name: 'Font Awesome 6.5',
+      css: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
+    },
+    gsap: {
+      name: 'Animate.css 4 + GSAP 3',
+      css: 'https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css',
+      js: 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js'
+    },
+    swiper: {
+      name: 'Swiper 11 Slider',
+      css: 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
+      js: 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js'
+    }
+  };
+
+  function syncLibraryCssEverywhere(iframeDoc = null) {
+    const combinedCss = (window.STUDIO_LIB_COMPONENTS_CSS || '') + '\n' + (state.customExtraCss || '');
+    // 1. Host document (for preview stages in sidebar & modal)
+    let hostStyle = document.getElementById('__ui_studio_libs_css_host__');
+    if (!hostStyle) {
+      hostStyle = document.createElement('style');
+      hostStyle.id = '__ui_studio_libs_css_host__';
+      document.head.appendChild(hostStyle);
+    }
+    hostStyle.textContent = combinedCss;
+
+    // 2. Iframe document (for live preview & inserted components on user's webpage)
+    const doc = iframeDoc || (dom.iframe && dom.iframe.contentDocument);
+    if (doc && doc.head) {
+      let iframeLibStyle = doc.getElementById('__ui_studio_libs_css__');
+      if (!iframeLibStyle) {
+        iframeLibStyle = doc.createElement('style');
+        iframeLibStyle.id = '__ui_studio_libs_css__';
+        iframeLibStyle.setAttribute('data-studio-ignore', 'true');
+        doc.head.appendChild(iframeLibStyle);
+      }
+      iframeLibStyle.textContent = combinedCss;
+    }
+  }
+
+  function applyInjectedCdnsToDoc(doc) {
+    if (!doc || !doc.head) return;
+    state.injectedCdns.forEach(cdnKey => {
+      const def = CDN_DEFINITIONS[cdnKey];
+      if (!def) return;
+      if (def.css && !doc.getElementById(`__uilib_cdn_css_${cdnKey}`)) {
+        const link = doc.createElement('link');
+        link.id = `__uilib_cdn_css_${cdnKey}`;
+        link.rel = 'stylesheet';
+        link.href = def.css;
+        link.setAttribute('data-studio-ignore', 'true');
+        doc.head.appendChild(link);
+      }
+      if (def.js && !doc.getElementById(`__uilib_cdn_js_${cdnKey}`)) {
+        const script = doc.createElement('script');
+        script.id = `__uilib_cdn_js_${cdnKey}`;
+        script.src = def.js;
+        script.setAttribute('data-studio-ignore', 'true');
+        doc.head.appendChild(script);
+      }
+    });
   }
 
   // ==================== OVERLAY & DRAG/RESIZE ENGINE INSIDE IFRAME ====================
@@ -589,6 +696,10 @@
       fontLink.setAttribute('data-studio-ignore', 'true');
       doc.head.appendChild(fontLink);
     }
+
+    // Inject UI Libraries Keyframes & CSS + active CDNs
+    syncLibraryCssEverywhere(doc);
+    applyInjectedCdnsToDoc(doc);
 
     // Inject helper stylesheet for Studio UI inside iframe
     let styleEl = doc.getElementById('__ui_studio_internal_css__');
@@ -1607,10 +1718,22 @@
       idx++;
     });
 
+    if (state.injectedCdns.size > 0) {
+      lines.push(`### Các Thư Viện UI / CDN Đã Kích Hoạt Trong \`<head>\`:`);
+      state.injectedCdns.forEach(cdnKey => {
+        const def = CDN_DEFINITIONS[cdnKey];
+        if (def) {
+          lines.push(`- **${def.name}**: ${def.css ? `CSS: \`${def.css}\` ` : ''}${def.js ? `JS: \`${def.js}\`` : ''}`);
+        }
+      });
+      lines.push(``);
+    }
+
     if (state.addedNodes.length > 0) {
-      lines.push(`### Các phần tử mới được chèn thêm:`);
+      lines.push(`### Các Component / Phần tử mới được chèn thêm từ Thư viện UI:`);
       state.addedNodes.forEach(node => {
-        lines.push(`- Chèn vào trong \`${node.parentSelector}\`: \`${node.html}\``);
+        const libTag = node.libName ? ` **[Thư viện: ${node.libName} — ${node.compName || node.id}]**` : '';
+        lines.push(`- Chèn vào trong \`${node.parentSelector}\`${libTag}: \`${node.html}\``);
       });
       lines.push(``);
     }
@@ -1638,7 +1761,24 @@
     const cleanDoc = parser.parseFromString(baseSource, 'text/html');
 
     // Remove any studio ignore artifacts just in case
-    cleanDoc.querySelectorAll('[data-studio-ignore="true"], #__ui_studio_overlay_root__, #__ui_studio_internal_css__').forEach(el => el.remove());
+    cleanDoc.querySelectorAll('[data-studio-ignore="true"], #__ui_studio_overlay_root__, #__ui_studio_internal_css__, #__ui_studio_libs_css__').forEach(el => el.remove());
+
+    // Persist any injected CDN links/scripts into cleanDoc.head
+    state.injectedCdns.forEach(cdnKey => {
+      const def = CDN_DEFINITIONS[cdnKey];
+      if (!def) return;
+      if (def.css && !cleanDoc.querySelector(`link[href="${def.css}"]`)) {
+        const link = cleanDoc.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = def.css;
+        cleanDoc.head.appendChild(link);
+      }
+      if (def.js && !cleanDoc.querySelector(`script[src="${def.js}"]`)) {
+        const script = cleanDoc.createElement('script');
+        script.src = def.js;
+        cleanDoc.head.appendChild(script);
+      }
+    });
 
     // Apply added elements
     state.addedNodes.forEach(item => {
@@ -1668,14 +1808,23 @@
 
     // Inject or update <style id="visual-ui-studio-styles">
     const cssPatch = generateCssPatchString();
+    const needsLibCss = state.addedNodes.some(n => n.html && n.html.includes('uilib-')) ||
+                        cssPatch.includes('uilib-') ||
+                        Boolean(state.customExtraCss);
+    const fullExportCss = [
+      needsLibCss ? (window.STUDIO_LIB_COMPONENTS_CSS || '') : '',
+      state.customExtraCss || '',
+      cssPatch
+    ].filter(Boolean).join('\n');
+
     let studioStyle = cleanDoc.getElementById('visual-ui-studio-styles');
-    if (cssPatch.trim()) {
+    if (fullExportCss.trim()) {
       if (!studioStyle) {
         studioStyle = cleanDoc.createElement('style');
         studioStyle.id = 'visual-ui-studio-styles';
         cleanDoc.head.appendChild(studioStyle);
       }
-      studioStyle.textContent = `\n/* Visual UI Studio Customizations */\n${cssPatch}\n`;
+      studioStyle.textContent = `\n/* Visual UI Studio Customizations */\n${fullExportCss}\n`;
     }
 
     return '<!DOCTYPE html>\n' + cleanDoc.documentElement.outerHTML;
@@ -2061,6 +2210,19 @@
       return;
     }
 
+    // Command Search / 38+ UI Libraries Hub: Ctrl+K / Cmd+K
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      if (dom.modalUilibExplorer) {
+        dom.modalUilibExplorer.classList.remove('hidden');
+        if (dom.uilibModalSearch) {
+          dom.uilibModalSearch.focus();
+          dom.uilibModalSearch.select();
+        }
+      }
+      return;
+    }
+
     // Do not intercept typing inside inputs/textareas/contenteditable
     const active = document.activeElement;
     const isTypingInHost = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT');
@@ -2360,10 +2522,594 @@
     });
   }
 
+  // ==================== 38+ UI LIBRARIES HUB, LIVE HOVER SEARCH & SMART JSX/TAILWIND IMPORTER ====================
+  function loadSavedCustomComponents() {
+    try {
+      const saved = JSON.parse(localStorage.getItem('studio_custom_uilib_comps') || '[]');
+      const savedCss = localStorage.getItem('studio_custom_uilib_css') || '';
+      if (savedCss) state.customExtraCss = savedCss;
+      if (Array.isArray(saved) && saved.length > 0 && window.STUDIO_LIB_COMPONENTS) {
+        saved.forEach(comp => {
+          if (!window.STUDIO_LIB_COMPONENTS.some(c => c.id === comp.id)) {
+            window.STUDIO_LIB_COMPONENTS.unshift(comp);
+          }
+        });
+      }
+    } catch (_) {}
+  }
+
+  function convertJsxToCleanHtml(rawCode) {
+    if (!rawCode) return '';
+    return rawCode
+      .replace(/\{\/\*[\s\S]*?\*\/\}/g, '')
+      .replace(/\bclassName=/g, 'class=')
+      .replace(/\bhtmlFor=/g, 'for=')
+      .replace(/<(div|span|i|button|a|section|nav|header|footer|p|h1|h2|h3|h4)([^>]*?)\s*\/>/gi, '<$1$2></$1>')
+      .trim();
+  }
+
+  function looksLikeTailwind(htmlStr) {
+    return /\b(px-\d|py-\d|bg-[a-z]+-|rounded-|flex\b|items-center|justify-|text-[a-z]+-|shadow-|hover:|bg-gradient-to-)/.test(htmlStr);
+  }
+
+  function morphSelectedWithLibComponent(comp) {
+    if (!state.selectedEl) {
+      showToast('Hãy click chọn 1 phần tử trên trang web trước, hoặc bấm "➕ Chèn Mới"!', '👆');
+      return;
+    }
+    endHoverPreview();
+    clearPreviewAddBlock();
+    const styles = comp.morphStyles || {};
+    const entries = Object.entries(styles);
+    if (entries.length === 0) {
+      insertLibComponentToPage(comp);
+      return;
+    }
+    entries.forEach(([k, v], idx) => {
+      applyStyleProperty(state.selectedEl, k, v, idx === entries.length - 1);
+    });
+    selectElement(state.selectedEl);
+    showToast(`Đã biến hình theo "${comp.libName} — ${comp.name}"! (Bấm ↺ Về Gốc nếu muốn hủy)`, '✨');
+  }
+
+  function insertLibComponentToPage(comp) {
+    endHoverPreview();
+    clearPreviewAddBlock();
+    const doc = dom.iframe.contentDocument;
+    if (!doc || !doc.body) return;
+
+    // Auto-inject Tailwind CDN if component uses Tailwind classes
+    if (looksLikeTailwind(comp.html) && !state.injectedCdns.has('tailwind')) {
+      state.injectedCdns.add('tailwind');
+      applyInjectedCdnsToDoc(doc);
+      syncCdnChipsUI();
+    }
+
+    syncLibraryCssEverywhere(doc);
+
+    const uniqueId = `uilib-${comp.libId || 'custom'}-${Date.now().toString(36)}`;
+    const container = state.selectedEl && state.selectedEl !== doc.body
+      ? state.selectedEl.parentElement || doc.body
+      : doc.body;
+
+    const parentSelector = getUniqueSelector(container) || 'body';
+    const temp = doc.createElement('div');
+    temp.innerHTML = comp.html;
+    const newEl = temp.firstElementChild;
+    if (!newEl) return;
+
+    newEl.setAttribute('data-ui-custom-id', uniqueId);
+    newEl.setAttribute('data-ui-init-style', newEl.getAttribute('style') || '');
+
+    if (state.selectedEl && state.selectedEl.parentElement === container) {
+      state.selectedEl.insertAdjacentElement('afterend', newEl);
+    } else {
+      container.appendChild(newEl);
+    }
+
+    state.addedNodes.push({
+      id: uniqueId,
+      libName: comp.libName,
+      compName: comp.name,
+      parentSelector,
+      html: newEl.outerHTML
+    });
+
+    selectElement(newEl);
+    newEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    buildDomTree();
+    updateHistoryUI();
+    showToast(`Đã chèn "${comp.name}" (${comp.libName}) vào trang!`, '➕');
+  }
+
+  function previewComponentCardOnHover(comp) {
+    const mode = dom.uilibHoverMode ? dom.uilibHoverMode.value : 'auto';
+    const hasSelected = Boolean(state.selectedEl);
+    const hasMorph = comp.morphStyles && Object.keys(comp.morphStyles).length > 0;
+
+    if (mode === 'morph' && hasSelected && hasMorph) {
+      startHoverPreview(comp.morphStyles, `${comp.libName}: ${comp.name}`);
+      return;
+    }
+    if (mode === 'insert') {
+      previewRawHtmlBlockOnHover(comp.html, `${comp.libName}: ${comp.name}`);
+      return;
+    }
+    // Auto smart mode: if user has selected a button/link/badge and hovers a button/badge component, preview morphing it directly!
+    // Otherwise preview inserting the full component block onto the page!
+    if (hasSelected && hasMorph) {
+      const selTag = state.selectedEl.tagName.toLowerCase();
+      const isBtnLike = selTag === 'button' || selTag === 'a' || selTag === 'span';
+      if ((comp.category === 'button' || comp.category === 'badge') && isBtnLike) {
+        startHoverPreview(comp.morphStyles, `Biến hình nút → ${comp.libName}: ${comp.name}`);
+        return;
+      }
+    }
+    previewRawHtmlBlockOnHover(comp.html, `${comp.libName}: ${comp.name}`);
+  }
+
+  function clearComponentHoverPreview() {
+    endHoverPreview();
+    clearPreviewAddBlock();
+  }
+
+  function createComponentCardElement(comp, isModalView = false) {
+    const libs = window.STUDIO_UI_LIBRARIES || [];
+    const libMeta = libs.find(l => l.id === comp.libId) || {
+      name: comp.libName || 'Custom UI',
+      url: 'https://21st.dev',
+      accent: '#8b5cf6'
+    };
+
+    const card = document.createElement('div');
+    card.className = 'uilib-comp-card';
+
+    const isLargeBlock = comp.category === 'card' || comp.category === 'pricing' || comp.category === 'hero' || comp.category === 'nav';
+
+    card.innerHTML = `
+      <div class="uilib-comp-card__top">
+        <div class="uilib-comp-card__meta">
+          <span class="uilib-lib-badge" style="border-color:${libMeta.accent}55;color:${libMeta.accent};background:${libMeta.accent}18;">${libMeta.name}</span>
+          <span class="uilib-comp-title" title="${comp.name}">${comp.name}</span>
+        </div>
+        <a href="${libMeta.url}" target="_blank" rel="noopener" class="uilib-site-link" title="Mở trang chủ ${libMeta.name} (${libMeta.url})">↗ Web</a>
+      </div>
+      <div class="uilib-comp-stage ${isLargeBlock ? 'uilib-comp-stage--scaled' : ''}">
+        ${comp.html}
+      </div>
+      <div class="uilib-comp-card__actions">
+        <button type="button" class="uilib-act-btn btn-morph-comp" title="Rê chuột để xem thử biến hình phần tử đang chọn theo phong cách của ${libMeta.name}">
+          ✨ Áp Style
+        </button>
+        <button type="button" class="uilib-act-btn uilib-act-btn--primary btn-insert-comp" title="Rê chuột để xem thử & Chèn Component này vào trang web">
+          ➕ Chèn Mới
+        </button>
+      </div>
+    `;
+
+    // Prevent links/buttons inside the preview stage from navigating away
+    const stageEl = card.querySelector('.uilib-comp-stage');
+    stageEl.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      insertLibComponentToPage(comp);
+      if (isModalView && dom.modalUilibExplorer) {
+        dom.modalUilibExplorer.classList.add('hidden');
+      }
+    });
+
+    // Hovering the card stage previews on the live webpage
+    stageEl.addEventListener('mouseenter', () => {
+      previewComponentCardOnHover(comp);
+    });
+    stageEl.addEventListener('mouseleave', clearComponentHoverPreview);
+
+    // Action Button 1: Morph currently selected element
+    const btnMorph = card.querySelector('.btn-morph-comp');
+    btnMorph.addEventListener('mouseenter', () => {
+      clearPreviewAddBlock();
+      if (state.selectedEl && comp.morphStyles) {
+        startHoverPreview(comp.morphStyles, `Áp Style ${libMeta.name}: ${comp.name}`);
+      }
+    });
+    btnMorph.addEventListener('mouseleave', clearComponentHoverPreview);
+    btnMorph.addEventListener('click', e => {
+      e.stopPropagation();
+      morphSelectedWithLibComponent(comp);
+      if (isModalView && dom.modalUilibExplorer) {
+        dom.modalUilibExplorer.classList.add('hidden');
+      }
+    });
+
+    // Action Button 2: Insert as new component block
+    const btnInsert = card.querySelector('.btn-insert-comp');
+    btnInsert.addEventListener('mouseenter', () => {
+      endHoverPreview();
+      previewRawHtmlBlockOnHover(comp.html, `Chèn mới ${libMeta.name}: ${comp.name}`);
+    });
+    btnInsert.addEventListener('mouseleave', clearComponentHoverPreview);
+    btnInsert.addEventListener('click', e => {
+      e.stopPropagation();
+      insertLibComponentToPage(comp);
+      if (isModalView && dom.modalUilibExplorer) {
+        dom.modalUilibExplorer.classList.add('hidden');
+      }
+    });
+
+    return card;
+  }
+
+  function getFilteredUiComponents(queryStr, categoryFilter, libFilter) {
+    const allComps = window.STUDIO_LIB_COMPONENTS || [];
+    const q = (queryStr || '').trim().toLowerCase();
+
+    return allComps.filter(comp => {
+      if (libFilter && libFilter !== 'all' && comp.libId !== libFilter) {
+        return false;
+      }
+      if (categoryFilter && categoryFilter !== 'all' && categoryFilter !== 'directory') {
+        if (categoryFilter === 'hero') {
+          if (comp.category !== 'hero' && comp.category !== 'nav') return false;
+        } else if (comp.category !== categoryFilter) {
+          return false;
+        }
+      }
+      if (!q) return true;
+      const hay = [
+        comp.name,
+        comp.libName,
+        comp.libId,
+        comp.category,
+        ...(comp.tags || [])
+      ].join(' ').toLowerCase();
+      return hay.includes(q);
+    });
+  }
+
+  function renderSidebarUiLibraries() {
+    if (!dom.uilibComponentsList) return;
+    dom.uilibComponentsList.innerHTML = '';
+
+    const libs = window.STUDIO_UI_LIBRARIES || [];
+    const q = (state.uilibSearchQuery || '').trim().toLowerCase();
+
+    // If user chose "📚 38 Web Libs" directory mode, render the 38 libraries directory cards!
+    if (state.uilibCategory === 'directory') {
+      const filteredLibs = libs.filter(l => {
+        if (!q) return true;
+        return `${l.name} ${l.category} ${l.desc} ${l.badge}`.toLowerCase().includes(q);
+      });
+      if (dom.uilibResultsCount) {
+        dom.uilibResultsCount.textContent = `Danh bạ ${filteredLibs.length} Thư viện UI trong ảnh của bạn`;
+      }
+      filteredLibs.forEach(lib => {
+        const compCount = (window.STUDIO_LIB_COMPONENTS || []).filter(c => c.libId === lib.id).length;
+        const el = document.createElement('div');
+        el.className = 'uilib-site-card';
+        el.innerHTML = `
+          <div class="uilib-site-card__top">
+            <div class="uilib-site-card__name">
+              <span style="width:8px;height:8px;border-radius:50%;background:${lib.accent};display:inline-block;"></span>
+              <span>${lib.name}</span>
+            </div>
+            <span class="uilib-lib-badge" style="border-color:${lib.accent}55;color:${lib.accent};background:${lib.accent}15;">${lib.badge}</span>
+          </div>
+          <div class="uilib-site-card__desc">${lib.desc}</div>
+          <div class="uilib-site-card__btns">
+            <button type="button" class="uilib-action-pill btn-filter-this-lib" style="flex:1;">
+              🔍 Xem ${compCount} mẫu có sẵn
+            </button>
+            <a href="${lib.url}" target="_blank" rel="noopener" class="uilib-action-pill uilib-action-pill--accent" style="text-decoration:none;">
+              ↗ Mở Trang Chủ
+            </a>
+          </div>
+        `;
+        el.querySelector('.btn-filter-this-lib').addEventListener('click', () => {
+          state.uilibCategory = 'all';
+          state.uilibSelectedLib = lib.id;
+          if (dom.uilibLibFilter) dom.uilibLibFilter.value = lib.id;
+          if (dom.uilibCatPills) {
+            dom.uilibCatPills.querySelectorAll('.uilib-cat-pill').forEach(b => {
+              b.classList.toggle('active', b.dataset.uicat === 'all');
+            });
+          }
+          renderSidebarUiLibraries();
+        });
+        dom.uilibComponentsList.appendChild(el);
+      });
+      return;
+    }
+
+    const matched = getFilteredUiComponents(
+      state.uilibSearchQuery,
+      state.uilibCategory,
+      state.uilibSelectedLib
+    );
+
+    if (dom.uilibResultsCount) {
+      const uniqueLibs = new Set(matched.map(m => m.libName)).size;
+      dom.uilibResultsCount.textContent = `Tìm thấy ${matched.length} Component từ ${uniqueLibs} Thư viện`;
+    }
+
+    if (matched.length === 0) {
+      dom.uilibComponentsList.innerHTML = `
+        <div class="empty-state-sm">
+          Không tìm thấy mẫu khớp với "<strong>${state.uilibSearchQuery}</strong>".<br/><br/>
+          💡 Bạn có thể bấm nút <strong>"📥 Import Code Từ Web"</strong> ở trên để dán bất kỳ code HTML/Tailwind/JSX nào từ trang chủ các thư viện!
+        </div>
+      `;
+      return;
+    }
+
+    matched.forEach(comp => {
+      dom.uilibComponentsList.appendChild(createComponentCardElement(comp, false));
+    });
+  }
+
+  function renderModalUiLibrariesExplorer(modalLibFilter = 'all', modalQuery = '') {
+    if (!dom.uilibModalSitesList || !dom.uilibModalGrid) return;
+    const libs = window.STUDIO_UI_LIBRARIES || [];
+
+    // Left column: 38 Libraries list
+    dom.uilibModalSitesList.innerHTML = '';
+    const allItem = document.createElement('div');
+    allItem.className = 'uilib-dir-item' + (modalLibFilter === 'all' ? ' active' : '');
+    allItem.innerHTML = `<span>🌐 Tất cả 38+ Thư viện</span><span class="badge-count">${(window.STUDIO_LIB_COMPONENTS || []).length}</span>`;
+    allItem.addEventListener('click', () => {
+      renderModalUiLibrariesExplorer('all', dom.uilibModalSearch ? dom.uilibModalSearch.value : '');
+    });
+    dom.uilibModalSitesList.appendChild(allItem);
+
+    libs.forEach(lib => {
+      const count = (window.STUDIO_LIB_COMPONENTS || []).filter(c => c.libId === lib.id).length;
+      const item = document.createElement('div');
+      item.className = 'uilib-dir-item' + (modalLibFilter === lib.id ? ' active' : '');
+      item.innerHTML = `
+        <span style="display:flex;align-items:center;gap:7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          <span style="width:7px;height:7px;border-radius:50%;background:${lib.accent};flex-shrink:0;"></span>
+          <span>${lib.name}</span>
+        </span>
+        <span style="display:flex;align-items:center;gap:4px;">
+          <span style="font-size:10px;opacity:0.65;">${count}</span>
+          <a href="${lib.url}" target="_blank" rel="noopener" class="uilib-site-link" title="Mở trang chủ ${lib.url}" onclick="event.stopPropagation();">↗</a>
+        </span>
+      `;
+      item.addEventListener('click', () => {
+        renderModalUiLibrariesExplorer(lib.id, dom.uilibModalSearch ? dom.uilibModalSearch.value : '');
+      });
+      dom.uilibModalSitesList.appendChild(item);
+    });
+
+    // Right grid
+    dom.uilibModalGrid.innerHTML = '';
+    const matched = getFilteredUiComponents(modalQuery, 'all', modalLibFilter);
+    matched.forEach(comp => {
+      dom.uilibModalGrid.appendChild(createComponentCardElement(comp, true));
+    });
+  }
+
+  function syncCdnChipsUI() {
+    document.querySelectorAll('[data-inject-cdn]').forEach(chip => {
+      const key = chip.dataset.injectCdn;
+      chip.classList.toggle('active', state.injectedCdns.has(key));
+    });
+  }
+
+  function initUiLibrariesHub() {
+    loadSavedCustomComponents();
+    syncLibraryCssEverywhere();
+
+    // Restore saved Studio Theme (tweakcn style)
+    const savedTheme = localStorage.getItem('studio_ui_theme') || 'obsidian';
+    document.documentElement.setAttribute('data-studio-theme', savedTheme);
+    if (dom.studioThemeSelect) {
+      dom.studioThemeSelect.value = savedTheme;
+      dom.studioThemeSelect.addEventListener('change', e => {
+        const theme = e.target.value;
+        document.documentElement.setAttribute('data-studio-theme', theme);
+        localStorage.setItem('studio_ui_theme', theme);
+        showToast(`Đã đổi giao diện Studio sang: ${e.target.options[e.target.selectedIndex].text}`, '🎨');
+      });
+    }
+
+    // Populate #uilib-lib-filter dropdown with all 38+ libraries
+    if (dom.uilibLibFilter && window.STUDIO_UI_LIBRARIES) {
+      window.STUDIO_UI_LIBRARIES.forEach(lib => {
+        const opt = document.createElement('option');
+        opt.value = lib.id;
+        opt.textContent = `${lib.name} (${lib.category})`;
+        dom.uilibLibFilter.appendChild(opt);
+      });
+      dom.uilibLibFilter.addEventListener('change', e => {
+        state.uilibSelectedLib = e.target.value;
+        if (state.uilibCategory === 'directory') {
+          state.uilibCategory = 'all';
+        }
+        renderSidebarUiLibraries();
+      });
+    }
+
+    // Search input in Left Sidebar
+    if (dom.uilibSearchInput) {
+      dom.uilibSearchInput.addEventListener('input', e => {
+        state.uilibSearchQuery = e.target.value;
+        if (dom.btnClearUilibSearch) {
+          dom.btnClearUilibSearch.classList.toggle('hidden', !state.uilibSearchQuery);
+        }
+        renderSidebarUiLibraries();
+      });
+    }
+    if (dom.btnClearUilibSearch) {
+      dom.btnClearUilibSearch.addEventListener('click', () => {
+        state.uilibSearchQuery = '';
+        dom.uilibSearchInput.value = '';
+        dom.btnClearUilibSearch.classList.add('hidden');
+        renderSidebarUiLibraries();
+      });
+    }
+
+    // Category filter pills
+    if (dom.uilibCatPills) {
+      dom.uilibCatPills.querySelectorAll('.uilib-cat-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          dom.uilibCatPills.querySelectorAll('.uilib-cat-pill').forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+          state.uilibCategory = pill.dataset.uicat;
+          renderSidebarUiLibraries();
+        });
+      });
+    }
+
+    // 1-Click CDN Injector Chips
+    document.querySelectorAll('[data-inject-cdn]').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const key = chip.dataset.injectCdn;
+        const def = CDN_DEFINITIONS[key];
+        if (!def) return;
+        if (state.injectedCdns.has(key)) {
+          state.injectedCdns.delete(key);
+          showToast(`Đã tắt CDN ${def.name} (Áp dụng khi lưu/tải lại)`, '📦');
+        } else {
+          state.injectedCdns.add(key);
+          applyInjectedCdnsToDoc(dom.iframe.contentDocument);
+          showToast(`Đã nạp trực tiếp ${def.name} vào trang web!`, '⚡');
+        }
+        syncCdnChipsUI();
+        updateHistoryUI();
+      });
+    });
+
+    // Open Full-Screen Modal Explorer (Ctrl+K or Topbar Search or Expand Button)
+    const openExplorerModal = (defaultTab = 'umtab-catalog') => {
+      if (!dom.modalUilibExplorer) return;
+      dom.modalUilibExplorer.classList.remove('hidden');
+      document.querySelectorAll('.uilib-mtab').forEach(b => {
+        b.classList.toggle('active', b.dataset.umtab === defaultTab);
+      });
+      document.querySelectorAll('.uilib-mtab-pane').forEach(p => {
+        p.classList.toggle('hidden', p.id !== defaultTab);
+        p.classList.toggle('active', p.id === defaultTab);
+      });
+      if (defaultTab === 'umtab-catalog') {
+        renderModalUiLibrariesExplorer('all', dom.uilibModalSearch ? dom.uilibModalSearch.value : '');
+        if (dom.uilibModalSearch) dom.uilibModalSearch.focus();
+      } else if (dom.importCompCode) {
+        dom.importCompCode.focus();
+      }
+    };
+
+    if (dom.btnOpenUilibExplorer) {
+      dom.btnOpenUilibExplorer.addEventListener('click', () => openExplorerModal('umtab-catalog'));
+    }
+    if (dom.btnExpandUilibModal) {
+      dom.btnExpandUilibModal.addEventListener('click', () => openExplorerModal('umtab-catalog'));
+    }
+    if (dom.btnOpenCustomImport) {
+      dom.btnOpenCustomImport.addEventListener('click', () => openExplorerModal('umtab-import'));
+    }
+
+    // Modal internal tabs
+    document.querySelectorAll('.uilib-mtab').forEach(tabBtn => {
+      tabBtn.addEventListener('click', () => {
+        openExplorerModal(tabBtn.dataset.umtab);
+      });
+    });
+
+    // Modal search input
+    if (dom.uilibModalSearch) {
+      dom.uilibModalSearch.addEventListener('input', e => {
+        renderModalUiLibrariesExplorer('all', e.target.value);
+      });
+    }
+
+    // Live Preview & Save in Custom JSX/Tailwind/HTML Importer
+    const updateCustomImportPreview = () => {
+      if (!dom.importCompCode || !dom.importLivePreviewStage) return;
+      const raw = dom.importCompCode.value.trim();
+      const extraCss = dom.importCompCss ? dom.importCompCss.value.trim() : '';
+      if (extraCss) {
+        state.customExtraCss = extraCss;
+        syncLibraryCssEverywhere();
+      }
+      if (!raw) {
+        dom.importLivePreviewStage.innerHTML = `<span style="color:#71717a;font-size:13px;">Hãy dán code vào ô bên trái để xem trước ngay tại đây...</span>`;
+        return;
+      }
+      const cleanHtml = convertJsxToCleanHtml(raw);
+      dom.importLivePreviewStage.innerHTML = cleanHtml;
+    };
+
+    if (dom.importCompCode) {
+      dom.importCompCode.addEventListener('input', updateCustomImportPreview);
+    }
+    if (dom.importCompCss) {
+      dom.importCompCss.addEventListener('input', updateCustomImportPreview);
+    }
+
+    const handleSaveImportedComponent = (alsoInsertToPage = false) => {
+      const rawCode = dom.importCompCode ? dom.importCompCode.value.trim() : '';
+      if (!rawCode) {
+        showToast('Hãy dán đoạn mã HTML hoặc JSX vào ô trước!', '⚠️');
+        return;
+      }
+      const cleanHtml = convertJsxToCleanHtml(rawCode);
+      const name = (dom.importCompName && dom.importCompName.value.trim()) || `Custom Component #${Date.now().toString().slice(-4)}`;
+      const category = (dom.importCompCat && dom.importCompCat.value) || 'button';
+      const extraCss = dom.importCompCss ? dom.importCompCss.value.trim() : '';
+
+      if (extraCss) {
+        state.customExtraCss = (state.customExtraCss ? state.customExtraCss + '\n' : '') + extraCss;
+        localStorage.setItem('studio_custom_uilib_css', state.customExtraCss);
+        syncLibraryCssEverywhere();
+      }
+
+      const newComp = {
+        id: `custom-${Date.now()}`,
+        name,
+        libId: '21stdev',
+        libName: 'Custom Import',
+        category,
+        tags: [category, 'custom', 'import', name.toLowerCase()],
+        morphStyles: {},
+        html: cleanHtml
+      };
+
+      if (!window.STUDIO_LIB_COMPONENTS) window.STUDIO_LIB_COMPONENTS = [];
+      window.STUDIO_LIB_COMPONENTS.unshift(newComp);
+
+      try {
+        const existingSaved = JSON.parse(localStorage.getItem('studio_custom_uilib_comps') || '[]');
+        existingSaved.unshift(newComp);
+        localStorage.setItem('studio_custom_uilib_comps', JSON.stringify(existingSaved.slice(0, 50)));
+      } catch (_) {}
+
+      renderSidebarUiLibraries();
+
+      if (alsoInsertToPage) {
+        insertLibComponentToPage(newComp);
+        if (dom.modalUilibExplorer) dom.modalUilibExplorer.classList.add('hidden');
+      } else {
+        showToast(`Đã lưu "${name}" vào Kho UI! Hãy rê chuột vào để xem thử trên web.`, '💾');
+        openExplorerModal('umtab-catalog');
+      }
+    };
+
+    if (dom.btnSaveAndInsertComp) {
+      dom.btnSaveAndInsertComp.addEventListener('click', () => handleSaveImportedComponent(true));
+    }
+    if (dom.btnOnlySaveComp) {
+      dom.btnOnlySaveComp.addEventListener('click', () => handleSaveImportedComponent(false));
+    }
+
+    renderSidebarUiLibraries();
+    renderModalUiLibrariesExplorer();
+  }
+
   // ==================== EVENT BINDINGS FOR STUDIO UI ====================
   function initStudioUIEvents() {
     window.addEventListener('keydown', handleGlobalKeydown);
 
+    initUiLibrariesHub();
     renderMagicPresetsCatalog();
 
     // Upgrade Font Family, Font Weight & Border Style to Live-Hover Preview Dropdowns!
