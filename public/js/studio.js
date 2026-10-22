@@ -301,15 +301,24 @@
    */
   function getUniqueSelector(el) {
     if (!el || el.nodeType !== 1) return '';
+    if (el.__studioCachedSelector && el.__studioCachedParent === el.parentElement) {
+      return el.__studioCachedSelector;
+    }
     if (el.getAttribute('data-ui-custom-id')) {
-      return `[data-ui-custom-id="${el.getAttribute('data-ui-custom-id')}"]`;
+      const customSel = `[data-ui-custom-id="${el.getAttribute('data-ui-custom-id')}"]`;
+      el.__studioCachedSelector = customSel;
+      el.__studioCachedParent = el.parentElement;
+      return customSel;
     }
     if (el.id && !el.id.startsWith('__ui_studio')) {
       const doc = el.ownerDocument;
       try {
         const escaped = CSS.escape(el.id);
         if (doc.querySelectorAll(`#${escaped}`).length === 1) {
-          return `#${escaped}`;
+          const idSel = `#${escaped}`;
+          el.__studioCachedSelector = idSel;
+          el.__studioCachedParent = el.parentElement;
+          return idSel;
         }
       } catch (_) {}
     }
@@ -346,7 +355,10 @@
       parts.unshift(part);
       cur = cur.parentElement;
     }
-    return parts.join(' > ');
+    const finalSel = parts.join(' > ');
+    el.__studioCachedSelector = finalSel;
+    el.__studioCachedParent = el.parentElement;
+    return finalSel;
   }
 
   function getFriendlyElementLabel(el) {
@@ -392,7 +404,16 @@
   }
 
   // ==================== EDIT TRACKING & UNDO/REDO ====================
+  function ensureInitBaselineAttrs(el) {
+    if (!el || el.nodeType !== 1) return;
+    if (!el.hasAttribute('data-ui-init-style') && !el.hasAttribute('data-studio-ignore')) {
+      el.setAttribute('data-ui-init-style', el.getAttribute('style') || '');
+      el.setAttribute('data-ui-init-class', el.getAttribute('class') || '');
+    }
+  }
+
   function ensureEditRecord(el) {
+    ensureInitBaselineAttrs(el);
     const selector = getUniqueSelector(el);
     if (!state.editsMap.has(selector)) {
       state.editsMap.set(selector, {
@@ -416,6 +437,7 @@
     return { dx: Math.round(dx), dy: Math.round(dy), rot: Math.round(rot), scale: Math.round(scale) };
   }
 
+  let posFrameRaf = null;
   function applyElementPosition(el, dx, dy, rot = null, scale = null) {
     if (!el) return;
     const cur = getElementOffsets(el);
@@ -429,9 +451,6 @@
     el.setAttribute('data-ui-rot', String(finalRot));
     el.setAttribute('data-ui-scale', String(finalScale));
 
-    const win = el.ownerDocument.defaultView;
-    const computed = win.getComputedStyle(el);
-
     const rec = ensureEditRecord(el);
 
     if (state.dragMode === 'margin') {
@@ -440,10 +459,13 @@
       rec.styles['margin-left'] = `${finalDx}px`;
       rec.styles['margin-top'] = `${finalDy}px`;
     } else {
-      // Ensure inline elements can be translated cleanly
-      if (computed.display === 'inline') {
-        el.style.setProperty('display', 'inline-block', 'important');
-        rec.styles['display'] = 'inline-block';
+      // Ensure inline elements can be translated cleanly without calling getComputedStyle on every pixel
+      if (!el.style.display && ['SPAN', 'A', 'SMALL', 'STRONG', 'EM', 'I', 'B', 'LABEL'].includes(el.tagName)) {
+        const win = el.ownerDocument.defaultView;
+        if (win && win.getComputedStyle(el).display === 'inline') {
+          el.style.setProperty('display', 'inline-block', 'important');
+          rec.styles['display'] = 'inline-block';
+        }
       }
       el.style.setProperty('translate', `${finalDx}px ${finalDy}px`, 'important');
       rec.styles['translate'] = `${finalDx}px ${finalDy}px`;
@@ -466,9 +488,16 @@
       delete rec.styles['scale'];
     }
 
-    updateOverlayPosition();
-    updateLiveCoordsReadout(el);
-    updateHistoryUI();
+    if (!posFrameRaf) {
+      posFrameRaf = requestAnimationFrame(() => {
+        posFrameRaf = null;
+        updateOverlayPosition();
+        updateLiveCoordsReadout(el);
+      });
+    }
+    if (!dragSession) {
+      updateHistoryUI();
+    }
   }
 
   function cloneEditRecord(rec) {
@@ -486,6 +515,7 @@
 
   function captureElementState(el) {
     if (!el) return null;
+    ensureInitBaselineAttrs(el);
     const selector = getUniqueSelector(el);
     return {
       selector,
@@ -534,10 +564,20 @@
     return el;
   }
 
+  let styleBurstBeforeSnap = null;
+  let styleBurstEl = null;
+  let styleBurstTimer = null;
+  let styleOverlayRaf = null;
+
   function applyStyleProperty(el, prop, value, recordHistory = true) {
     if (!el) return;
     endHoverPreview();
-    const beforeSnap = recordHistory ? captureElementState(el) : null;
+
+    if (recordHistory && (!styleBurstBeforeSnap || styleBurstEl !== el)) {
+      styleBurstBeforeSnap = captureElementState(el);
+      styleBurstEl = el;
+    }
+
     const rec = ensureEditRecord(el);
 
     if (value === '' || value === null) {
@@ -548,19 +588,31 @@
       rec.styles[prop] = value;
     }
 
-    if (recordHistory && beforeSnap) {
-      const afterSnap = captureElementState(el);
-      pushUndoAction({
-        type: 'snapshot',
-        selector: rec.selector,
-        before: beforeSnap,
-        after: afterSnap
+    if (!styleOverlayRaf) {
+      styleOverlayRaf = requestAnimationFrame(() => {
+        styleOverlayRaf = null;
+        updateOverlayPosition();
+        updateLiveCoordsReadout(el);
       });
     }
 
-    updateOverlayPosition();
-    updateLiveCoordsReadout(el);
-    updateHistoryUI();
+    if (recordHistory) {
+      if (styleBurstTimer) clearTimeout(styleBurstTimer);
+      styleBurstTimer = setTimeout(() => {
+        if (styleBurstBeforeSnap && styleBurstEl === el) {
+          const afterSnap = captureElementState(el);
+          pushUndoAction({
+            type: 'snapshot',
+            selector: rec.selector,
+            before: styleBurstBeforeSnap,
+            after: afterSnap
+          });
+          styleBurstBeforeSnap = null;
+          styleBurstEl = null;
+          updateHistoryUI();
+        }
+      }, 180);
+    }
   }
 
   function pushUndoAction(action) {
@@ -748,6 +800,7 @@
 
   function ensureHoverBackupBaseline(el) {
     if (!el) return;
+    ensureInitBaselineAttrs(el);
     if (!activeHoverBackup || activeHoverBackup.el !== el) {
       activeHoverBackup = {
         el,
@@ -887,7 +940,9 @@
       hostStyle.id = '__ui_studio_libs_css_host__';
       document.head.appendChild(hostStyle);
     }
-    hostStyle.textContent = combinedCss;
+    if (hostStyle.textContent !== combinedCss) {
+      hostStyle.textContent = combinedCss;
+    }
 
     // 2. Iframe document (for live preview & inserted components on user's webpage)
     const doc = iframeDoc || (dom.iframe && dom.iframe.contentDocument);
@@ -899,7 +954,9 @@
         iframeLibStyle.setAttribute('data-studio-ignore', 'true');
         doc.head.appendChild(iframeLibStyle);
       }
-      iframeLibStyle.textContent = combinedCss;
+      if (iframeLibStyle.textContent !== combinedCss) {
+        iframeLibStyle.textContent = combinedCss;
+      }
     }
   }
 
@@ -935,13 +992,8 @@
     const existing = doc.getElementById('__ui_studio_overlay_root__');
     if (existing) existing.remove();
 
-    // Snapshot initial inline styles & classes on all elements so "↺ Màu gốc / Về Gốc" restores 100% accurately
-    doc.querySelectorAll('*').forEach(node => {
-      if (!node.hasAttribute('data-ui-init-style') && !node.hasAttribute('data-studio-ignore')) {
-        node.setAttribute('data-ui-init-style', node.getAttribute('style') || '');
-        node.setAttribute('data-ui-init-class', node.getAttribute('class') || '');
-      }
-    });
+    // Baseline attributes (data-ui-init-style / data-ui-init-class) are captured lazily
+    // in ensureInitBaselineAttrs(el) when an element is actually hovered or edited!
 
     // Inject Google Fonts catalog into iframe <head> so all Font Picker options render genuinely on hover!
     if (window.STUDIO_GOOGLE_FONTS_URL && !doc.getElementById('__ui_studio_google_fonts__')) {
@@ -1835,6 +1887,7 @@
     if (!doc || !doc.body) return;
     const query = (dom.layerSearch.value || '').trim().toLowerCase();
     dom.domTreeContainer.innerHTML = '';
+    const treeFrag = document.createDocumentFragment();
 
     const SKIP_TAGS = new Set(['script', 'style', 'noscript', 'meta', 'link', 'path', 'defs', 'clippath', 'g']);
 
@@ -1897,7 +1950,7 @@
           state.hoveredEl = null;
           updateOverlayPosition();
         });
-        dom.domTreeContainer.appendChild(item);
+        treeFrag.appendChild(item);
       }
 
       if (depth < 7) {
@@ -1906,6 +1959,7 @@
     }
 
     Array.from(doc.body.children).forEach(child => traverse(child, 0));
+    dom.domTreeContainer.appendChild(treeFrag);
   }
 
   function highlightTreeNode(el) {
@@ -3168,7 +3222,9 @@
     const doc = el.ownerDocument;
     syncLibraryCssEverywhere(doc);
 
-    if (looksLikeTailwind(comp.html) && !state.injectedCdns.has('tailwind')) {
+    // Only auto-inject Tailwind Play CDN when committing a custom user-imported snippet
+    // (built-in 282 components already have pre-compiled CSS in STUDIO_LIB_COMPONENTS_CSS!)
+    if (!isPreviewOnly && isCustomImportedComp(comp) && looksLikeTailwind(comp.html) && !state.injectedCdns.has('tailwind')) {
       state.injectedCdns.add('tailwind');
       applyInjectedCdnsToDoc(doc);
       syncCdnChipsUI();
@@ -3370,8 +3426,8 @@
     const doc = dom.iframe.contentDocument;
     if (!doc || !doc.body) return;
 
-    // Auto-inject Tailwind CDN if component uses Tailwind classes
-    if (looksLikeTailwind(comp.html) && !state.injectedCdns.has('tailwind')) {
+    // Auto-inject Tailwind CDN only for custom user-imported snippets (built-in components use pre-compiled STUDIO_LIB_COMPONENTS_CSS)
+    if (isCustomImportedComp(comp) && looksLikeTailwind(comp.html) && !state.injectedCdns.has('tailwind')) {
       state.injectedCdns.add('tailwind');
       applyInjectedCdnsToDoc(doc);
       syncCdnChipsUI();

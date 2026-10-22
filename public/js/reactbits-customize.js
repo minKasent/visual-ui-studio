@@ -38891,8 +38891,10 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
         onValueChange(ctrl.key, val, ctrl);
       };
 
+      let cachedRect = null;
+      let sliderRafId = null;
       const computeFromClientX = clientX => {
-        const rect = track.getBoundingClientRect();
+        const rect = cachedRect || track.getBoundingClientRect();
         const ratio = clamp((clientX - rect.left) / (rect.width || 1), 0, 1);
         return min + ratio * range;
       };
@@ -38908,6 +38910,7 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
         if (isDisabled || e.button !== 0) return;
         e.preventDefault();
         isDragging = true;
+        cachedRect = track.getBoundingClientRect();
         track.setAttribute('data-dragging', 'true');
         track.setAttribute('data-active', 'true');
         try { track.setPointerCapture(e.pointerId); } catch (_) {}
@@ -38915,11 +38918,21 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
       });
       track.addEventListener('pointermove', e => {
         if (!isDragging || isDisabled) return;
-        updateSliderUI(computeFromClientX(e.clientX));
+        const nextClientX = e.clientX;
+        if (sliderRafId) cancelAnimationFrame(sliderRafId);
+        sliderRafId = requestAnimationFrame(() => {
+          sliderRafId = null;
+          updateSliderUI(computeFromClientX(nextClientX));
+        });
       });
       const stopDrag = e => {
         if (!isDragging) return;
         isDragging = false;
+        cachedRect = null;
+        if (sliderRafId) {
+          cancelAnimationFrame(sliderRafId);
+          sliderRafId = null;
+        }
         track.setAttribute('data-dragging', 'false');
         try { track.releasePointerCapture(e.pointerId); } catch (_) {}
       };
@@ -39402,13 +39415,16 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
     if (!schema) return;
     const values = getValuesForSchema(schema);
 
+    const dockEl = document.getElementById('rb-customize-dock');
+    const isDockVisible = Boolean(dockEl && !dockEl.classList.contains('hidden'));
     const containers = [
-      document.getElementById('rb-dock-options-grid'),
+      isDockVisible ? document.getElementById('rb-dock-options-grid') : null,
       document.getElementById('rb-sidebar-options-grid')
     ].filter(Boolean);
 
     containers.forEach(grid => {
       grid.innerHTML = '';
+      const frag = document.createDocumentFragment();
       (schema.controls || []).forEach(ctrl => {
         const currentVal = values[ctrl.key] !== undefined ? values[ctrl.key] : ctrl.value;
         const scrubberEl = createScrubberElement(
@@ -39431,8 +39447,9 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
           },
           values
         );
-        grid.appendChild(scrubberEl);
+        frag.appendChild(scrubberEl);
       });
+      grid.appendChild(frag);
     });
 
     // Update schema select & badge counts
