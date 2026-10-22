@@ -38706,13 +38706,87 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
   };
 
   const rbState = {
-    theme: 'light', // Default to 'light' so it matches the exact white/grey screenshots from reactbits.dev!
-    activeSchemaId: 'rb-micro-tearticket', // Default to TearTicket (Image 1) or MaskedHeading (Image 2) or 'master-all'
+    theme: localStorage.getItem('studio_rb_theme') || 'dark',
+    activeSchemaId: 'rb-micro-tearticket',
     filterGroup: 'all',
     searchQuery: '',
     valuesBySchema: {},
     dockOpen: false
   };
+
+  const VI_PROP_LABELS = {
+    'Preset': 'Preset (Mẫu cài sẵn)',
+    'Orientation': 'Hướng bố cục',
+    'Reveal': 'Hiệu ứng xuất hiện',
+    'Trigger': 'Kích hoạt (Trigger)',
+    'Text': 'Nội dung chữ',
+    'Media': 'Loại Media',
+    'Align': 'Căn lề chữ',
+    'Background': 'Màu nền (Fill)',
+    'Color': 'Màu chữ (Text)',
+    'Tint Color': 'Màu phủ (Tint)',
+    'Outline Color': 'Màu viền chữ',
+    'Width': 'Chiều rộng (Width)',
+    'Height': 'Chiều cao (Height)',
+    'Stub Size': 'Cỡ cuống vé (Stub)',
+    'Radius': 'Bo góc (Radius)',
+    'Border Radius': 'Bo góc (Radius)',
+    'Holes': 'Số lỗ đục (Holes)',
+    'Hole Size': 'Cỡ lỗ (Hole Size)',
+    'Notch': 'Khe khuyết (Notch)',
+    'Roughness': 'Độ nhám (Roughness)',
+    'Tear Angle': 'Góc xé (Tear Angle)',
+    'Stretch': 'Độ kéo giãn (Stretch)',
+    'Resistance': 'Lực cản (Resistance)',
+    'Rotate': 'Góc xoay (Rotate)',
+    'Tilt Max': 'Góc nghiêng 3D (Tilt)',
+    'Tilt Reach': 'Vùng cảm ứng 3D',
+    'Parallax': 'Độ lệch Parallax',
+    'Perspective': 'Phối cảnh (Perspective)',
+    'Border Width': 'Độ dày viền (Stroke)',
+    'Duration': 'Thời lượng (Duration)',
+    'Stagger': 'Độ trễ nhịp (Stagger)',
+    'Drift': 'Độ trôi (Drift)',
+    'Hover Zoom': 'Phóng to khi Hover',
+    'Spotlight Radius': 'Bán kính Spotlight',
+    'Fill Scale': 'Tỷ lệ lấp đầy (Scale)',
+    'Brightness': 'Độ sáng (Brightness)',
+    'Saturation': 'Độ bão hòa (Saturation)',
+    'Text Size': 'Cỡ chữ (Text Size)',
+    'Font Size': 'Cỡ chữ (Font Size)',
+    'Weight': 'Độ đậm (Weight)',
+    'Tracking': 'Giãn chữ (Tracking)',
+    'Line Height': 'Chiều cao dòng',
+    'Outline Width': 'Độ dày viền chữ',
+    'Scrim': 'Phủ bóng tối (Scrim)',
+    'Tilt': 'Nghiêng 3D (Tilt)',
+    'Border': 'Hiển thị viền (Border)',
+    'Recenter': 'Tự cân bằng tâm',
+    'Disabled': 'Vô hiệu hóa (Disabled)',
+    'Spotlight': 'Tâm sáng (Spotlight)',
+    'Tint': 'Phủ màu (Tint)',
+    'Grayscale': 'Đen trắng (Grayscale)',
+    'Outline': 'Viền chữ (Outline)',
+    'Speed': 'Tốc độ (Speed)',
+    'Intensity': 'Cường độ (Intensity)',
+    'Scale': 'Tỷ lệ (Scale)',
+    'Opacity': 'Độ mờ (Opacity)',
+    'Blur': 'Độ nhòe (Blur)',
+    'Spread': 'Độ lan (Spread)',
+    'Count': 'Số lượng (Count)',
+    'Size': 'Kích thước (Size)',
+    'Gap': 'Khoảng cách (Gap)',
+    'Distance': 'Khoảng cách (Distance)',
+    'Direction': 'Hướng chuyển động',
+    'Pause On Hover': 'Dừng khi Hover',
+    'Show Cursor': 'Hiện con trỏ'
+  };
+
+  function getCtrlTitle(ctrl) {
+    const lang = (window.getStudioLang && window.getStudioLang()) || localStorage.getItem('studio_lang') || 'vi';
+    if (lang === 'en') return ctrl.title;
+    return VI_PROP_LABELS[ctrl.title] || ctrl.title;
+  }
 
   function getActiveSchema() {
     const catalog = window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG || [];
@@ -38758,6 +38832,7 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
   function createScrubberElement(ctrl, currentVal, onValueChange, allValues) {
     const wrap = document.createElement('div');
     wrap.className = 'scrubber';
+    const displayTitle = getCtrlTitle(ctrl);
 
     // Check conditional disabled state just like ReactBits (e.g. Spotlight Radius disabled when Spotlight is off, Outline Width disabled when Outline is off)
     let isDisabled = false;
@@ -38781,7 +38856,7 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
       const track = document.createElement('div');
       track.className = 'scrubber-track';
       track.setAttribute('role', 'slider');
-      track.setAttribute('aria-label', ctrl.title);
+      track.setAttribute('aria-label', displayTitle);
       track.setAttribute('aria-valuemin', String(min));
       track.setAttribute('aria-valuemax', String(max));
       track.setAttribute('aria-valuenow', String(val));
@@ -38799,7 +38874,7 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
         '<div class="scrubber-fill" style="width:' + pct + '%"></div>' +
         '<div class="scrubber-ticks">' + ticksHtml + '</div>' +
         '<div class="scrubber-thumb-wrapper" style="left:' + pct + '%"><div class="scrubber-thumb"></div></div>' +
-        '<div class="scrubber-label">' + ctrl.title + '</div>' +
+        '<div class="scrubber-label">' + displayTitle + '</div>' +
         '<div class="scrubber-value">' + formatted + '</div>';
 
       const fillEl = track.querySelector('.scrubber-fill');
@@ -38882,7 +38957,7 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
       btn.setAttribute('data-checked', String(checked));
       btn.setAttribute('data-disabled', String(isDisabled));
       btn.innerHTML =
-        '<span class="scrubber-label">' + ctrl.title + '</span>' +
+        '<span class="scrubber-label">' + displayTitle + '</span>' +
         '<span class="scrubber-switch-toggle"><span class="scrubber-switch-knob"></span></span>';
 
       btn.addEventListener('click', e => {
@@ -38905,7 +38980,7 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
       btn.className = 'scrubber-track scrubber-track--select';
       btn.setAttribute('data-disabled', String(isDisabled));
       btn.innerHTML =
-        '<span class="scrubber-label">' + ctrl.title + '</span>' +
+        '<span class="scrubber-label">' + displayTitle + '</span>' +
         '<span class="scrubber-select-right">' +
           '<span class="scrubber-value">' + formatOptionLabel(val) + '</span>' +
           '<svg class="scrubber-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>' +
@@ -38955,10 +39030,10 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
       const track = document.createElement('div');
       track.className = 'scrubber-track scrubber-track--color';
       track.innerHTML =
-        '<span class="scrubber-label">' + ctrl.title + '</span>' +
+        '<span class="scrubber-label">' + displayTitle + '</span>' +
         '<div class="scrubber-color-controls">' +
-          '<input class="scrubber-color-swatch" type="color" value="' + colorVal + '" aria-label="' + ctrl.title + ' color" />' +
-          '<input class="scrubber-color-text" type="text" value="' + colorVal + '" maxlength="7" aria-label="' + ctrl.title + ' hex" />' +
+          '<input class="scrubber-color-swatch" type="color" value="' + colorVal + '" aria-label="' + displayTitle + ' color" />' +
+          '<input class="scrubber-color-text" type="text" value="' + colorVal + '" maxlength="7" aria-label="' + displayTitle + ' hex" />' +
         '</div>';
 
       const swatch = track.querySelector('.scrubber-color-swatch');
@@ -38984,7 +39059,7 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
     const track = document.createElement('div');
     track.className = 'scrubber-track scrubber-track--input';
     track.innerHTML =
-      '<span class="scrubber-label">' + ctrl.title + '</span>' +
+      '<span class="scrubber-label">' + displayTitle + '</span>' +
       '<input class="scrubber-input" type="text" value="' + String(currentVal || '').replace(/"/g, '&quot;') + '" placeholder="' + (ctrl.placeholder || '') + '" />';
     const inp = track.querySelector('.scrubber-input');
     inp.addEventListener('input', e => {
@@ -39361,20 +39436,43 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
     });
 
     // Update schema select & badge counts
+    const lang = (window.getStudioLang && window.getStudioLang()) || localStorage.getItem('studio_lang') || 'vi';
     const countBadge = document.getElementById('rb-active-control-count');
     if (countBadge) {
-      countBadge.textContent = (schema.controls || []).length + ' thông số';
+      countBadge.textContent = (schema.controls || []).length + (lang === 'en' ? ' parameters' : ' thông số');
     }
     const docsLink = document.getElementById('rb-active-docs-link');
     if (docsLink && schema.docsUrl) {
       docsLink.href = schema.docsUrl;
-      docsLink.title = 'Mở ' + schema.title + ' trên trang chủ reactbits.dev';
+      docsLink.title = lang === 'en'
+        ? 'Open ' + schema.title + ' on reactbits.dev'
+        : 'Mở ' + schema.title + ' trên trang chủ reactbits.dev';
     }
+  }
+
+  function syncRbThemeUI(themeVal) {
+    if (themeVal === 'dark' || themeVal === 'light') {
+      rbState.theme = themeVal;
+      localStorage.setItem('studio_rb_theme', rbState.theme);
+    }
+    document.querySelectorAll('.rb-customize-scope').forEach(el => {
+      el.setAttribute('data-rb-theme', rbState.theme);
+    });
+    const lang = (window.getStudioLang && window.getStudioLang()) || localStorage.getItem('studio_lang') || 'vi';
+    document.querySelectorAll('.btn-rb-toggle-theme, #btn-rb-toggle-theme').forEach(btn => {
+      if (rbState.theme === 'dark') {
+        btn.textContent = '🌙 Dark';
+      } else {
+        btn.textContent = lang === 'en' ? '☀️ Light' : '☀️ Light ( Sáng )';
+      }
+    });
   }
 
   // Expose helper for studio.js
   window.applyReactBitsPropsToElement = applyReactBitsPropsToElement;
   window.renderReactBitsGrids = renderReactBitsGrids;
+  window.setReactBitsTheme = syncRbThemeUI;
+  window.getReactBitsTheme = () => rbState.theme;
   window.getReactBitsActiveHtml = () => {
     const schema = getActiveSchema();
     const values = getValuesForSchema(schema);
@@ -39390,12 +39488,15 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
 
     const populateSelect = (selEl, filterText = '') => {
       if (!selEl) return;
+      const lang = (window.getStudioLang && window.getStudioLang()) || localStorage.getItem('studio_lang') || 'vi';
       const q = (filterText || '').trim().toLowerCase();
       selEl.innerHTML = '';
 
       const masterOpt = document.createElement('option');
       masterOpt.value = 'master-all';
-      masterOpt.textContent = '⚡ Tất cả thông số Chỉnh Trực Tiếp (50+ Master Controls)';
+      masterOpt.textContent = lang === 'en'
+        ? '⚡ Universal Live Element Controls (50+ Master Props)'
+        : '⚡ Tất cả thông số Chỉnh Trực Tiếp (50+ Master Controls)';
       selEl.appendChild(masterOpt);
 
       const groups = {};
@@ -39414,7 +39515,7 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
           const opt = document.createElement('option');
           opt.value = item.id;
           const star = (item.compName === 'TearTicket' || item.compName === 'MaskedHeading') ? '★ ' : '';
-          opt.textContent = star + item.title + ' (' + item.controls.length + ' controls)';
+          opt.textContent = star + item.title + ' (' + item.controls.length + (lang === 'en' ? ' props)' : ' thông số)');
           og.appendChild(opt);
         });
         selEl.appendChild(og);
@@ -39425,6 +39526,13 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
 
     populateSelect(schemaSelect);
     populateSelect(sidebarSchemaSelect);
+
+    window.refreshReactBitsLang = () => {
+      populateSelect(schemaSelect, searchInput ? searchInput.value : '');
+      populateSelect(sidebarSchemaSelect);
+      syncRbThemeUI();
+      renderReactBitsGrids();
+    };
 
     const onSchemaChange = newId => {
       rbState.activeSchemaId = newId;
@@ -39472,17 +39580,14 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
       });
     });
 
-    // Theme toggle (Light = exact match to user's screenshots, Dark = Obsidian ReactBits)
-    const btnTheme = document.getElementById('btn-rb-toggle-theme');
-    if (btnTheme) {
+    // Theme toggle (Dark = Obsidian ReactBits, Light = exact match to white screenshots)
+    syncRbThemeUI(rbState.theme);
+    document.querySelectorAll('.btn-rb-toggle-theme, #btn-rb-toggle-theme').forEach(btnTheme => {
       btnTheme.addEventListener('click', () => {
-        rbState.theme = rbState.theme === 'light' ? 'dark' : 'light';
-        document.querySelectorAll('.rb-customize-scope').forEach(el => {
-          el.setAttribute('data-rb-theme', rbState.theme);
-        });
-        btnTheme.textContent = rbState.theme === 'light' ? '☀️ Light (Chuẩn ảnh)' : '🌙 Dark';
+        const next = rbState.theme === 'light' ? 'dark' : 'light';
+        syncRbThemeUI(next);
       });
-    }
+    });
 
     // Reset button
     document.querySelectorAll('.btn-rb-reset-props').forEach(btn => {

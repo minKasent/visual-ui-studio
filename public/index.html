@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Dancing+Script:wght@600;700&family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto:wght@300;400;500;700;900&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/studio.css?v=6.2" />
+  <link rel="stylesheet" href="./css/studio.css?v=6.3" />
 </head>
 <body>
   <!-- TOP NAVIGATION BAR (Shadcn + Luxe + Origin UI Aesthetic) -->
@@ -78,20 +78,36 @@
       </div>
 
       <!-- Freeze Preloader / Animations Checkbox -->
-      <label class="toggle-pill" title="Tự động ẩn màn hình chờ (Loader) và hiện đầy đủ các khối ẩn để dễ chỉnh sửa">
+      <label class="toggle-pill" id="lbl-bypass-loader" title="Tự động ẩn màn hình chờ (Loader) và hiện đầy đủ các khối ẩn để dễ chỉnh sửa">
         <input type="checkbox" id="chk-bypass-loader" checked />
-        <span>Tắt Loader</span>
+        <span id="txt-bypass-loader">Tắt Loader</span>
       </label>
+
+      <!-- 1-Click Canvas Webpage Dark Mode Preview Toggle -->
+      <button type="button" id="btn-canvas-dark-mode" class="btn-secondary btn-xs" title="Bật/Tắt chế độ Dark Mode cho trang web đang chỉnh sửa trong khung Canvas">
+        🌓 Web Dark
+      </button>
     </div>
 
-    <!-- Right Actions: Studio Theme, Undo/Redo, AI Prompt, Save -->
+    <!-- Right Actions: Language Switcher, Dark Mode Toggle, Studio Theme, Undo/Redo, AI Prompt, Save -->
     <div class="topbar__right">
+      <!-- Bilingual Language Switcher (EN / VI — Industry Standard Terminology) -->
+      <div class="segmented-group lang-switcher" id="lang-switcher" title="Switch Language / Đổi ngôn ngữ (English / Tiếng Việt)">
+        <button type="button" class="seg-btn" data-lang="en" title="English (Figma / Framer / Webflow Standard Terminology)">EN</button>
+        <button type="button" class="seg-btn active" data-lang="vi" title="Tiếng Việt (Thuật ngữ Thiết kế UI/UX chuẩn)">VI</button>
+      </div>
+
+      <!-- 1-Click Unified Dark / Light Mode Toggle -->
+      <button type="button" id="btn-dark-mode-toggle" class="btn-secondary btn-sm" title="Chuyển đổi nhanh chế độ Dark Mode / Light Mode cho toàn bộ Studio & Bảng Customize">
+        🌙 Dark
+      </button>
+
       <!-- tweakcn Studio Theme Switcher -->
       <select id="studio-theme-select" class="select-control select-theme" title="Đổi giao diện của công cụ Studio (Cảm hứng từ tweakcn & Shadcn)">
-        <option value="obsidian">🖤 Obsidian Luxe</option>
-        <option value="aurora">🌌 Aceternity Aurora</option>
+        <option value="obsidian">🖤 Obsidian Dark</option>
+        <option value="aurora">🌌 Aurora Cyber</option>
         <option value="claude">🧡 Claude Warm</option>
-        <option value="daylight">☀️ AlignUI Daylight</option>
+        <option value="daylight">☀️ Daylight Light</option>
       </select>
 
       <div class="history-btns">
@@ -417,14 +433,15 @@
             <div class="prop-group__header">
               <span>🎛️ ReactBits Customize</span>
               <div class="header-right-inline">
+                <button type="button" class="btn-reset-pill btn-rb-toggle-theme" title="Chuyển đổi Dark / Light Mode cho bảng Customize">🌙 Dark</button>
                 <button type="button" class="btn-reset-pill btn-rb-reset-props" title="Đặt lại toàn bộ thông số Customize về mặc định">↺ Reset</button>
-                <button type="button" class="btn-reset-pill btn-toggle-rb-dock" title="Mở rộng Bảng Customize 3 cột chuẩn ReactBits.dev" style="background:rgba(168,85,247,0.2);color:#e9d5ff;border-color:rgba(168,85,247,0.5);">⤢ Bảng 3 Cột</button>
+                <button type="button" class="btn-reset-pill btn-toggle-rb-dock" id="btn-sidebar-rb-dock" title="Mở rộng Bảng Customize 3 cột chuẩn ReactBits.dev" style="background:rgba(168,85,247,0.2);color:#e9d5ff;border-color:rgba(168,85,247,0.5);">⤢ Bảng 3 Cột</button>
               </div>
             </div>
 
             <div style="display:flex;gap:5px;margin-bottom:7px;">
               <select id="rb-sidebar-schema-selector" class="select-control" style="flex:1;font-size:11.5px;height:28px;" title="Chọn trong 218 bộ thông số Customize từ reactbits.dev"></select>
-              <button type="button" class="btn-secondary btn-xs btn-rb-insert-custom" title="Chèn mẫu ReactBits đã chỉnh sửa vào trang web" style="height:28px;padding:0 9px;">➕ Chèn</button>
+              <button type="button" id="btn-sidebar-rb-insert" class="btn-secondary btn-xs btn-rb-insert-custom" title="Chèn mẫu ReactBits đã chỉnh sửa vào trang web" style="height:28px;padding:0 9px;">➕ Chèn</button>
             </div>
 
             <!-- Compact Category Filter Pills for Master Controls -->
@@ -435,7 +452,7 @@
               <button type="button" class="rb-group-chip" data-rb-group="motion">🌀 3D &amp; Tilt</button>
             </div>
 
-            <div class="rb-customize-scope" data-rb-theme="light" style="border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);">
+            <div class="rb-customize-scope" data-rb-theme="dark" style="border-radius:10px;overflow:hidden;border:1px solid var(--border-color);">
               <div id="rb-sidebar-options-grid" class="rb-preview-options rb-preview-options--sidebar"></div>
             </div>
           </section>
@@ -993,7 +1010,7 @@
   </div>
 
   <!-- OFFICIAL 3-COLUMN REACTBITS.DEV CUSTOMIZE PANEL (218 Component Schemas & 3,960 Scrubber Controls) -->
-  <div id="rb-customize-dock" class="rb-customize-dock rb-customize-scope hidden" data-rb-theme="light">
+  <div id="rb-customize-dock" class="rb-customize-dock rb-customize-scope hidden" data-rb-theme="dark">
     <div class="rb-customize-frame">
       <div class="rb-customize-heading">
         <div class="rb-customize-heading-left">
@@ -1006,10 +1023,10 @@
           <span id="rb-active-control-count" style="font-size:11px;color:var(--rb-text-muted);font-weight:600;">25 thông số</span>
         </div>
         <div class="rb-customize-heading-actions">
-          <button type="button" id="btn-rb-toggle-theme" class="rb-customize-action-btn" title="Đổi giao diện bảng Customize giữa Light (Chuẩn ảnh chụp) và Dark">☀️ Light (Chuẩn ảnh)</button>
+          <button type="button" id="btn-rb-toggle-theme" class="rb-customize-action-btn btn-rb-toggle-theme" title="Đổi giao diện bảng Customize giữa Dark và Light">🌙 Dark</button>
           <button type="button" class="rb-customize-action-btn btn-rb-reset-props" title="Đặt lại toàn bộ thanh kéo về mặc định (Reset)">↺ Reset</button>
           <a id="rb-active-docs-link" href="https://reactbits.dev" target="_blank" rel="noopener" class="rb-customize-action-btn" title="Mở trang gốc trên reactbits.dev">↗ ReactBits</a>
-          <button type="button" class="rb-customize-action-btn rb-customize-action-btn--primary btn-rb-insert-custom" title="Chèn Component đã tùy chỉnh thông số này vào trang web">➕ Chèn Lên Web</button>
+          <button type="button" id="btn-dock-rb-insert" class="rb-customize-action-btn rb-customize-action-btn--primary btn-rb-insert-custom" title="Chèn Component đã tùy chỉnh thông số này vào trang web">➕ Chèn Lên Web</button>
           <button type="button" id="btn-close-rb-dock" class="rb-customize-action-btn" title="Thu gọn bảng Customize 3 cột">✕</button>
         </div>
       </div>
@@ -1020,9 +1037,10 @@
   <!-- TOAST NOTIFICATION -->
   <div id="toast-container" class="toast-container"></div>
 
-  <script src="./js/ui-libs-registry.js?v=6.2"></script>
-  <script src="./js/reactbits-customize.js?v=6.2"></script>
-  <script src="./js/templates.js?v=6.2"></script>
-  <script src="./js/studio.js?v=6.2"></script>
+  <script src="./js/ui-libs-registry.js?v=6.3"></script>
+  <script src="./js/reactbits-customize.js?v=6.3"></script>
+  <script src="./js/templates.js?v=6.3"></script>
+  <script src="./js/studio.js?v=6.3"></script>
+  <script src="./js/i18n-theme.js?v=6.3"></script>
 </body>
 </html>
