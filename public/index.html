@@ -3,766 +3,720 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Visual UI Studio Pro v3.0 — Kéo Thả & Sửa Giao Diện Web Tức Thì</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <title>Visual UI Studio Pro v3.1 — Kéo Thả &amp; Xem Trước Giao Diện Web Tức Thì</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Dancing+Script:wght@600;700&family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto:wght@300;400;500;700;900&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./css/studio.css" />
 </head>
 <body>
-  <!-- TOPBAR -->
+  <!-- TOP NAVIGATION BAR -->
   <header class="topbar">
-    <div class="brand">
-      <div class="brand-logo" title="Visual UI Studio Pro v3.0">
-        <i class="ph-fill ph-magic-wand"></i>
-      </div>
-      <div class="brand-info">
-        <div class="brand-title-row">
-          <span class="brand-name">Visual UI Studio</span>
-          <span class="badge-pro">PRO v3.0</span>
+    <div class="topbar__left">
+      <div class="brand">
+        <div class="brand__logo">✦</div>
+        <div class="brand__text">
+          <span class="brand__title">Visual UI Studio <span class="pro-tag">v3.1</span></span>
+          <span class="brand__badge">Live Hover Preview WYSIWYG</span>
         </div>
-        <span class="brand-sub" id="lbl-workspace-name" data-i18n="brandSub">Đang tải dự án...</span>
       </div>
-    </div>
 
-    <!-- Project / File Actions -->
-    <div class="topbar-group">
-      <div class="file-selector-wrap" title="Chọn file HTML trong thư mục">
-        <i class="ph ph-file-html"></i>
-        <select id="file-selector" class="file-selector">
-          <option value="index.html">index.html</option>
+      <div class="divider-v"></div>
+
+      <!-- Source Selector -->
+      <div class="project-bar">
+        <button id="btn-change-folder" class="btn-ghost btn-sm" title="Đổi thư mục dự án trên máy tính">
+          📂 <span id="current-folder-label">d:\Khoa\Porfolio</span>
+        </button>
+        <select id="page-selector" class="select-control" title="Chọn file HTML trong dự án">
+          <option value="">-- Chọn trang web --</option>
         </select>
-      </div>
-
-      <button class="btn-tool" id="btn-open-local-file" title="Mở 1 file .html bất kỳ từ máy tính của bạn">
-        <i class="ph ph-file-arrow-up"></i>
-        <span data-i18n="openHtml">Mở file .html</span>
-      </button>
-      <input type="file" id="hidden-html-input" accept=".html,.htm" style="display:none" />
-
-      <button class="btn-tool" id="btn-open-folder" title="Đổi thư mục dự án Web (Hỗ trợ đầy đủ ảnh & CSS đi kèm)">
-        <i class="ph ph-folder-open"></i>
-        <span data-i18n="openFolder">Mở Thư Mục</span>
-      </button>
-
-      <button class="btn-tool btn-accent-soft" id="btn-open-templates" title="Kho giao diện mẫu dựng sẵn cực đẹp">
-        <i class="ph ph-sparkle"></i>
-        <span data-i18n="templates">Kho Mẫu</span>
-      </button>
-    </div>
-
-    <!-- Center Viewport & Tool Controls -->
-    <div class="topbar-center">
-      <!-- Viewport Switcher -->
-      <div class="segmented-control" id="viewport-switcher">
-        <button class="seg-btn active" data-viewport="desktop" title="Màn hình Máy tính (100%)">
-          <i class="ph ph-desktop"></i>
-          <span>Desktop</span>
+        <button id="btn-open-local-file" class="btn-ghost btn-sm" title="Thả hoặc chọn file HTML / Thư mục bất kỳ từ máy tính">
+          📥 Thả Web / Mở File
         </button>
-        <button class="seg-btn" data-viewport="tablet" title="Máy tính bảng iPad (768px)">
-          <i class="ph ph-device-tablet"></i>
-          <span>Tablet</span>
-        </button>
-        <button class="seg-btn" data-viewport="mobile" title="Điện thoại iPhone (390px)">
-          <i class="ph ph-device-mobile"></i>
-          <span>Mobile</span>
-        </button>
-      </div>
-
-      <!-- Mode Switcher (Edit vs Preview) -->
-      <div class="segmented-control" id="mode-switcher">
-        <button class="seg-btn active" data-mode="edit" id="mode-edit-btn" title="Chế độ Chỉnh sửa & Kéo thả">
-          <i class="ph ph-cursor-click"></i>
-          <span data-i18n="modeEdit">Chỉnh sửa</span>
-        </button>
-        <button class="seg-btn" data-mode="preview" id="mode-preview-btn" title="Chế độ Xem thử & Bấm nút như Web thật">
-          <i class="ph ph-play"></i>
-          <span data-i18n="modePreview">Xem thử</span>
-        </button>
-      </div>
-
-      <!-- Canvas Helpers -->
-      <div class="toolbar-icons">
-        <button class="icon-btn active" id="btn-toggle-guides" title="Bật/Tắt đường gióng thông minh & khoảng cách (Smart Guides)">
-          <i class="ph ph-ruler"></i>
-        </button>
-        <button class="icon-btn" id="btn-toggle-grid" title="Bật/Tắt lưới căn chỉnh (Grid)">
-          <i class="ph ph-grid-four"></i>
-        </button>
-        <button class="icon-btn" id="btn-toggle-outlines" title="Hiển thị khung viền mọi phần tử (X-Ray Mode)">
-          <i class="ph ph-bounding-box"></i>
-        </button>
-        <div class="divider-v"></div>
-        <button class="icon-btn" id="btn-undo" title="Hoàn tác bước vừa làm (Ctrl+Z)" disabled>
-          <i class="ph ph-arrow-u-up-left"></i>
-        </button>
-        <button class="icon-btn" id="btn-redo" title="Làm lại bước vừa hoàn tác (Ctrl+Y)" disabled>
-          <i class="ph ph-arrow-u-up-right"></i>
-        </button>
-        <button class="icon-btn" id="btn-reload-canvas" title="Tải lại trang Web trong khung nhìn">
-          <i class="ph ph-arrows-clockwise"></i>
+        <button id="btn-load-demo" class="btn-ghost btn-sm" title="Mở giao diện mẫu để thử nghiệm">
+          🎨 Trang Mẫu
         </button>
       </div>
     </div>
 
-    <!-- Right Actions -->
-    <div class="topbar-right">
-      <button class="icon-btn" id="btn-lang-toggle" title="Switch Language (Tiếng Việt / English)">
-        <span id="lbl-lang" style="font-size:11px;font-weight:700;">VI</span>
-      </button>
-      <button class="icon-btn" id="btn-help-modal" title="Hướng dẫn sử dụng nhanh & Phím tắt">
-        <i class="ph ph-question"></i>
+    <!-- Center Viewport Controls -->
+    <div class="topbar__center">
+      <div class="segmented-group" id="viewport-switcher">
+        <button class="seg-btn active" data-viewport="100%" title="Màn hình máy tính (Desktop)">🖥️ Desktop</button>
+        <button class="seg-btn" data-viewport="768px" title="Máy tính bảng (Tablet 768px)">📱 Tablet</button>
+        <button class="seg-btn" data-viewport="390px" title="Điện thoại (Mobile 390px)">📲 Mobile</button>
+      </div>
+
+      <div class="zoom-controls">
+        <button id="btn-zoom-out" class="btn-icon" title="Thu nhỏ">-</button>
+        <span id="zoom-label" class="zoom-value">100%</span>
+        <button id="btn-zoom-in" class="btn-icon" title="Phóng to">+</button>
+        <button id="btn-zoom-reset" class="btn-ghost btn-xs" title="Đặt lại 100%">Reset</button>
+      </div>
+
+      <div class="divider-v"></div>
+
+      <!-- Mode Switcher: Edit vs Preview -->
+      <div class="segmented-group">
+        <button id="mode-edit-btn" class="seg-btn active" title="Chế độ kéo thả & chỉnh sửa trực tiếp">
+          ✏️ Chế độ Sửa
+        </button>
+        <button id="mode-preview-btn" class="seg-btn" title="Chế độ xem thử như trang web thật (bấm link, cuộn mượt)">
+          👁️ Xem Thử
+        </button>
+      </div>
+
+      <!-- Freeze Preloader / Animations Checkbox -->
+      <label class="toggle-pill" title="Tự động ẩn màn hình chờ (Loader) và hiện đầy đủ các khối ẩn để dễ chỉnh sửa">
+        <input type="checkbox" id="chk-bypass-loader" checked />
+        <span>Bỏ qua Loader &amp; Hiện phần tử ẩn</span>
+      </label>
+    </div>
+
+    <!-- Right Actions: Undo/Redo, AI Prompt, Save -->
+    <div class="topbar__right">
+      <div class="history-btns">
+        <button id="btn-undo" class="btn-icon" title="Hoàn tác (Ctrl+Z)" disabled>↩</button>
+        <button id="btn-redo" class="btn-icon" title="Làm lại (Ctrl+Y)" disabled>↪</button>
+      </div>
+
+      <button id="btn-ai-prompt" class="btn-secondary btn-sm" title="Tự động tạo câu lệnh Prompt chi tiết mọi thay đổi để gửi cho AI">
+        🤖 Xuất Prompt AI <span id="change-count-badge" class="badge-count">0</span>
       </button>
 
-      <button class="btn-action btn-outline" id="btn-ai-prompt" title="Xuất câu lệnh chuẩn xác để gửi cho AI sửa code hộ">
-        <i class="ph ph-robot"></i>
-        <span data-i18n="aiPrompt">Lệnh cho AI</span>
-        <span class="change-counter" id="change-badge">0</span>
+      <button id="btn-download-html" class="btn-secondary btn-sm" title="Tải file HTML đã chỉnh sửa về máy">
+        ⬇️ Tải HTML
       </button>
 
-      <button class="btn-action btn-secondary" id="btn-download-html" title="Tải file HTML hoàn chỉnh về máy tính">
-        <i class="ph ph-download-simple"></i>
-        <span data-i18n="downloadHtml">Tải HTML</span>
-      </button>
-
-      <button class="btn-action btn-primary" id="btn-save-direct" title="Lưu trực tiếp mọi thay đổi vào file gốc (Ctrl+S)">
-        <i class="ph ph-floppy-disk-back"></i>
-        <span data-i18n="saveDirect">Lưu vào File gốc</span>
+      <button id="btn-save-direct" class="btn-primary btn-sm" title="Lưu trực tiếp vào file gốc trên máy (Ctrl+S)">
+        💾 Lưu Vào File Gốc
       </button>
     </div>
   </header>
 
   <!-- MAIN WORKSPACE -->
-  <div class="workspace">
-    <!-- LEFT SIDEBAR -->
-    <aside class="sidebar-left">
-      <div class="sidebar-tabs">
-        <button class="tab-btn active" data-tab="tab-add" title="Kéo hoặc bấm để chèn thêm nút, chữ, ảnh, khung mẫu">
-          <i class="ph ph-plus-circle"></i>
-          <span data-i18n="tabAdd">Thêm mới</span>
-        </button>
-        <button class="tab-btn" data-tab="tab-layers" title="Danh sách các lớp giao diện trên trang">
-          <i class="ph ph-stack"></i>
-          <span data-i18n="tabLayers">Cây giao diện</span>
-        </button>
-        <button class="tab-btn" data-tab="tab-magic" title="Bộ nâng cấp thiết kế 1-Click">
-          <i class="ph ph-sparkle"></i>
-          <span data-i18n="tabMagic">Phép thuật</span>
-        </button>
-        <button class="tab-btn" data-tab="tab-history" title="Lịch sử các chỉnh sửa và nút khôi phục từng phần">
-          <i class="ph ph-clock-counter-clockwise"></i>
-          <span data-i18n="tabHistory">Lịch sử</span>
-        </button>
+  <div class="studio-body">
+    <!-- LEFT SIDEBAR: Layers, Add Elements, Magic Presets, Change History -->
+    <aside class="sidebar sidebar--left">
+      <div class="sidebar-tabs sidebar-tabs--4">
+        <button class="sidebar-tab active" data-tab="tab-layers">📑 Cây UI</button>
+        <button class="sidebar-tab" data-tab="tab-add">➕ Thêm</button>
+        <button class="sidebar-tab" data-tab="tab-magic">✨ Phép Thuật</button>
+        <button class="sidebar-tab" data-tab="tab-history">🕒 Lịch Sử</button>
       </div>
 
-      <!-- TAB 1: ADD ELEMENTS -->
-      <div class="tab-panel active" id="tab-add">
-        <div class="panel-note">
-          <i class="ph-fill ph-info"></i>
-          <span data-i18n="addHint">Bấm vào thành phần bên dưới để chèn ngay vào vị trí đang chọn trên trang. Chọn nhầm có thể bấm <b>🗑️ Xóa</b> hoặc <b>Ctrl+Z</b> ngay!</span>
+      <!-- TAB 1: DOM Layers Tree -->
+      <div class="sidebar-panel active" id="tab-layers">
+        <div class="panel-search">
+          <input type="text" id="layer-search" placeholder="🔍 Tìm thẻ, class, nội dung chữ..." />
+          <button id="btn-refresh-tree" class="btn-icon" title="Làm mới cây giao diện">⟳</button>
         </div>
-
-        <div class="insert-mode-bar">
-          <span class="insert-label" data-i18n="insertPos">Vị trí chèn:</span>
-          <select id="insert-position-mode" class="mini-select">
-            <option value="after" data-i18n="insertAfter">Ngay bên dưới phần tử đang chọn</option>
-            <option value="inside" data-i18n="insertInside">Bên trong khung đang chọn</option>
-            <option value="before" data-i18n="insertBefore">Ngay phía trên phần tử đang chọn</option>
-          </select>
+        <div id="dom-tree-container" class="dom-tree">
+          <!-- Populated dynamically -->
         </div>
-
-        <div class="section-label" data-i18n="basicBlocks">THÀNH PHẦN CƠ BẢN</div>
-        <div class="element-grid" id="basic-blocks-grid"></div>
-
-        <div class="section-label" style="margin-top:16px;" data-i18n="proBlocks">KHỐI GIAO DIỆN DỰNG SẴN (PRO)</div>
-        <div class="element-grid pro-grid" id="pro-blocks-grid"></div>
       </div>
 
-      <!-- TAB 2: DOM LAYERS -->
-      <div class="tab-panel" id="tab-layers">
-        <div class="search-box">
-          <i class="ph ph-magnifying-glass"></i>
-          <input type="text" id="layer-search" placeholder="Tìm thẻ, chữ, nút, ID..." />
+      <!-- TAB 2: Add New UI Elements -->
+      <div class="sidebar-panel" id="tab-add">
+        <div class="panel-section">
+          <p class="section-hint">💡 <strong>Rê chuột vào khối</strong> để xem trước trực tiếp trên trang web, <strong>Bấm chuột</strong> để chèn vào! (Thêm nhầm có thể bấm <strong>🗑️ Xóa</strong> hoặc <strong>Ctrl+Z</strong>):</p>
+          <div class="add-blocks-grid">
+            <button class="add-block-card" data-add-type="button">
+              <span class="add-block-icon">🔘</span>
+              <span class="add-block-title">Nút Bấm (Button)</span>
+              <span class="add-block-desc">Nút kêu gọi hành động</span>
+            </button>
+            <button class="add-block-card" data-add-type="heading">
+              <span class="add-block-icon">🔤</span>
+              <span class="add-block-title">Tiêu Đề (Heading)</span>
+              <span class="add-block-desc">Tiêu đề lớn nổi bật</span>
+            </button>
+            <button class="add-block-card" data-add-type="paragraph">
+              <span class="add-block-icon">📝</span>
+              <span class="add-block-title">Đoạn Văn (Text)</span>
+              <span class="add-block-desc">Văn bản mô tả chi tiết</span>
+            </button>
+            <button class="add-block-card" data-add-type="badge">
+              <span class="add-block-icon">🏷️</span>
+              <span class="add-block-title">Nhãn (Badge / Pill)</span>
+              <span class="add-block-desc">Tag nhỏ trang trí</span>
+            </button>
+            <button class="add-block-card" data-add-type="image">
+              <span class="add-block-icon">🖼️</span>
+              <span class="add-block-title">Hình Ảnh (Image)</span>
+              <span class="add-block-desc">Khung ảnh bo góc</span>
+            </button>
+            <button class="add-block-card" data-add-type="card">
+              <span class="add-block-icon">📦</span>
+              <span class="add-block-title">Khối Card (Box)</span>
+              <span class="add-block-desc">Hộp chứa nội dung</span>
+            </button>
+            <button class="add-block-card" data-add-type="flex-row">
+              <span class="add-block-icon">↔️</span>
+              <span class="add-block-title">Hàng Ngang (Flex)</span>
+              <span class="add-block-desc">Chia cột ngang tự động</span>
+            </button>
+            <button class="add-block-card" data-add-type="divider">
+              <span class="add-block-icon">➖</span>
+              <span class="add-block-title">Đường Kẻ Ngang</span>
+              <span class="add-block-desc">Phân cách các phần</span>
+            </button>
+          </div>
         </div>
-        <div class="layers-tree" id="layers-tree"></div>
       </div>
 
-      <!-- TAB 3: MAGIC PRESETS -->
-      <div class="tab-panel" id="tab-magic">
-        <div class="panel-note">
-          <i class="ph-fill ph-magic-wand"></i>
-          <span data-i18n="magicHint">Chọn 1 phần tử trên trang rồi bấm vào các phong cách dưới đây để tự động làm đẹp tức thì! (Bấm <b>↺ Khôi phục gốc</b> bất cứ lúc nào).</span>
+      <!-- TAB 3: Magic Presets (1-Click Style & Live Hover Preview) -->
+      <div class="sidebar-panel" id="tab-magic">
+        <div class="panel-section">
+          <p class="section-hint">✨ Chọn 1 phần tử trên web rồi <strong>rê chuột qua các phong cách dưới đây</strong> để xem trước hiệu ứng ngay lập tức!</p>
+          <div id="magic-presets-list" class="magic-presets-list"></div>
         </div>
-        <div class="magic-list" id="magic-presets-list"></div>
       </div>
 
-      <!-- TAB 4: CHANGE HISTORY -->
-      <div class="tab-panel" id="tab-history">
-        <div class="history-header-row">
-          <span class="section-label" style="margin:0;" data-i18n="editedList">DANH SÁCH ĐÃ CHỈNH SỬA</span>
-          <button class="btn-text-danger" id="btn-clear-all-history" title="Hủy toàn bộ thay đổi, đưa trang web về nguyên bản">
-            <i class="ph ph-trash"></i> <span data-i18n="resetAll">Khôi phục tất cả</span>
-          </button>
-        </div>
-        <div id="history-list" class="history-list">
-          <div class="empty-msg" data-i18n="noChangesYet">Chưa có thay đổi nào. Hãy bấm vào trang web và kéo thả thử!</div>
+      <!-- TAB 4: History & Change Log -->
+      <div class="sidebar-panel" id="tab-history">
+        <div class="panel-section">
+          <div class="section-header-row">
+            <h4>Nhật ký chỉnh sửa (<span id="history-total">0</span>)</h4>
+            <button id="btn-clear-all-edits" class="btn-ghost btn-xs text-danger">↺ Khôi phục tất cả</button>
+          </div>
+          <p class="section-hint">Mọi thao tác đều có thể hoàn tác từng phần hoặc bấm <strong>Ctrl+Z</strong>.</p>
+          <div id="change-log-list" class="change-log-list">
+            <div class="empty-state-sm">Chưa có thay đổi nào. Hãy click vào một phần tử trên trang để bắt đầu kéo thả!</div>
+          </div>
         </div>
       </div>
     </aside>
 
-    <!-- CENTER CANVAS -->
-    <main class="canvas-area" id="canvas-dropzone">
-      <!-- Floating Quick Context Toolbar -->
-      <div class="canvas-Quickbar" id="canvas-quickbar">
-        <div class="quickbar-left">
-          <span class="breadcrumb-trail" id="breadcrumb-trail">
-            <span class="crumb-empty" data-i18n="clickToSelect">👆 Hãy bấm vào bất kỳ chữ, nút hoặc khung nào trên Web để sửa</span>
-          </span>
+    <!-- CENTER CANVAS AREA -->
+    <main class="canvas-stage" id="canvas-stage">
+      <!-- Top Quick Guide Helper Bar -->
+      <div class="canvas-statusbar">
+        <div class="statusbar-left">
+          <span class="status-dot"></span>
+          <span id="status-breadcrumb">Chưa chọn phần tử nào</span>
         </div>
-        <div class="quickbar-right">
-          <span class="zoom-label" id="zoom-level-lbl">100%</span>
-          <button class="mini-icon-btn" id="btn-zoom-out" title="Thu nhỏ"><i class="ph ph-minus"></i></button>
-          <button class="mini-icon-btn" id="btn-zoom-reset" title="Về 100%">100%</button>
-          <button class="mini-icon-btn" id="btn-zoom-in" title="Phóng to"><i class="ph ph-plus"></i></button>
+        <div class="statusbar-center">
+          <span id="live-preview-badge" class="live-preview-badge hidden">👁️ Đang xem thử trực tiếp...</span>
+          <span class="shortcut-tip"><kbd>Click + Kéo</kbd> Di chuyển</span>
+          <span class="shortcut-tip"><kbd>← ↑ → ↓</kbd> Nhích 1px</span>
+          <span class="shortcut-tip"><kbd>Double-Click</kbd> Sửa chữ</span>
+          <span class="shortcut-tip"><kbd>Delete</kbd> Xóa</span>
+          <span class="shortcut-tip"><kbd>Ctrl+Z</kbd> Hoàn tác</span>
         </div>
-      </div>
-
-      <!-- Drag & Drop File Overlay -->
-      <div class="dropzone-overlay" id="dropzone-overlay">
-        <div class="dropzone-card">
-          <i class="ph-fill ph-file-html"></i>
-          <h3 data-i18n="dropTitle">Thả file .HTML hoặc Ảnh vào đây!</h3>
-          <p data-i18n="dropSub">Nếu thả file .html: Mở trang web ngay lập tức.<br/>Nếu thả file Ảnh (.png, .jpg, .webp): Thay ảnh vào khung đang chọn!</p>
+        <div class="statusbar-right">
+          <span id="live-coords-readout" class="coords-pill">X: 0px | Y: 0px | W: -- | H: --</span>
         </div>
       </div>
 
-      <!-- Viewport Stage -->
-      <div class="viewport-stage" id="viewport-stage">
-        <div class="iframe-container" id="iframe-container">
-          <iframe id="preview-iframe" title="Web UI Canvas"></iframe>
+      <!-- Drag & Drop File Overlay when dragging files from OS -->
+      <div id="dropzone-overlay" class="dropzone-overlay hidden">
+        <div class="dropzone-box">
+          <div class="dropzone-icon">🚀</div>
+          <h3>Thả File HTML hoặc Thư Mục Web vào đây!</h3>
+          <p>Hỗ trợ thả 1 file <code>.html</code> hoặc nguyên cả thư mục chứa HTML, CSS, Hình ảnh</p>
         </div>
       </div>
 
-      <!-- Floating Bottom Helper Bar -->
-      <div class="canvas-footer-tips">
-        <span><kbd>Click</kbd> <span data-i18n="tipClick">Chọn</span></span>
-        <span><kbd>Double-Click</kbd> <span data-i18n="tipDblClick">Sửa chữ trực tiếp</span></span>
-        <span><kbd>Kéo chuột</kbd> <span data-i18n="tipDrag">Dịch chuyển tự do</span></span>
-        <span><kbd>Shift + Kéo</kbd> <span data-i18n="tipShift">Khóa thẳng hàng</span></span>
-        <span><kbd>Phím mũi tên</kbd> <span data-i18n="tipArrows">Nhích 1px (+Shift: 10px)</span></span>
-        <span><kbd>Delete</kbd> <span data-i18n="tipDelete">Xóa phần tử</span></span>
-        <span><kbd>Ctrl+Z</kbd> <span data-i18n="tipUndo">Hoàn tác</span></span>
+      <!-- The Interactive Viewport Wrapper -->
+      <div class="canvas-viewport-scroll" id="canvas-scroll-area">
+        <div class="canvas-frame-wrapper" id="canvas-frame-wrapper">
+          <iframe id="canvas-iframe" title="Editable Web Canvas" sandbox="allow-same-origin allow-scripts allow-forms allow-modals"></iframe>
+        </div>
       </div>
     </main>
 
-    <!-- RIGHT SIDEBAR: INSPECTOR -->
-    <aside class="sidebar-right">
-      <!-- Empty State when nothing selected -->
-      <div class="inspector-empty" id="inspector-empty">
-        <div class="empty-illustration">
-          <i class="ph-duotone ph-cursor-click"></i>
+    <!-- RIGHT SIDEBAR: Visual Property Inspector -->
+    <aside class="sidebar sidebar--right">
+      <div class="inspector-header">
+        <div class="inspector-title-row">
+          <span class="inspector-badge" id="selected-tag-badge">NONE</span>
+          <span class="inspector-selector" id="selected-selector-label">Hãy chọn 1 phần tử trên web</span>
         </div>
-        <h3 data-i18n="emptyTitle">Chưa chọn phần tử nào</h3>
-        <p data-i18n="emptyDesc">Hãy bấm chuột vào bất kỳ <b>Nút bấm, Tiêu đề, Hình ảnh</b> hoặc <b>Khung</b> nào ở giữa màn hình để:</p>
-        <ul class="feature-checklist">
-          <li><i class="ph-fill ph-check-circle"></i> <span data-i18n="feat1">Kéo thả dịch chuyển vị trí tự do theo thời gian thực</span></li>
-          <li><i class="ph-fill ph-check-circle"></i> <span data-i18n="feat2">Đổi màu chữ, màu nền, Gradient (có nút <b>↺ Màu gốc</b>)</span></li>
-          <li><i class="ph-fill ph-check-circle"></i> <span data-i18n="feat3">Sửa nội dung chữ, thay ảnh từ máy tính cực nhanh</span></li>
-          <li><i class="ph-fill ph-check-circle"></i> <span data-i18n="feat4">Thêm nút/khung mới hoặc bấm <b>🗑️ Xóa</b> phần tử thừa</span></li>
+
+        <!-- Quick Element Actions -->
+        <div class="quick-element-actions" id="element-quick-actions">
+          <button id="btn-el-parent" class="btn-action" title="Chọn phần tử cha (Bao ngoài)" disabled>⬆️ Khối Cha</button>
+          <button id="btn-el-duplicate" class="btn-action" title="Nhân bản phần tử này (Ctrl+D)" disabled>📋 Nhân Bản</button>
+          <button id="btn-el-reset" class="btn-action btn-action--warning" title="Khôi phục phần tử này về nguyên trạng ban đầu" disabled>↺ Về Gốc</button>
+          <button id="btn-el-delete" class="btn-action btn-action--danger" title="Xóa phần tử này khỏi trang (Phím Delete)" disabled>🗑️ Xóa</button>
+        </div>
+      </div>
+
+      <!-- Empty State when nothing is selected -->
+      <div id="inspector-empty" class="inspector-empty">
+        <div class="inspector-empty__icon">👆</div>
+        <h3>Chọn bất kỳ phần tử nào trên trang web</h3>
+        <p>Click vào nút bấm, dòng chữ, hình ảnh hoặc khung giao diện ở giữa màn hình để:</p>
+        <ul class="inspector-feature-list">
+          <li>✨ <strong>Kéo thả tự do</strong> sang trái/phải/lên/xuống với tọa độ Realtime</li>
+          <li>👁️ <strong>Rê chuột xem trước tức thì (Live Hover Preview)</strong> trên mọi Font chữ, Màu sắc, Gradient, Đổ bóng trước khi chọn!</li>
+          <li>↺ <strong>Quay lại Màu gốc / Vị trí gốc</strong> bất cứ lúc nào chỉ với 1 nút bấm</li>
+          <li>🗑️ <strong>Thêm nút mới hoặc Xóa phần tử</strong> cực nhanh ngay trên thanh nổi</li>
         </ul>
       </div>
 
-      <!-- Active Inspector Content -->
-      <div class="inspector-content" id="inspector-content" style="display:none;">
-        <!-- Selected Element Header -->
-        <div class="inspector-header">
-          <div class="selected-meta">
-            <span class="tag-pill" id="insp-tag">BUTTON</span>
-            <span class="selector-pill" id="insp-selector" title="Định danh CSS của phần tử">.btn-primary</span>
-          </div>
-          <div class="quick-elem-actions">
-            <button class="elem-act-btn" id="btn-select-parent" title="Chọn khung cha bao ngoài (Esc)">
-              <i class="ph ph-arrow-elbow-left-up"></i> <span data-i18n="parentBtn">Khung cha</span>
-            </button>
-            <button class="elem-act-btn" id="btn-move-prev" title="Đẩy phần tử lên trước / sang trái trong danh sách">
-              <i class="ph ph-arrow-left"></i>
-            </button>
-            <button class="elem-act-btn" id="btn-move-next" title="Đẩy phần tử xuống sau / sang phải trong danh sách">
-              <i class="ph ph-arrow-right"></i>
-            </button>
-            <button class="elem-act-btn" id="btn-duplicate-el" title="Nhân bản phần tử này (Ctrl+D)">
-              <i class="ph ph-copy"></i> <span data-i18n="dupBtn">Nhân bản</span>
-            </button>
-            <button class="elem-act-btn warning" id="btn-reset-el" title="Khôi phục phần tử này về nguyên trạng ban đầu">
-              <i class="ph ph-arrow-counter-clockwise"></i> <span data-i18n="resetBtn">Gốc</span>
-            </button>
-            <button class="elem-act-btn danger" id="btn-delete-el" title="Xóa phần tử này khỏi trang (Phím Delete)">
-              <i class="ph ph-trash"></i> <span data-i18n="deleteBtn">Xóa</span>
-            </button>
-          </div>
-        </div>
+      <!-- Active Controls when an element is selected -->
+      <div id="inspector-controls" class="inspector-content hidden">
 
-        <!-- State & Breakpoint Scope Bar -->
-        <div class="scope-bar">
-          <div class="scope-group">
-            <span class="scope-lbl" data-i18n="stateLbl">Trạng thái:</span>
-            <div class="mini-tabs" id="state-tabs">
-              <button class="mini-tab active" data-state="normal" data-i18n="stateNormal">Bình thường</button>
-              <button class="mini-tab" data-state="hover" title="Màu sắc/hiệu ứng khi người dùng rê chuột vào">Khi rê chuột (Hover)</button>
+        <!-- 1. REALTIME COORDINATES & POSITION -->
+        <section class="prop-group">
+          <div class="prop-group__header">
+            <span>📍 Tọa Độ &amp; Kích Thước</span>
+            <div class="header-right-inline">
+              <select id="drag-mode-select" class="select-xs" title="Cách thức dịch chuyển phần tử">
+                <option value="translate">Kéo tự do (Translate)</option>
+                <option value="margin">Đẩy bố cục (Margin)</option>
+              </select>
+              <button type="button" id="btn-pos-reset" class="btn-reset-pill" title="Đưa vị trí X, Y, góc xoay và kích thước về gốc ban đầu">↺ Vị trí gốc</button>
             </div>
           </div>
-          <div class="scope-badge" id="scope-viewport-badge" title="Mọi chỉnh sửa đang áp dụng cho màn hình này">
-            <i class="ph ph-desktop"></i> <span>Tất cả màn hình</span>
+
+          <!-- X & Y Coordinates with Quick Nudge Buttons -->
+          <div class="coord-grid">
+            <div class="coord-box">
+              <label>Ngang X (Trái / Phải)</label>
+              <div class="input-stepper">
+                <button type="button" class="step-btn" data-nudge-x="-10" title="Sang trái 10px (Rê chuột để xem thử)">-10</button>
+                <button type="button" class="step-btn" data-nudge-x="-1" title="Sang trái 1px">◀</button>
+                <input type="number" id="prop-x" value="0" />
+                <button type="button" class="step-btn" data-nudge-x="1" title="Sang phải 1px">▶</button>
+                <button type="button" class="step-btn" data-nudge-x="10" title="Sang phải 10px (Rê chuột để xem thử)">+10</button>
+              </div>
+            </div>
+
+            <div class="coord-box">
+              <label>Dọc Y (Lên / Xuống)</label>
+              <div class="input-stepper">
+                <button type="button" class="step-btn" data-nudge-y="-10" title="Lên trên 10px (Rê chuột để xem thử)">-10</button>
+                <button type="button" class="step-btn" data-nudge-y="-1" title="Lên trên 1px">▲</button>
+                <input type="number" id="prop-y" value="0" />
+                <button type="button" class="step-btn" data-nudge-y="1" title="Xuống dưới 1px">▼</button>
+                <button type="button" class="step-btn" data-nudge-y="10" title="Xuống dưới 10px (Rê chuột để xem thử)">+10</button>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div class="inspector-scroll">
-          <!-- 1. REALTIME COORDINATES & SIZE -->
-          <section class="insp-section">
-            <div class="sec-head">
-              <span><i class="ph-fill ph-arrows-out-cardinal"></i> <span data-i18n="secPos">TỌA ĐỘ & KÍCH THƯỚC (REALTIME)</span></span>
-              <button class="btn-reset-pill" id="btn-pos-reset" title="Đưa vị trí X, Y và kích thước về nguyên bản ban đầu">
-                <i class="ph ph-arrow-counter-clockwise"></i> <span data-i18n="resetPos">Vị trí gốc</span>
-              </button>
-            </div>
-            <div class="coord-grid">
-              <div class="coord-field">
-                <label title="Độ lệch ngang (Trái: âm, Phải: dương)">Dịch Ngang X</label>
-                <div class="input-with-unit">
-                  <input type="number" id="inp-tx" value="0" step="1" />
-                  <span>px</span>
-                  <button class="mini-zero-btn" id="btn-reset-x" title="Đưa X về 0">0</button>
-                </div>
-              </div>
-              <div class="coord-field">
-                <label title="Độ lệch dọc (Lên: âm, Xuống: dương)">Dịch Dọc Y</label>
-                <div class="input-with-unit">
-                  <input type="number" id="inp-ty" value="0" step="1" />
-                  <span>px</span>
-                  <button class="mini-zero-btn" id="btn-reset-y" title="Đưa Y về 0">0</button>
-                </div>
-              </div>
-              <div class="coord-field">
-                <label>Rộng (W)</label>
-                <div class="input-with-unit">
-                  <input type="text" id="inp-width" placeholder="auto" />
-                  <span>px</span>
-                </div>
-              </div>
-              <div class="coord-field">
-                <label>Cao (H)</label>
-                <div class="input-with-unit">
-                  <input type="text" id="inp-height" placeholder="auto" />
-                  <span>px</span>
-                </div>
+          <!-- Width & Height -->
+          <div class="prop-row-2col mt-8">
+            <div class="prop-field">
+              <label>Chiều rộng (W px)</label>
+              <div class="input-with-unit">
+                <input type="text" id="prop-width" placeholder="auto" />
+                <button type="button" class="unit-btn" id="btn-width-auto" title="Đặt lại chiều rộng tự động">auto</button>
               </div>
             </div>
+            <div class="prop-field">
+              <label>Chiều cao (H px)</label>
+              <div class="input-with-unit">
+                <input type="text" id="prop-height" placeholder="auto" />
+                <button type="button" class="unit-btn" id="btn-height-auto" title="Đặt lại chiều cao tự động">auto</button>
+              </div>
+            </div>
+          </div>
 
-            <!-- Quick Nudge D-Pad for Non-IT Users -->
-            <div class="nudge-bar">
-              <span class="nudge-lbl" data-i18n="nudgeLbl">Dịch nhanh:</span>
-              <div class="nudge-btns">
-                <button class="nudge-btn" data-dx="-5" data-dy="0" title="Sang trái 5px"><i class="ph ph-arrow-left"></i> Trái</button>
-                <button class="nudge-btn" data-dx="5" data-dy="0" title="Sang phải 5px">Phải <i class="ph ph-arrow-right"></i></button>
-                <button class="nudge-btn" data-dx="0" data-dy="-5" title="Lên trên 5px"><i class="ph ph-arrow-up"></i> Lên</button>
-                <button class="nudge-btn" data-dx="0" data-dy="5" title="Xuống dưới 5px">Xuống <i class="ph ph-arrow-down"></i></button>
-                <button class="nudge-btn" id="btn-center-h" title="Căn giữa ngang"><i class="ph ph-align-center-horizontal"></i> Giữa</button>
-              </div>
+          <!-- Rotate, Scale & Z-Index -->
+          <div class="prop-row-3col mt-8">
+            <div class="prop-field">
+              <label>Xoay (°)</label>
+              <input type="number" id="prop-rotate" value="0" step="1" />
             </div>
-          </section>
+            <div class="prop-field">
+              <label>Tỷ lệ (%)</label>
+              <input type="number" id="prop-scale" value="100" step="5" min="10" max="300" />
+            </div>
+            <div class="prop-field">
+              <label>Lớp (Z-Index)</label>
+              <input type="number" id="prop-zindex" placeholder="auto" />
+            </div>
+          </div>
+        </section>
 
-          <!-- 2. CONTENT & MEDIA (TEXT / LINK / IMAGE) -->
-          <section class="insp-section" id="sec-content">
-            <div class="sec-head">
-              <span><i class="ph-fill ph-text-t"></i> <span data-i18n="secContent">NỘI DUNG & HÌNH ẢNH</span></span>
-              <button class="btn-reset-pill" id="btn-text-reset" title="Khôi phục nội dung chữ ban đầu">
-                <i class="ph ph-arrow-counter-clockwise"></i> <span data-i18n="origText">Chữ gốc</span>
-              </button>
-            </div>
-            <div class="form-row" id="row-text-content">
-              <label data-i18n="lblText">Văn bản hiển thị (hoặc Double-click vào phần tử)</label>
-              <textarea id="inp-text" rows="2" placeholder="Nhập nội dung chữ..."></textarea>
-            </div>
-            <div class="form-row" id="row-href" style="display:none;">
-              <label>Đường dẫn khi bấm vào (Link URL)</label>
-              <input type="text" id="inp-href" placeholder="https://... hoặc #section" />
-            </div>
-            <div class="form-row" id="row-img-src" style="display:none;">
-              <div class="label-with-action">
-                <label>Đường dẫn Ảnh (Image URL / Chọn ảnh từ máy)</label>
-                <button class="btn-reset-pill" id="btn-img-reset" title="Khôi phục ảnh gốc ban đầu">
-                  <i class="ph ph-arrow-counter-clockwise"></i> Ảnh gốc
-                </button>
-              </div>
-              <div class="img-picker-row">
-                <input type="text" id="inp-img-src" placeholder="https://... hoặc data:image..." />
-                <button class="btn-upload-img" id="btn-upload-img" title="Chọn ảnh từ máy tính của bạn">
-                  <i class="ph ph-upload-simple"></i> Chọn ảnh
-                </button>
-                <input type="file" id="hidden-img-input" accept="image/*" style="display:none;" />
-              </div>
-              <div class="form-row" style="margin-top:8px;">
-                <label>Chế độ cắt ảnh (Object Fit)</label>
-                <select id="sel-object-fit">
-                  <option value="">Mặc định</option>
-                  <option value="cover">Cover (Lấp đầy khung, không méo)</option>
-                  <option value="contain">Contain (Hiện trọn vẹn ảnh)</option>
-                  <option value="fill">Fill (Kéo giãn vừa khung)</option>
-                </select>
-              </div>
-            </div>
-          </section>
+        <!-- 2. COLORS & BACKGROUND (WITH LIVE HOVER PREVIEW & ORIGINAL COLOR RESET) -->
+        <section class="prop-group">
+          <div class="prop-group__header">
+            <span>🎨 Màu Sắc &amp; Nền (Rê chuột xem thử)</span>
+            <button type="button" id="btn-all-colors-reset" class="btn-reset-pill" title="Khôi phục cả màu chữ lẫn màu nền về nguyên bản">↺ Tất cả màu gốc</button>
+          </div>
 
-          <!-- 3. COLORS & GRADIENTS (WITH EXPLICIT ORIGINAL COLOR RESET!) -->
-          <section class="insp-section">
-            <div class="sec-head">
-              <span><i class="ph-fill ph-palette"></i> <span data-i18n="secColors">MÀU SẮC & NỀN</span></span>
-              <button class="btn-reset-pill btn-sec-reset" data-reset-sec="colors" title="Khôi phục toàn bộ màu chữ và màu nền về nguyên bản">
-                <i class="ph ph-arrow-counter-clockwise"></i> <span data-i18n="resetColorsAll">Tất cả màu gốc</span>
-              </button>
+          <!-- Text Color -->
+          <div class="color-control-block">
+            <div class="color-row">
+              <label>Màu chữ</label>
+              <div class="color-picker-wrap">
+                <input type="color" id="prop-color-picker" value="#ffffff" />
+                <input type="text" id="prop-color-hex" class="hex-input" value="#ffffff" />
+                <button type="button" id="btn-color-reset" class="btn-reset-pill" title="Quay lại màu chữ gốc ban đầu của trang web">↺ Màu gốc</button>
+              </div>
             </div>
+            <div class="swatch-row" id="text-color-swatches">
+              <button class="swatch" style="background:#ffffff" data-text-color="#ffffff" title="Trắng"></button>
+              <button class="swatch" style="background:#f8fafc" data-text-color="#f8fafc" title="Trắng ngà"></button>
+              <button class="swatch" style="background:#94a3b8" data-text-color="#94a3b8" title="Xám nhạt"></button>
+              <button class="swatch" style="background:#1e293b" data-text-color="#1e293b" title="Đen xám"></button>
+              <button class="swatch" style="background:#000000" data-text-color="#000000" title="Đen"></button>
+              <button class="swatch" style="background:#6366f1" data-text-color="#6366f1" title="Tím Indigo"></button>
+              <button class="swatch" style="background:#3b82f6" data-text-color="#3b82f6" title="Xanh dương"></button>
+              <button class="swatch" style="background:#06b6d4" data-text-color="#06b6d4" title="Xanh Cyan"></button>
+              <button class="swatch" style="background:#00f5d4" data-text-color="#00f5d4" title="Xanh Neon"></button>
+              <button class="swatch" style="background:#10b981" data-text-color="#10b981" title="Xanh Ngọc"></button>
+              <button class="swatch" style="background:#f59e0b" data-text-color="#f59e0b" title="Vàng Cam"></button>
+              <button class="swatch" style="background:#f97316" data-text-color="#f97316" title="Cam"></button>
+              <button class="swatch" style="background:#ef4444" data-text-color="#ef4444" title="Đỏ"></button>
+              <button class="swatch" style="background:#ec4899" data-text-color="#ec4899" title="Hồng"></button>
+            </div>
+          </div>
 
-            <!-- Text Color -->
-            <div class="color-control-block">
-              <div class="label-with-action">
-                <label data-i18n="lblTextColor">Màu chữ (Text Color)</label>
-                <button class="btn-reset-pill" id="btn-color-reset" title="Quay lại màu chữ gốc ban đầu của trang web">
-                  <i class="ph ph-arrow-counter-clockwise"></i> <span data-i18n="origColor">Màu gốc</span>
-                </button>
-              </div>
-              <div class="color-picker-row">
-                <input type="color" id="inp-color-picker" value="#ffffff" />
-                <input type="text" id="inp-color-hex" class="hex-input" value="#ffffff" placeholder="Màu gốc" />
-              </div>
-              <div class="swatch-row" data-target="color">
-                <button class="swatch" style="background:#ffffff" data-color="#ffffff" title="Trắng"></button>
-                <button class="swatch" style="background:#f8fafc" data-color="#f8fafc" title="Trắng xám"></button>
-                <button class="swatch" style="background:#94a3b8" data-color="#94a3b8" title="Xám nhạt"></button>
-                <button class="swatch" style="background:#1e293b" data-color="#1e293b" title="Đen than"></button>
-                <button class="swatch" style="background:#00f5d4" data-color="#00f5d4" title="Xanh Neon"></button>
-                <button class="swatch" style="background:#38bdf8" data-color="#38bdf8" title="Xanh Sky"></button>
-                <button class="swatch" style="background:#6366f1" data-color="#6366f1" title="Tím Indigo"></button>
-                <button class="swatch" style="background:#a855f7" data-color="#a855f7" title="Tím Purple"></button>
-                <button class="swatch" style="background:#ec4899" data-color="#ec4899" title="Hồng Pink"></button>
-                <button class="swatch" style="background:#ef4444" data-color="#ef4444" title="Đỏ Red"></button>
-                <button class="swatch" style="background:#f59e0b" data-color="#f59e0b" title="Vàng Cam"></button>
-                <button class="swatch" style="background:#10b981" data-color="#10b981" title="Xanh Lá"></button>
+          <!-- Background Color -->
+          <div class="color-control-block mt-10">
+            <div class="color-row">
+              <label>Màu nền</label>
+              <div class="color-picker-wrap">
+                <input type="color" id="prop-bg-picker" value="#6366f1" />
+                <input type="text" id="prop-bg-hex" class="hex-input" value="#6366f1" />
+                <button type="button" id="btn-bg-transparent" class="btn-xs btn-ghost" title="Làm nền trong suốt">Trong suốt</button>
+                <button type="button" id="btn-bg-reset" class="btn-reset-pill" title="Quay lại màu nền / gradient gốc ban đầu của trang web">↺ Màu gốc</button>
               </div>
             </div>
+            <div class="swatch-row" id="bg-color-swatches">
+              <button class="swatch" style="background:#ffffff" data-bg-color="#ffffff" title="Trắng"></button>
+              <button class="swatch" style="background:#f1f5f9" data-bg-color="#f1f5f9" title="Xám sáng"></button>
+              <button class="swatch" style="background:#1e293b" data-bg-color="#1e293b" title="Xám Đen"></button>
+              <button class="swatch" style="background:#0f172a" data-bg-color="#0f172a" title="Xanh Đen"></button>
+              <button class="swatch" style="background:#000000" data-bg-color="#000000" title="Đen"></button>
+              <button class="swatch" style="background:#6366f1" data-bg-color="#6366f1" title="Tím Indigo"></button>
+              <button class="swatch" style="background:#2563eb" data-bg-color="#2563eb" title="Xanh Royal"></button>
+              <button class="swatch" style="background:#0891b2" data-bg-color="#0891b2" title="Xanh Cyan"></button>
+              <button class="swatch" style="background:#00f5d4" data-bg-color="#00f5d4" title="Xanh Neon"></button>
+              <button class="swatch" style="background:#059669" data-bg-color="#059669" title="Xanh Lá"></button>
+              <button class="swatch" style="background:#eab308" data-bg-color="#eab308" title="Vàng"></button>
+              <button class="swatch" style="background:#ea580c" data-bg-color="#ea580c" title="Cam"></button>
+              <button class="swatch" style="background:#e11d48" data-bg-color="#e11d48" title="Đỏ Hồng"></button>
+              <button class="swatch" style="background:#9333ea" data-bg-color="#9333ea" title="Tím"></button>
+            </div>
+          </div>
 
-            <!-- Background Color -->
-            <div class="color-control-block" style="margin-top:12px;">
-              <div class="label-with-action">
-                <label data-i18n="lblBgColor">Màu nền (Background)</label>
-                <div class="inline-reset-group">
-                  <button class="btn-mini-pill" id="btn-bg-transparent" title="Làm nền trong suốt (Không màu)">
-                    Trong suốt
-                  </button>
-                  <button class="btn-reset-pill" id="btn-bg-reset" title="Quay lại màu nền / gradient gốc ban đầu của trang web">
-                    <i class="ph ph-arrow-counter-clockwise"></i> <span data-i18n="origColor">Màu gốc</span>
-                  </button>
-                </div>
-              </div>
-              <div class="color-picker-row">
-                <input type="color" id="inp-bg-picker" value="#6366f1" />
-                <input type="text" id="inp-bg-hex" class="hex-input" value="#6366f1" placeholder="Màu nền gốc" />
-              </div>
-              <div class="swatch-row" data-target="background-color">
-                <button class="swatch" style="background:#0f172a" data-color="#0f172a"></button>
-                <button class="swatch" style="background:#1e293b" data-color="#1e293b"></button>
-                <button class="swatch" style="background:#ffffff" data-color="#ffffff"></button>
-                <button class="swatch" style="background:#00f5d4" data-color="#00f5d4"></button>
-                <button class="swatch" style="background:#38bdf8" data-color="#38bdf8"></button>
-                <button class="swatch" style="background:#6366f1" data-color="#6366f1"></button>
-                <button class="swatch" style="background:#8b5cf6" data-color="#8b5cf6"></button>
-                <button class="swatch" style="background:#ec4899" data-color="#ec4899"></button>
-                <button class="swatch" style="background:#f43f5e" data-color="#f43f5e"></button>
-                <button class="swatch" style="background:#f59e0b" data-color="#f59e0b"></button>
-                <button class="swatch" style="background:#10b981" data-color="#10b981"></button>
-                <button class="swatch" style="background:rgba(255,255,255,0.08)" data-color="rgba(255,255,255,0.08)" title="Kính mờ tối"></button>
-              </div>
+          <!-- Gradient Presets -->
+          <div class="mt-10">
+            <div class="label-row-between">
+              <label class="sub-label">Màu nền chuyển sắc (Rê chuột xem thử Gradient)</label>
+              <button type="button" id="btn-grad-reset" class="btn-reset-pill" title="Gỡ Gradient, quay về màu nền gốc">↺ Bỏ Gradient / Về gốc</button>
             </div>
+            <div class="gradient-swatches" id="gradient-swatches">
+              <button class="grad-swatch" style="background:linear-gradient(135deg,#6366f1 0%,#a855f7 50%,#ec4899 100%)" data-bg-gradient="linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%)" title="Aurora Purple"></button>
+              <button class="grad-swatch" style="background:linear-gradient(135deg,#3b82f6 0%,#06b6d4 100%)" data-bg-gradient="linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%)" title="Ocean Blue"></button>
+              <button class="grad-swatch" style="background:linear-gradient(135deg,#00f5d4 0%,#3b82f6 100%)" data-bg-gradient="linear-gradient(135deg, #00f5d4 0%, #3b82f6 100%)" title="Cyber Mint"></button>
+              <button class="grad-swatch" style="background:linear-gradient(135deg,#10b981 0%,#059669 100%)" data-bg-gradient="linear-gradient(135deg, #10b981 0%, #059669 100%)" title="Emerald"></button>
+              <button class="grad-swatch" style="background:linear-gradient(135deg,#f97316 0%,#ef4444 100%)" data-bg-gradient="linear-gradient(135deg, #f97316 0%, #ef4444 100%)" title="Sunset Fire"></button>
+              <button class="grad-swatch" style="background:linear-gradient(135deg,#f59e0b 0%,#eab308 100%)" data-bg-gradient="linear-gradient(135deg, #f59e0b 0%, #eab308 100%)" title="Gold"></button>
+            </div>
+          </div>
 
-            <!-- Gradient Presets -->
-            <div class="color-control-block" style="margin-top:12px;">
-              <div class="label-with-action">
-                <label data-i18n="lblGradient">Màu chuyển sắc (Gradient 1-Click)</label>
-                <button class="btn-reset-pill" id="btn-grad-reset" title="Gỡ Gradient, quay về màu nền gốc">
-                  <i class="ph ph-arrow-counter-clockwise"></i> <span data-i18n="removeGrad">Bỏ Gradient / Về gốc</span>
-                </button>
-              </div>
-              <div class="gradient-row" id="gradient-swatches">
-                <button class="grad-swatch" data-grad="linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%)" style="background:linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%)" title="Aurora Violet"></button>
-                <button class="grad-swatch" data-grad="linear-gradient(135deg, #00f5d4 0%, #3b82f6 100%)" style="background:linear-gradient(135deg, #00f5d4 0%, #3b82f6 100%)" title="Cyber Mint"></button>
-                <button class="grad-swatch" data-grad="linear-gradient(135deg, #f43f5e 0%, #fb923c 100%)" style="background:linear-gradient(135deg, #f43f5e 0%, #fb923c 100%)" title="Sunset Coral"></button>
-                <button class="grad-swatch" data-grad="linear-gradient(135deg, #10b981 0%, #059669 100%)" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%)" title="Emerald"></button>
-                <button class="grad-swatch" data-grad="linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)" style="background:linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)" title="Gold Fire"></button>
-                <button class="grad-swatch" data-grad="linear-gradient(135deg, #1e293b 0%, #0f172a 100%)" style="background:linear-gradient(135deg, #1e293b 0%, #0f172a 100%)" title="Dark Slate"></button>
-              </div>
-            </div>
-          </section>
+          <!-- Opacity -->
+          <div class="slider-row mt-10">
+            <label>Độ hiển thị (Opacity)</label>
+            <input type="range" id="prop-opacity-slider" min="0" max="100" value="100" />
+            <span id="prop-opacity-val" class="slider-val">100%</span>
+          </div>
+        </section>
 
-          <!-- 4. TYPOGRAPHY -->
-          <section class="insp-section">
-            <div class="sec-head">
-              <span><i class="ph-fill ph-text-aa"></i> <span data-i18n="secTypo">KIỂU CHỮ (TYPOGRAPHY)</span></span>
-              <button class="btn-reset-pill btn-sec-reset" data-reset-sec="typography" title="Khôi phục phông chữ, cỡ chữ về gốc">
-                <i class="ph ph-arrow-counter-clockwise"></i> <span data-i18n="origBtn">Gốc</span>
-              </button>
+        <!-- 3. TEXT, IMAGE & TYPOGRAPHY (WITH LIVE HOVER FONT PREVIEW!) -->
+        <section class="prop-group">
+          <div class="prop-group__header">
+            <span>✍️ Nội Dung &amp; Kiểu Chữ</span>
+            <button type="button" id="btn-font-reset" class="btn-reset-pill" title="Khôi phục Font chữ, cỡ chữ, độ đậm về gốc">↺ Kiểu chữ gốc</button>
+          </div>
+
+          <!-- Text content input -->
+          <div class="prop-field" id="text-content-group">
+            <div class="label-row-between">
+              <label>Nội dung văn bản (Hoặc nhấp đúp trực tiếp trên web)</label>
+              <button type="button" id="btn-text-reset" class="btn-reset-pill" title="Khôi phục nội dung chữ gốc ban đầu">↺ Chữ gốc</button>
             </div>
-            <div class="form-row">
-              <label>Phông chữ (Font Family)</label>
-              <select id="sel-font-family">
+            <textarea id="prop-text-content" rows="2" placeholder="Nhập nội dung chữ..."></textarea>
+          </div>
+
+          <!-- Image Src Controls (Shown when IMG or element is selected) -->
+          <div class="prop-field mt-8" id="image-src-group">
+            <div class="label-row-between">
+              <label>Đường dẫn Ảnh (URL) hoặc tải ảnh từ máy</label>
+              <button type="button" id="btn-img-reset" class="btn-reset-pill" title="Khôi phục ảnh gốc ban đầu">↺ Ảnh gốc</button>
+            </div>
+            <div class="image-upload-row">
+              <input type="text" id="prop-img-src" placeholder="img/..." />
+              <label class="btn-secondary btn-xs upload-label">
+                📁 Chọn Ảnh
+                <input type="file" id="prop-img-file" accept="image/*" hidden />
+              </label>
+            </div>
+          </div>
+
+          <!-- Link Href Controls (Shown when <a> is selected) -->
+          <div class="prop-field mt-8 hidden" id="link-href-group">
+            <label>Đường dẫn liên kết (Link URL)</label>
+            <input type="text" id="prop-link-href" placeholder="https://..." />
+          </div>
+
+          <!-- Font Family & Weight (Upgraded with Custom Live-Hover Preview Dropdowns!) -->
+          <div class="prop-row-2col mt-8">
+            <div class="prop-field">
+              <label>Font chữ <span class="hint-eye">(Rê chuột xem thử)</span></label>
+              <select id="prop-font-family">
                 <option value="">Mặc định của trang</option>
-                <option value="'Inter', sans-serif">Inter (Hiện đại, gọn gàng)</option>
-                <option value="'Plus Jakarta Sans', sans-serif">Plus Jakarta Sans (Startup)</option>
-                <option value="'Space Grotesk', sans-serif">Space Grotesk (Công nghệ)</option>
+                <option value="'Plus Jakarta Sans', sans-serif">Plus Jakarta Sans</option>
+                <option value="'Be Vietnam Pro', sans-serif">Be Vietnam Pro (Tiếng Việt)</option>
+                <option value="'Inter', sans-serif">Inter (Hiện đại)</option>
+                <option value="'Syne', sans-serif">Syne (Nghệ thuật)</option>
+                <option value="'Space Grotesk', sans-serif">Space Grotesk (Tech)</option>
+                <option value="'Outfit', sans-serif">Outfit (Trẻ trung)</option>
+                <option value="'Montserrat', sans-serif">Montserrat (Mạnh mẽ)</option>
+                <option value="'Roboto', sans-serif">Roboto (Cổ điển)</option>
                 <option value="'Playfair Display', serif">Playfair Display (Sang trọng)</option>
-                <option value="'JetBrains Mono', monospace">JetBrains Mono (Lập trình)</option>
+                <option value="'Lora', serif">Lora (Tạp chí)</option>
+                <option value="'Dancing Script', cursive">Dancing Script (Viết tay)</option>
+                <option value="'JetBrains Mono', monospace">JetBrains Mono (Code)</option>
               </select>
             </div>
-
-            <div class="two-col">
-              <div class="form-row">
-                <label>Cỡ chữ (<span id="lbl-font-size">16px</span>)</label>
-                <div class="slider-with-num">
-                  <input type="range" id="rng-font-size" min="10" max="96" value="16" />
-                  <input type="number" id="inp-font-size" value="16" min="8" max="200" />
-                </div>
-              </div>
-              <div class="form-row">
-                <label>Độ đậm (Weight)</label>
-                <select id="sel-font-weight">
-                  <option value="300">300 - Mảnh</option>
-                  <option value="400">400 - Bình thường</option>
-                  <option value="500">500 - Vừa</option>
-                  <option value="600">600 - Hơi đậm</option>
-                  <option value="700">700 - Đậm (Bold)</option>
-                  <option value="800">800 - Rất đậm</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <label>Căn lề chữ</label>
-              <div class="align-btns" id="text-align-group">
-                <button class="align-btn" data-align="left" title="Căn trái"><i class="ph ph-text-align-left"></i></button>
-                <button class="align-btn" data-align="center" title="Căn giữa"><i class="ph ph-text-align-center"></i></button>
-                <button class="align-btn" data-align="right" title="Căn phải"><i class="ph ph-text-align-right"></i></button>
-                <button class="align-btn" data-align="justify" title="Căn đều 2 bên"><i class="ph ph-text-align-justify"></i></button>
-              </div>
-            </div>
-          </section>
-
-          <!-- 5. BORDER, RADIUS & SHADOW -->
-          <section class="insp-section">
-            <div class="sec-head">
-              <span><i class="ph-fill ph-corners-out"></i> <span data-i18n="secBorder">BO GÓC, VIỀN & ĐỔ BÓNG</span></span>
-              <button class="btn-reset-pill btn-sec-reset" data-reset-sec="border" title="Khôi phục bo góc, viền, đổ bóng về gốc">
-                <i class="ph ph-arrow-counter-clockwise"></i> <span data-i18n="origBtn">Gốc</span>
-              </button>
-            </div>
-            <div class="two-col">
-              <div class="form-row">
-                <label>Bo tròn góc (<span id="lbl-radius">0px</span>)</label>
-                <div class="slider-with-num">
-                  <input type="range" id="rng-radius" min="0" max="60" value="0" />
-                  <input type="number" id="inp-radius" value="0" min="0" max="999" />
-                </div>
-              </div>
-              <div class="form-row">
-                <label>Độ trong suốt (<span id="lbl-opacity">100%</span>)</label>
-                <div class="slider-with-num">
-                  <input type="range" id="rng-opacity" min="0" max="100" value="100" />
-                </div>
-              </div>
-            </div>
-
-            <div class="two-col">
-              <div class="form-row">
-                <label>Độ dày viền (px)</label>
-                <input type="number" id="inp-border-width" min="0" max="20" value="0" />
-              </div>
-              <div class="form-row">
-                <label>Màu viền</label>
-                <input type="color" id="inp-border-color" value="#334155" style="width:100%;height:32px;" />
-              </div>
-            </div>
-
-            <div class="form-row">
-              <label>Hiệu ứng Đổ bóng (Box Shadow)</label>
-              <select id="sel-shadow">
+            <div class="prop-field">
+              <label>Độ đậm chữ <span class="hint-eye">(Xem thử)</span></label>
+              <select id="prop-font-weight">
                 <option value="">Mặc định</option>
-                <option value="none">Không đổ bóng</option>
-                <option value="0 4px 12px rgba(0,0,0,0.12)">Bóng nhẹ tinh tế</option>
-                <option value="0 12px 32px -4px rgba(0,0,0,0.28)">Bóng nổi 3D (Card)</option>
-                <option value="0 20px 50px rgba(0,0,0,0.45)">Bóng sâu kịch tính</option>
-                <option value="0 0 25px rgba(0, 245, 212, 0.55)">Phát sáng Neon Cyan</option>
-                <option value="0 0 28px rgba(99, 102, 241, 0.65)">Phát sáng Neon Indigo</option>
-                <option value="0 0 28px rgba(236, 72, 153, 0.65)">Phát sáng Neon Pink</option>
+                <option value="300">300 - Mỏng (Light)</option>
+                <option value="400">400 - Thường (Regular)</option>
+                <option value="500">500 - Vừa (Medium)</option>
+                <option value="600">600 - Hơi đậm (SemiBold)</option>
+                <option value="700">700 - Đậm (Bold)</option>
+                <option value="800">800 - Rất đậm (ExtraBold)</option>
+                <option value="900">900 - Siêu đậm (Black)</option>
               </select>
             </div>
-          </section>
+          </div>
 
-          <!-- 6. SPACING & FLEXBOX -->
-          <section class="insp-section">
-            <div class="sec-head">
-              <span><i class="ph-fill ph-columns"></i> <span data-i18n="secSpacing">KHOẢNG CÁCH & BỐ CỤC KHUNG</span></span>
-              <button class="btn-reset-pill btn-sec-reset" data-reset-sec="spacing" title="Khôi phục khoảng cách và bố cục về gốc">
-                <i class="ph ph-arrow-counter-clockwise"></i> <span data-i18n="origBtn">Gốc</span>
-              </button>
-            </div>
-            <div class="two-col">
-              <div class="form-row">
-                <label title="Khoảng đệm từ viền vào nội dung bên trong">Đệm trong (Padding)</label>
-                <input type="text" id="inp-padding" placeholder="VD: 12px 24px" />
-              </div>
-              <div class="form-row">
-                <label title="Khoảng cách đẩy các phần tử xung quanh ra xa">Lề ngoài (Margin)</label>
-                <input type="text" id="inp-margin" placeholder="VD: 16px 0px" />
-              </div>
-            </div>
+          <!-- Font Size Slider & Input -->
+          <div class="slider-row mt-8">
+            <label>Cỡ chữ (px)</label>
+            <input type="range" id="prop-fontsize-slider" min="8" max="120" value="16" />
+            <input type="number" id="prop-fontsize-num" class="num-sm" value="16" min="6" max="300" />
+          </div>
 
-            <div class="form-row">
-              <label>Chế độ dàn trang (Flex Layout cho khung chứa)</label>
-              <div class="flex-quick-bar">
-                <button class="flex-btn" id="btn-flex-row" title="Xếp các phần tử con nằm ngang"><i class="ph ph-arrows-horizontal"></i> Xếp Ngang</button>
-                <button class="flex-btn" id="btn-flex-col" title="Xếp các phần tử con nằm dọc"><i class="ph ph-arrows-vertical"></i> Xếp Dọc</button>
-                <button class="flex-btn" id="btn-flex-center" title="Căn chính giữa mọi phần tử con"><i class="ph ph-corners-in"></i> Căn Giữa</button>
-                <button class="flex-btn" id="btn-flex-between" title="Giãn đều 2 đầu"><i class="ph ph-distribute-horizontal"></i> Giãn Đều</button>
+          <!-- Text Align & Letter Spacing -->
+          <div class="prop-row-2col mt-8">
+            <div class="prop-field">
+              <label>Căn lề chữ (Rê chuột xem thử)</label>
+              <div class="align-btn-group">
+                <button type="button" class="align-btn" data-align="left" title="Căn trái">⬅</button>
+                <button type="button" class="align-btn" data-align="center" title="Căn giữa">↔</button>
+                <button type="button" class="align-btn" data-align="right" title="Căn phải">➡</button>
+                <button type="button" class="align-btn" data-align="justify" title="Căn đều">☰</button>
               </div>
             </div>
-            <div class="form-row">
-              <label>Khoảng cách giữa các phần tử con (Gap px)</label>
-              <input type="number" id="inp-gap" min="0" max="120" placeholder="0" />
+            <div class="prop-field">
+              <label>Giãn chữ (px)</label>
+              <input type="number" id="prop-letter-spacing" step="0.5" value="0" />
             </div>
-          </section>
-        </div>
+          </div>
+        </section>
+
+        <!-- 4. BORDER, RADIUS & SHADOWS -->
+        <section class="prop-group">
+          <div class="prop-group__header">
+            <span>🔲 Bo Góc, Viền &amp; Đổ Bóng</span>
+            <button type="button" id="btn-border-reset" class="btn-reset-pill" title="Khôi phục bo góc, viền và đổ bóng về gốc">↺ Viền &amp; Bóng gốc</button>
+          </div>
+
+          <!-- Border Radius -->
+          <div class="slider-row">
+            <label>Bo tròn góc</label>
+            <input type="range" id="prop-radius-slider" min="0" max="64" value="0" />
+            <input type="number" id="prop-radius-num" class="num-sm" value="0" min="0" max="999" />
+            <button type="button" id="btn-radius-pill" class="btn-xs btn-ghost" title="Bo tròn hình viên thuốc (999px) — Rê chuột xem thử">Tròn</button>
+          </div>
+
+          <!-- Border Width, Style, Color -->
+          <div class="prop-row-3col mt-8">
+            <div class="prop-field">
+              <label>Độ dày viền</label>
+              <input type="number" id="prop-border-width" min="0" max="40" value="0" />
+            </div>
+            <div class="prop-field">
+              <label>Kiểu viền</label>
+              <select id="prop-border-style">
+                <option value="none">Không viền</option>
+                <option value="solid">Nét liền</option>
+                <option value="dashed">Nét đứt</option>
+                <option value="dotted">Nét chấm</option>
+              </select>
+            </div>
+            <div class="prop-field">
+              <label>Màu viền</label>
+              <input type="color" id="prop-border-color" value="#6366f1" class="color-full" />
+            </div>
+          </div>
+
+          <!-- Shadow Presets -->
+          <div class="mt-10">
+            <label class="sub-label">Hiệu ứng đổ bóng (Rê chuột xem thử Box Shadow)</label>
+            <div class="preset-pills" id="shadow-presets">
+              <button type="button" class="preset-pill" data-shadow="none">Không</button>
+              <button type="button" class="preset-pill" data-shadow="0 4px 12px rgba(0,0,0,0.12)">Nhẹ</button>
+              <button type="button" class="preset-pill" data-shadow="0 12px 32px rgba(0,0,0,0.25)">Nổi khối</button>
+              <button type="button" class="preset-pill" data-shadow="0 24px 48px rgba(0,0,0,0.45)">Sâu 3D</button>
+              <button type="button" class="preset-pill" data-shadow="0 0 24px rgba(99,102,241,0.65)">Neon Tím</button>
+              <button type="button" class="preset-pill" data-shadow="0 0 24px rgba(6,182,212,0.65)">Neon Xanh</button>
+              <button type="button" class="preset-pill" data-shadow="0 0 24px rgba(236,72,153,0.65)">Neon Hồng</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. PADDING & MARGIN (4 DIRECTIONS) -->
+        <section class="prop-group">
+          <div class="prop-group__header">
+            <span>📏 Khoảng Cách Trong (Padding) &amp; Ngoài (Margin)</span>
+            <button type="button" id="btn-spacing-reset" class="btn-reset-pill" title="Khôi phục Padding & Margin về gốc">↺ Khoảng cách gốc</button>
+          </div>
+
+          <label class="sub-label">Padding — Khoảng đệm bên trong phần tử (px)</label>
+          <div class="box-4way">
+            <div class="prop-field">
+              <label>Trên</label>
+              <input type="number" id="prop-pad-top" value="0" />
+            </div>
+            <div class="prop-field">
+              <label>Phải</label>
+              <input type="number" id="prop-pad-right" value="0" />
+            </div>
+            <div class="prop-field">
+              <label>Dưới</label>
+              <input type="number" id="prop-pad-bottom" value="0" />
+            </div>
+            <div class="prop-field">
+              <label>Trái</label>
+              <input type="number" id="prop-pad-left" value="0" />
+            </div>
+          </div>
+
+          <label class="sub-label mt-8">Margin — Khoảng cách đẩy ra bên ngoài (px)</label>
+          <div class="box-4way">
+            <div class="prop-field">
+              <label>Trên</label>
+              <input type="number" id="prop-mar-top" value="0" />
+            </div>
+            <div class="prop-field">
+              <label>Phải</label>
+              <input type="number" id="prop-mar-right" value="0" />
+            </div>
+            <div class="prop-field">
+              <label>Dưới</label>
+              <input type="number" id="prop-mar-bottom" value="0" />
+            </div>
+            <div class="prop-field">
+              <label>Trái</label>
+              <input type="number" id="prop-mar-left" value="0" />
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. QUICK FLEX LAYOUT -->
+        <section class="prop-group">
+          <div class="prop-group__header">
+            <span>⚡ Căn Chỉnh Bố Cục Nhanh (Rê chuột xem thử)</span>
+          </div>
+          <div class="preset-pills">
+            <button type="button" class="preset-pill" id="btn-flex-row">↔ Xếp Hàng Ngang</button>
+            <button type="button" class="preset-pill" id="btn-flex-col">↕ Xếp Hàng Dọc</button>
+            <button type="button" class="preset-pill" id="btn-flex-center">🎯 Căn Giữa Tất Cả</button>
+            <button type="button" class="preset-pill" id="btn-flex-between">⇔ Giãn Đều 2 Bên</button>
+          </div>
+        </section>
+
       </div>
     </aside>
   </div>
 
-  <!-- MODAL 1: AI PROMPT & CSS DIFF -->
-  <div class="modal-backdrop" id="modal-ai-prompt" style="display:none;">
-    <div class="modal-card modal-lg">
-      <div class="modal-header">
-        <div>
-          <h3><i class="ph-fill ph-robot"></i> Xuất Bản Chỉnh Sửa & Prompt Cho AI</h3>
-          <p>Bạn có thể lưu thẳng vào file gốc, hoặc copy đoạn lệnh chuẩn xác dưới đây gửi cho bất kỳ AI nào (ChatGPT, Claude, Antigravity, Cursor).</p>
-        </div>
-        <button class="modal-close" data-close="modal-ai-prompt"><i class="ph ph-x"></i></button>
-      </div>
-      <div class="modal-body">
-        <div class="modal-tabs">
-          <button class="m-tab active" data-mtab="mtab-prompt">📋 Câu lệnh gửi AI (Tiếng Việt rõ ràng)</button>
-          <button class="m-tab" data-mtab="mtab-css">🎨 Mã CSS chuẩn xác</button>
-        </div>
-        <div class="m-panel active" id="mtab-prompt">
-          <textarea id="ai-prompt-output" class="code-textarea" rows="14" readonly></textarea>
-        </div>
-        <div class="m-panel" id="mtab-css" style="display:none;">
-          <textarea id="css-diff-output" class="code-textarea" rows="14" readonly></textarea>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-action btn-outline" data-close="modal-ai-prompt">Đóng</button>
-        <button class="btn-action btn-primary" id="btn-copy-prompt">
-          <i class="ph ph-copy"></i> Copy nội dung
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL 2: STARTER TEMPLATES -->
-  <div class="modal-backdrop" id="modal-templates" style="display:none;">
-    <div class="modal-card modal-lg">
-      <div class="modal-header">
-        <div>
-          <h3><i class="ph-fill ph-sparkle"></i> Kho Giao Diện Mẫu Dựng Sẵn (Starter Templates)</h3>
-          <p>Chưa có sẵn trang web? Chọn ngay 1 mẫu dưới đây để bắt đầu kéo thả, đổi màu và cá nhân hóa!</p>
-        </div>
-        <button class="modal-close" data-close="modal-templates"><i class="ph ph-x"></i></button>
-      </div>
-      <div class="modal-body">
-        <div class="templates-grid" id="starter-templates-grid"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL 3: OPEN WORKSPACE FOLDER -->
-  <div class="modal-backdrop" id="modal-folder" style="display:none;">
+  <!-- MODAL 1: OPEN / DROP WEB FILE OR FOLDER OR PASTE HTML -->
+  <div id="modal-open-web" class="modal-backdrop hidden">
     <div class="modal-card">
       <div class="modal-header">
-        <div>
-          <h3><i class="ph-fill ph-folder-open"></i> Mở Thư Mục Dự Án Web Trên Máy Tính</h3>
-          <p>Nhập đường dẫn thư mục chứa file HTML của bạn để load đầy đủ cả hình ảnh và CSS đi kèm.</p>
-        </div>
-        <button class="modal-close" data-close="modal-folder"><i class="ph ph-x"></i></button>
+        <h3>📥 Đưa Giao Diện Web Của Bạn Vào Studio</h3>
+        <button class="btn-icon modal-close" data-close="modal-open-web">✕</button>
       </div>
       <div class="modal-body">
-        <div class="form-row">
-          <label>Đường dẫn thư mục trên máy tính (Folder Path):</label>
-          <input type="text" id="inp-workspace-path" placeholder="VD: D:\Khoa\Porfolio hoặc C:\Users\..." />
+        <div class="import-grid">
+          <!-- Option 1: Select HTML file from computer -->
+          <div class="import-option" id="card-pick-html">
+            <div class="import-option__icon">📄</div>
+            <h4>1. Chọn File <code>.html</code> từ máy</h4>
+            <p>Mở trực tiếp bất kỳ file HTML nào và lưu đè lại ngay khi sửa xong.</p>
+            <button id="btn-trigger-file-picker" class="btn-primary btn-sm mt-8">Chọn File .HTML</button>
+            <input type="file" id="input-html-file" accept=".html,.htm" hidden />
+          </div>
+
+          <!-- Option 2: Select an entire project folder from browser -->
+          <div class="import-option" id="card-pick-folder">
+            <div class="import-option__icon">📁</div>
+            <h4>2. Thả Nguyên Thư Mục Web</h4>
+            <p>Tự động nạp cả file HTML, CSS và Hình ảnh đi kèm trong thư mục.</p>
+            <label class="btn-secondary btn-sm mt-8 upload-label">
+              Chọn Thư Mục Web
+              <input type="file" id="input-folder-files" webkitdirectory directory multiple hidden />
+            </label>
+          </div>
         </div>
-        <p class="helper-note">💡 Mẹo: Bạn cũng có thể bấm nút <b>"Mở file .html"</b> ở thanh trên cùng hoặc kéo thả trực tiếp file `.html` từ máy tính vào giữa màn hình!</p>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-action btn-outline" data-close="modal-folder">Hủy</button>
-        <button class="btn-action btn-primary" id="btn-confirm-folder">
-          <i class="ph ph-check"></i> Kết nối Thư mục
-        </button>
+
+        <!-- Option 3: Connect local directory path via Studio Server -->
+        <div class="import-box mt-12">
+          <label>🔗 <strong>3. Hoặc nhập đường dẫn thư mục dự án trên máy tính (Hỗ trợ lưu trực tiếp Ctrl+S):</strong></label>
+          <div class="folder-path-row mt-6">
+            <input type="text" id="input-workspace-path" value="d:\Khoa\Porfolio" placeholder="Ví dụ: d:\Khoa\Porfolio" />
+            <button id="btn-apply-workspace-path" class="btn-primary btn-sm">Kết nối Thư mục</button>
+          </div>
+        </div>
+
+        <!-- Option 4: Paste raw HTML code -->
+        <div class="import-box mt-12">
+          <label>📋 <strong>4. Hoặc dán trực tiếp mã HTML / Giao diện vào đây:</strong></label>
+          <textarea id="textarea-paste-html" rows="5" class="mt-6" placeholder="Dán code <html>...</html> hoặc một đoạn giao diện vào đây..."></textarea>
+          <button id="btn-load-pasted-html" class="btn-secondary btn-sm mt-6">Nạp Mã HTML Này</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL 4: QUICK HELP FOR NON-IT USERS -->
-  <div class="modal-backdrop" id="modal-help" style="display:none;">
-    <div class="modal-card modal-lg">
+  <!-- MODAL 2: EXPORT AI PROMPT & CSS PATCH -->
+  <div id="modal-ai-prompt" class="modal-backdrop hidden">
+    <div class="modal-card modal-card--lg">
       <div class="modal-header">
-        <div>
-          <h3><i class="ph-fill ph-Chats-circle"></i> Hướng Dẫn Nhanh Cho Người Không Rành IT</h3>
-          <p>Chỉ cần nhớ 5 thao tác cực dễ dưới đây là bạn làm chủ hoàn toàn giao diện trang web!</p>
-        </div>
-        <button class="modal-close" data-close="modal-help"><i class="ph ph-x"></i></button>
+        <h3>🤖 Prompt Chuẩn Cho AI &amp; Mã CSS Đã Tinh Chỉnh</h3>
+        <button class="btn-icon modal-close" data-close="modal-ai-prompt">✕</button>
       </div>
       <div class="modal-body">
-        <div class="help-cards-grid">
-          <div class="help-card">
-            <div class="help-num">1</div>
-            <h4>Dịch chuyển & Đổi cỡ tự do</h4>
-            <p>Bấm vào bất kỳ nút hay chữ nào rồi <b>nhấn giữ chuột kéo đi</b>. Muốn to/nhỏ hơn? Kéo <b>8 chấm tròn trắng</b> ở quanh khung viền!</p>
-          </div>
-          <div class="help-card">
-            <div class="help-num">2</div>
-            <h4>Thêm nút mới rồi muốn XÓA thì sao?</h4>
-            <p>Cực dễ! Khi chọn phần tử đó, bạn có thể bấm nút <b>🗑️ Xóa</b> màu đỏ nằm <b>ngay trên thanh nổi</b> sát phần tử, hoặc bấm phím <b>Delete</b> trên bàn phím, hoặc bấm <b>Ctrl+Z</b> để quay lại!</p>
-          </div>
-          <div class="help-card">
-            <div class="help-num">3</div>
-            <h4>Đổi màu khác rồi muốn về MÀU GỐC thì sao?</h4>
-            <p>Ở cột bên phải mục Màu sắc, ngay cạnh Màu chữ, Màu nền và Gradient đều có nút <b>"↺ Màu gốc"</b>. Bấm vào đó là trả về đúng màu ban đầu của trang web tức thì!</p>
-          </div>
-          <div class="help-card">
-            <div class="help-num">4</div>
-            <h4>Sửa chữ & Thay ảnh từ máy tính</h4>
-            <p><b>Nhấp đúp chuột (Double-click)</b> thẳng vào chữ trên web để gõ chữ mới (không làm mất icon!). Bấm vào ảnh rồi chọn <b>"Chọn ảnh"</b> ở cột phải để tải ảnh từ máy lên.</p>
-          </div>
-          <div class="help-card">
-            <div class="help-num">5</div>
-            <h4>Lưu kết quả hoặc gửi cho AI</h4>
-            <p>Bấm nút <b>"Lưu vào File gốc"</b> (màu tím) để ghi đè vào web của bạn, hoặc bấm <b>"Tải HTML"</b> / <b>"Lệnh cho AI"</b> nếu muốn nhờ AI tinh chỉnh thêm.</p>
+        <p class="modal-desc">
+          Bạn có thể bấm <strong>"💾 Lưu Vào File Gốc"</strong> ở góc trên bên phải để áp dụng ngay mà không cần hỏi AI!
+          Tuy nhiên, nếu bạn đang làm việc trên dự án phức tạp (React, Next.js, Vue, hoặc muốn AI đồng bộ vào file CSS riêng), hãy copy đoạn Prompt tự động bên dưới gửi cho AI:
+        </p>
+        <div class="prompt-tabs">
+          <button class="prompt-tab active" data-ptab="ptab-prompt">📋 Prompt Gửi Cho AI</button>
+          <button class="prompt-tab" data-ptab="ptab-css">🎨 Mã CSS Đã Sinh Tự Động</button>
+        </div>
+        <div id="ptab-prompt" class="ptab-content active">
+          <textarea id="ai-prompt-output" rows="12" readonly></textarea>
+          <div class="modal-actions mt-8">
+            <button id="btn-copy-ai-prompt" class="btn-primary">📋 Copy Prompt Cho AI</button>
           </div>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-action btn-primary" data-close="modal-help">Đã hiểu, bắt đầu thôi!</button>
+        <div id="ptab-css" class="ptab-content hidden">
+          <textarea id="css-patch-output" rows="12" readonly></textarea>
+          <div class="modal-actions mt-8">
+            <button id="btn-copy-css-patch" class="btn-secondary">📋 Copy Mã CSS</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- TOAST CONTAINER -->
-  <div class="toast-container" id="toast-container"></div>
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast-container" class="toast-container"></div>
 
   <script src="./js/templates.js"></script>
   <script src="./js/studio.js"></script>

@@ -1,32 +1,9 @@
 {
   "name": "visual-ui-studio",
-  "version": "3.0.0",
-  "description": "Zero-dependency Visual Web UI & Real-Time Coordinate Editor for Non-IT Users & Developers. Drag & drop any HTML element, tweak colors/gradients with 1-click original reset, add/delete components, and save directly or export AI-ready CSS prompts.",
+  "version": "1.0.0",
+  "description": "Real-time WYSIWYG Drag-and-Drop Web UI & Coordinate Editor for Non-IT Users",
   "main": "server.js",
-  "bin": {
-    "visual-ui-studio": "./server.js"
-  },
   "scripts": {
-    "start": "node server.js --open",
-    "serve": "node server.js"
-  },
-  "keywords": [
-    "wysiwyg",
-    "html-editor",
-    "visual-editor",
-    "drag-and-drop",
-    "ui-builder",
-    "no-code",
-    "css-editor",
-    "ai-prompt-generator"
-  ],
-  "author": "minKasent",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/minKasent/visual-ui-studio.git"
-  },
-  "engines": {
-    "node": ">=16.0.0"
+    "start": "node server.js"
   }
 }
