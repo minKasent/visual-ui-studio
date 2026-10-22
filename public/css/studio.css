@@ -1080,19 +1080,32 @@ button, select, input, textarea {
 .uilib-comp-card {
   flex-shrink: 0;
   min-height: 154px;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 154px;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   overflow: hidden;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
   display: flex;
   flex-direction: column;
   box-shadow: var(--specular-top);
 }
 .uilib-comp-card:hover {
-  border-color: rgba(139, 92, 246, 0.75);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(139, 92, 246, 0.4);
-  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+}
+
+/* Pause continuous keyframe animations inside sidebar cards unless hovered to guarantee 0% idle GPU usage */
+.uilib-comp-stage *,
+.uilib-comp-stage *::before,
+.uilib-comp-stage *::after {
+  animation-play-state: paused !important;
+}
+.uilib-comp-card:hover .uilib-comp-stage *,
+.uilib-comp-card:hover .uilib-comp-stage *::before,
+.uilib-comp-card:hover .uilib-comp-stage *::after {
+  animation-play-state: running !important;
 }
 
 .uilib-comp-card__top {

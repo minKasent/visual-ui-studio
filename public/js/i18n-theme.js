@@ -760,8 +760,11 @@
 
   // Translate dynamic cards, counters, and lists rendered by studio.js with Origin UI SVG icons
   function translateDynamicDomNodes(lang) {
-    // 1. Component Cards (.uilib-comp-card)
+    // 1. Component Cards (.uilib-comp-card) — skip cards already translated for this language!
     document.querySelectorAll('.uilib-comp-card').forEach(card => {
+      if (card.dataset.i18nLang === lang) return;
+      card.dataset.i18nLang = lang;
+
       const btnMorph = card.querySelector('.btn-morph-comp');
       if (btnMorph) {
         btnMorph.innerHTML = lang === 'en'
@@ -797,22 +800,26 @@
       });
     });
 
-    // 2. Results counter (#uilib-results-count)
+    // 2. Results counter (#uilib-results-count) — only mutate if text actually differs
     const resCount = document.getElementById('uilib-results-count');
     if (resCount && resCount.textContent) {
       const txt = resCount.textContent;
+      let nextTxt = txt;
       if (lang === 'en') {
-        resCount.textContent = txt
+        nextTxt = txt
           .replace(/Tìm thấy (\d+) Component từ (\d+) Thư viện/, 'Showing $1 Components across $2 Libraries')
-          .replace(/🎯 Gợi ý theo thẻ chọn: (\d+) mẫu từ (\d+) Thư viện/, 'Smart Match: $1 Components across $2 Libraries')
-          .replace(/☑️ Checklist \((\d+) loại\): (\d+) mẫu từ (\d+) Thư viện/, 'Taxonomy ($1 types): $2 Components across $3 Libraries')
+          .replace(/🎯?\s*Gợi ý theo thẻ chọn: (\d+) mẫu từ (\d+) Thư viện/, 'Smart Match: $1 Components across $2 Libraries')
+          .replace(/☑️?\s*Checklist \((\d+) loại\): (\d+) mẫu từ (\d+) Thư viện/, 'Taxonomy ($1 types): $2 Components across $3 Libraries')
           .replace(/Danh bạ (\d+) Thư viện UI \(Click Logo mở Web\)/, 'Directory of $1 UI Libraries (Click Logo to open Docs)');
       } else {
-        resCount.textContent = txt
+        nextTxt = txt
           .replace(/Showing (\d+) Components across (\d+) Libraries/, 'Tìm thấy $1 Component từ $2 Thư viện')
           .replace(/Smart Match: (\d+) Components across (\d+) Libraries/, 'Gợi ý theo thẻ chọn: $1 mẫu từ $2 Thư viện')
           .replace(/Taxonomy \((\d+) types\): (\d+) Components across (\d+) Libraries/, 'Checklist ($1 loại): $2 mẫu từ $3 Thư viện')
           .replace(/Directory of (\d+) UI Libraries \(Click Logo to open Docs\)/, 'Danh bạ $1 Thư viện UI (Click Logo mở Web)');
+      }
+      if (nextTxt !== txt) {
+        resCount.textContent = nextTxt;
       }
     }
 
@@ -820,11 +827,13 @@
     const selLabel = document.getElementById('selected-selector-label');
     const selBadge = document.getElementById('selected-tag-badge');
     if (selLabel && selBadge && selBadge.textContent === 'NONE') {
-      selLabel.textContent = lang === 'en' ? 'Select an element on canvas' : 'Hãy chọn 1 phần tử trên web';
+      const nextLbl = lang === 'en' ? 'Select an element on canvas' : 'Hãy chọn 1 phần tử trên web';
+      if (selLabel.textContent !== nextLbl) selLabel.textContent = nextLbl;
     }
     const breadcrumb = document.getElementById('status-breadcrumb');
     if (breadcrumb && (breadcrumb.textContent.includes('Chưa chọn') || breadcrumb.textContent.includes('No element'))) {
-      breadcrumb.textContent = lang === 'en' ? 'No element selected' : 'Chưa chọn phần tử nào';
+      const nextBc = lang === 'en' ? 'No element selected' : 'Chưa chọn phần tử nào';
+      if (breadcrumb.textContent !== nextBc) breadcrumb.textContent = nextBc;
     }
 
     // 4. Page Selector default option
@@ -832,19 +841,19 @@
     if (pageSel && pageSel.options.length > 0 && pageSel.options[0].value === '') {
       const m = pageSel.options[0].textContent.match(/\d+/);
       const count = m ? m[0] : '';
-      if (count) {
-        pageSel.options[0].textContent = lang === 'en'
-          ? `-- Select HTML Page (${count} pages) --`
-          : `-- Chọn file HTML (${count} trang) --`;
-      } else {
-        pageSel.options[0].textContent = lang === 'en' ? '-- Select HTML Page --' : '-- Chọn trang web --';
+      const nextOpt = count
+        ? (lang === 'en' ? `-- Select HTML Page (${count} pages) --` : `-- Chọn file HTML (${count} trang) --`)
+        : (lang === 'en' ? '-- Select HTML Page --' : '-- Chọn trang web --');
+      if (pageSel.options[0].textContent !== nextOpt) {
+        pageSel.options[0].textContent = nextOpt;
       }
     }
 
     // 5. History Header & Empty State
     const histHeader = document.querySelector('#tab-history .section-header-row h4');
     const histTotal = document.getElementById('history-total');
-    if (histHeader && histTotal) {
+    if (histHeader && histTotal && histHeader.dataset.i18nLang !== lang) {
+      histHeader.dataset.i18nLang = lang;
       const num = histTotal.textContent || '0';
       histHeader.innerHTML = lang === 'en'
         ? 'Edit History (<span id="history-total">' + num + '</span>)'
@@ -852,15 +861,17 @@
     }
     const emptyHist = document.querySelector('#change-log-list .empty-state-sm');
     if (emptyHist) {
-      emptyHist.textContent = lang === 'en'
+      const nextEmpty = lang === 'en'
         ? 'No changes recorded yet. Click any element on the canvas to start designing!'
         : 'Chưa có thay đổi nào. Hãy click vào một phần tử trên trang để bắt đầu kéo thả!';
+      if (emptyHist.textContent !== nextEmpty) emptyHist.textContent = nextEmpty;
     }
 
     // 6. Modal All Libraries item
     const modalFirstDir = document.querySelector('#uilib-modal-sites-list .uilib-dir-item:first-child > span:first-child');
     if (modalFirstDir) {
-      modalFirstDir.textContent = lang === 'en' ? 'All 38+ UI Libraries' : 'Tất cả 38+ Thư viện';
+      const nextDir = lang === 'en' ? 'All 38+ UI Libraries' : 'Tất cả 38+ Thư viện';
+      if (modalFirstDir.textContent !== nextDir) modalFirstDir.textContent = nextDir;
     }
 
     // 7. Live-Hover Custom Select Triggers (Default vs Mặc định)
@@ -869,6 +880,8 @@
       if (lang === 'vi' && lbl.textContent.trim() === 'Default') lbl.textContent = 'Mặc định';
     });
   }
+
+  window.translateDynamicStudioNodes = () => translateDynamicDomNodes(currentLang);
 
   function applyStudioLanguage(lang, showNotification = false) {
     currentLang = lang === 'en' ? 'en' : 'vi';
@@ -1215,9 +1228,7 @@
     const obsTargets = [
       document.getElementById('uilib-components-list'),
       document.getElementById('uilib-modal-grid'),
-      document.getElementById('change-log-list'),
-      document.getElementById('uilib-results-count'),
-      document.getElementById('selected-selector-label')
+      document.getElementById('change-log-list')
     ].filter(Boolean);
 
     if (obsTargets.length > 0 && window.MutationObserver) {
@@ -1225,10 +1236,13 @@
       const observer = new MutationObserver(() => {
         if (rafId) cancelAnimationFrame(rafId);
         rafId = requestAnimationFrame(() => {
+          rafId = null;
+          observer.disconnect();
           translateDynamicDomNodes(currentLang);
+          obsTargets.forEach(t => observer.observe(t, { childList: true, subtree: false }));
         });
       });
-      obsTargets.forEach(t => observer.observe(t, { childList: true, subtree: false, characterData: true }));
+      obsTargets.forEach(t => observer.observe(t, { childList: true, subtree: false }));
     }
 
     // Initial language & theme synchronization

@@ -1270,9 +1270,17 @@
 
   function bindIframeEvents(doc) {
     const win = doc.defaultView;
+    let overlayRafId = null;
+    const scheduleOverlayUpdate = () => {
+      if (overlayRafId) return;
+      overlayRafId = requestAnimationFrame(() => {
+        overlayRafId = null;
+        updateOverlayPosition();
+      });
+    };
 
-    win.addEventListener('scroll', updateOverlayPosition, { passive: true });
-    win.addEventListener('resize', updateOverlayPosition, { passive: true });
+    win.addEventListener('scroll', scheduleOverlayUpdate, { passive: true });
+    win.addEventListener('resize', scheduleOverlayUpdate, { passive: true });
 
     // Prevent default navigation on click in Edit Mode
     doc.addEventListener('click', e => {
@@ -1284,7 +1292,8 @@
       }
     }, true);
 
-    // Hover highlight
+    // Hover highlight (zero-thrash: skip when cursor stays on the same target)
+    let lastRawTarget = null;
     doc.addEventListener('mousemove', e => {
       if (state.mode !== 'edit') return;
 
@@ -1293,13 +1302,17 @@
         return;
       }
 
+      if (e.target === lastRawTarget) return;
+      lastRawTarget = e.target;
+
       const target = resolveSmartTarget(e.target);
-      if (target && target !== doc.body && target !== doc.documentElement) {
-        state.hoveredEl = target;
-      } else {
-        state.hoveredEl = null;
-      }
-      updateOverlayPosition();
+      const nextHovered = (target && target !== doc.body && target !== doc.documentElement)
+        ? target
+        : null;
+
+      if (nextHovered === state.hoveredEl) return;
+      state.hoveredEl = nextHovered;
+      scheduleOverlayUpdate();
     }, true);
 
     // Mousedown: Start Resize OR Select & Prepare Free Drag
@@ -1635,6 +1648,7 @@
   // ==================== ELEMENT SELECTION & INSPECTOR SYNC ====================
   function selectElement(el) {
     state.selectedEl = el;
+    const prevAutoCat = state.autoDetectedCategory;
 
     if (!el) {
       state.selectedSelector = null;
@@ -1652,9 +1666,10 @@
       updateOverlayPosition();
       updateLiveCoordsReadout(null);
       highlightTreeNode(null);
-      if (state.autoMatchSelectedEl && typeof renderSidebarUiLibraries === 'function') {
+      if (state.autoMatchSelectedEl && prevAutoCat !== null && typeof renderSidebarUiLibraries === 'function') {
         renderSidebarUiLibraries();
       }
+      if (window.translateDynamicStudioNodes) window.translateDynamicStudioNodes();
       return;
     }
 
@@ -1674,7 +1689,7 @@
       } else if (dom.uilibDetectedBanner) {
         dom.uilibDetectedBanner.classList.add('hidden');
       }
-      if (typeof renderSidebarUiLibraries === 'function') {
+      if (detectedCat !== prevAutoCat && typeof renderSidebarUiLibraries === 'function') {
         renderSidebarUiLibraries();
       }
     }
@@ -3585,23 +3600,39 @@
       }
     });
 
-    // Hovering the card stage previews on the live webpage
+    // Hovering the card stage previews on the live webpage (75ms hover-intent to avoid scroll/sweep lag)
+    let hoverTimer = null;
+    const cancelCardHover = () => {
+      if (hoverTimer) {
+        clearTimeout(hoverTimer);
+        hoverTimer = null;
+      }
+      clearComponentHoverPreview();
+    };
+
     stageEl.addEventListener('mouseenter', () => {
-      previewComponentCardOnHover(comp);
+      if (hoverTimer) clearTimeout(hoverTimer);
+      hoverTimer = setTimeout(() => {
+        previewComponentCardOnHover(comp);
+      }, 75);
     });
-    stageEl.addEventListener('mouseleave', clearComponentHoverPreview);
+    stageEl.addEventListener('mouseleave', cancelCardHover);
 
     // Action Button 1: Morph currently selected element (with full style, animation, hover FX & icon!)
     const btnMorph = card.querySelector('.btn-morph-comp');
     btnMorph.addEventListener('mouseenter', () => {
-      clearPreviewAddBlock();
-      if (state.selectedEl) {
-        startComponentFullMorphPreview(comp, `Áp Style & FX ${libMeta.name}: ${comp.name}`);
-      }
+      if (hoverTimer) clearTimeout(hoverTimer);
+      hoverTimer = setTimeout(() => {
+        clearPreviewAddBlock();
+        if (state.selectedEl) {
+          startComponentFullMorphPreview(comp, `Áp Style & FX ${libMeta.name}: ${comp.name}`);
+        }
+      }, 75);
     });
-    btnMorph.addEventListener('mouseleave', clearComponentHoverPreview);
+    btnMorph.addEventListener('mouseleave', cancelCardHover);
     btnMorph.addEventListener('click', e => {
       e.stopPropagation();
+      if (hoverTimer) clearTimeout(hoverTimer);
       morphSelectedWithLibComponent(comp);
       if (isModalView && dom.modalUilibExplorer) {
         dom.modalUilibExplorer.classList.add('hidden');
@@ -3611,12 +3642,16 @@
     // Action Button 2: Insert as new component block
     const btnInsert = card.querySelector('.btn-insert-comp');
     btnInsert.addEventListener('mouseenter', () => {
-      endHoverPreview();
-      previewRawHtmlBlockOnHover(comp.html, `Chèn mới ${libMeta.name}: ${comp.name}`);
+      if (hoverTimer) clearTimeout(hoverTimer);
+      hoverTimer = setTimeout(() => {
+        endHoverPreview();
+        previewRawHtmlBlockOnHover(comp.html, `Chèn mới ${libMeta.name}: ${comp.name}`);
+      }, 75);
     });
-    btnInsert.addEventListener('mouseleave', clearComponentHoverPreview);
+    btnInsert.addEventListener('mouseleave', cancelCardHover);
     btnInsert.addEventListener('click', e => {
       e.stopPropagation();
+      if (hoverTimer) clearTimeout(hoverTimer);
       insertLibComponentToPage(comp);
       if (isModalView && dom.modalUilibExplorer) {
         dom.modalUilibExplorer.classList.add('hidden');
@@ -3889,9 +3924,46 @@
       return;
     }
 
-    matched.forEach(comp => {
-      dom.uilibComponentsList.appendChild(createComponentCardElement(comp, false));
-    });
+    const frag = document.createDocumentFragment();
+    const SIDEBAR_BATCH_SIZE = 24;
+    let renderedCount = 0;
+
+    const appendNextSidebarBatch = () => {
+      if (renderedCount >= matched.length) return;
+      const oldMoreBtn = dom.uilibComponentsList.querySelector('.uilib-load-more-btn');
+      if (oldMoreBtn) oldMoreBtn.remove();
+
+      const slice = matched.slice(renderedCount, renderedCount + SIDEBAR_BATCH_SIZE);
+      const batchFrag = document.createDocumentFragment();
+      slice.forEach(comp => {
+        batchFrag.appendChild(createComponentCardElement(comp, false));
+      });
+      renderedCount += slice.length;
+
+      if (renderedCount < matched.length) {
+        const moreBtn = document.createElement('button');
+        moreBtn.type = 'button';
+        moreBtn.className = 'btn-secondary btn-sm uilib-load-more-btn';
+        moreBtn.style.cssText = 'width:100%;margin-top:6px;padding:8px 12px;justify-content:center;';
+        moreBtn.textContent = `↓ Xem thêm (${matched.length - renderedCount} Component còn lại)`;
+        moreBtn.addEventListener('click', appendNextSidebarBatch);
+        batchFrag.appendChild(moreBtn);
+      }
+
+      dom.uilibComponentsList.appendChild(batchFrag);
+      if (window.translateDynamicStudioNodes) window.translateDynamicStudioNodes();
+    };
+
+    appendNextSidebarBatch();
+
+    // Auto-append next batch when scrolling near the bottom of #uilib-components-list
+    dom.uilibComponentsList.onscroll = () => {
+      if (renderedCount >= matched.length) return;
+      const el = dom.uilibComponentsList;
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 280) {
+        appendNextSidebarBatch();
+      }
+    };
   }
 
   function renderModalUiLibrariesExplorer(modalLibFilter = 'all', modalQuery = '') {
@@ -3928,12 +4000,47 @@
       dom.uilibModalSitesList.appendChild(item);
     });
 
-    // Right grid
+    // Right grid (progressive chunked rendering for 60fps modal smoothness)
     dom.uilibModalGrid.innerHTML = '';
     const matched = getFilteredUiComponents(modalQuery, 'all', modalLibFilter);
-    matched.forEach(comp => {
-      dom.uilibModalGrid.appendChild(createComponentCardElement(comp, true));
-    });
+    const MODAL_BATCH_SIZE = 32;
+    let modalRenderedCount = 0;
+
+    const appendNextModalBatch = () => {
+      if (modalRenderedCount >= matched.length) return;
+      const oldMore = dom.uilibModalGrid.querySelector('.uilib-modal-load-more');
+      if (oldMore) oldMore.remove();
+
+      const slice = matched.slice(modalRenderedCount, modalRenderedCount + MODAL_BATCH_SIZE);
+      const batchFrag = document.createDocumentFragment();
+      slice.forEach(comp => {
+        batchFrag.appendChild(createComponentCardElement(comp, true));
+      });
+      modalRenderedCount += slice.length;
+
+      if (modalRenderedCount < matched.length) {
+        const moreBtn = document.createElement('button');
+        moreBtn.type = 'button';
+        moreBtn.className = 'btn-secondary btn-sm uilib-modal-load-more';
+        moreBtn.style.cssText = 'grid-column: 1 / -1; width:100%; padding:10px; justify-content:center;';
+        moreBtn.textContent = `↓ Xem thêm (${matched.length - modalRenderedCount} Component còn lại)`;
+        moreBtn.addEventListener('click', appendNextModalBatch);
+        batchFrag.appendChild(moreBtn);
+      }
+
+      dom.uilibModalGrid.appendChild(batchFrag);
+      if (window.translateDynamicStudioNodes) window.translateDynamicStudioNodes();
+    };
+
+    appendNextModalBatch();
+
+    dom.uilibModalGrid.onscroll = () => {
+      if (modalRenderedCount >= matched.length) return;
+      const el = dom.uilibModalGrid;
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 320) {
+        appendNextModalBatch();
+      }
+    };
   }
 
   function syncCdnChipsUI() {
