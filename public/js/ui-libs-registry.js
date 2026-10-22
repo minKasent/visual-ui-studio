@@ -2,21 +2,6 @@
  * VISUAL UI STUDIO PRO v4.0 — UI LIBRARIES & COMPONENT REGISTRY
  * Extracted from the user's curated collection of 38+ modern UI libraries,
  * design systems, animation engines, and component registries.
- *
- * Includes:
- * 1. STUDIO_UI_LIBRARIES: Metadata, official homepage URLs, categories, badges, and optional CDN links
- *    for all 38+ libraries from the user's screenshot.
- * 2. STUDIO_LIB_COMPONENTS_CSS: Self-contained high-craft CSS & @keyframes for Aceternity UI, Magic UI,
- *    Shadcn UI, Hover.dev, Animata, React Bits, KokonutUI, Luxe, Cult UI, Origin UI, AlignUI,
- *    Untitled UI, FlyonUI, SmoothUI, Skiper UI, Eldora UI, Kibo UI, Park UI, Catalyst, Astryx, etc.
- * 3. STUDIO_LIB_COMPONENTS: Searchable, filterable, live-hover-previewable components across categories:
- *    - button (Buttons & CTAs)
- *    - card (Cards, Bento & Containers)
- *    - badge (Badges, Pills & Status)
- *    - input (Inputs, Search & Forms)
- *    - hero (Hero Headers, Text Effects & Callouts)
- *    - pricing (Pricing & Metric Widgets)
- *    - nav (Navbars, Docks & Tabs)
  */
 
 window.STUDIO_UI_LIBRARIES = [
@@ -106,7 +91,7 @@ window.STUDIO_UI_LIBRARIES = [
     name: 'Luxe UI',
     url: 'https://www.luxeui.com',
     category: 'Luxury Dark',
-    accent: '#d4af37',
+    accent: '#fbbf24',
     badge: 'Sang trọng Dark',
     desc: 'Phong cách kim loại đen tuyền (Obsidian Metallic) với ánh sáng quét ngang tinh xảo.'
   },
@@ -234,8 +219,7 @@ window.STUDIO_UI_LIBRARIES = [
     category: 'Official Tailwind',
     accent: '#38bdf8',
     badge: 'Chính chủ Tailwind',
-    desc: 'Bố cục Bento Grid, Hero Section, Pricing Table chuẩn mực từ đội ngũ Tailwind Labs.',
-    cdnJs: 'https://cdn.tailwindcss.com'
+    desc: 'Bố cục Bento Grid, Hero Section, Pricing Table chuẩn mực từ đội ngũ Tailwind Labs.'
   },
   {
     id: 'catalyst',
@@ -316,9 +300,7 @@ window.STUDIO_UI_LIBRARIES = [
     category: 'Classic Framework',
     accent: '#7952b3',
     badge: 'Có CDN 1-Click',
-    desc: 'Framework UI phổ biến nhất thế giới, hỗ trợ nạp trực tiếp CDN vào trang web.',
-    cdnCss: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css',
-    cdnJs: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js'
+    desc: 'Framework UI phổ biến nhất thế giới, hỗ trợ nạp trực tiếp CDN vào trang web.'
   },
   {
     id: 'fontawesome',
@@ -327,8 +309,7 @@ window.STUDIO_UI_LIBRARIES = [
     category: 'Icon Library',
     accent: '#538dd7',
     badge: 'Có CDN Icon',
-    desc: 'Kho biểu tượng vector lớn nhất thế giới — Bật 1-Click để dùng ngay `<i class="fa-solid ...">`.',
-    cdnCss: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
+    desc: 'Kho biểu tượng vector lớn nhất thế giới — Bật 1-Click để dùng ngay icon.'
   },
   {
     id: 'swiper',
@@ -337,9 +318,7 @@ window.STUDIO_UI_LIBRARIES = [
     category: 'Slider / Carousel',
     accent: '#0080ff',
     badge: 'Có CDN Slider',
-    desc: 'Thư viện trượt ảnh/thẻ cảm ứng mượt nhất hiện nay (kèm Owl Carousel 2).',
-    cdnCss: 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
-    cdnJs: 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js'
+    desc: 'Thư viện trượt ảnh/thẻ cảm ứng mượt nhất hiện nay (kèm Owl Carousel 2).'
   },
   {
     id: 'gsap',
@@ -348,9 +327,7 @@ window.STUDIO_UI_LIBRARIES = [
     category: 'Animation Engine',
     accent: '#0ae448',
     badge: 'Có CDN Animation',
-    desc: 'Động cơ hoạt ảnh chuyên nghiệp GSAP 3 kết hợp bộ class hiệu ứng Animate.css.',
-    cdnCss: 'https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css',
-    cdnJs: 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js'
+    desc: 'Động cơ hoạt ảnh chuyên nghiệp GSAP 3 kết hợp bộ class hiệu ứng Animate.css.'
   },
   {
     id: 'venobox',
@@ -359,15 +336,10 @@ window.STUDIO_UI_LIBRARIES = [
     category: 'Lightbox & Reset',
     accent: '#a3e635',
     badge: 'Có CDN Lightbox',
-    desc: 'Hộp phóng to ảnh/video VenoBox 2 và chuẩn hóa CSS Normalize trên mọi trình duyệt.',
-    cdnCss: 'https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css'
+    desc: 'Hộp phóng to ảnh/video VenoBox 2 và chuẩn hóa CSS Normalize trên mọi trình duyệt.'
   }
 ];
 
-/**
- * Self-contained CSS & Keyframes for all Library Components so they render identically
- * inside the Studio catalog AND inside any user webpage without external build steps.
- */
 window.STUDIO_LIB_COMPONENTS_CSS = `
 @keyframes uilib-shimmer {
   0% { background-position: -200% 0; }
@@ -378,20 +350,10 @@ window.STUDIO_LIB_COMPONENTS_CSS = `
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
-@keyframes uilib-spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
 @keyframes uilib-pulse-dot {
   0%, 100% { transform: scale(1); opacity: 1; }
   50% { transform: scale(1.45); opacity: 0.55; }
 }
-@keyframes uilib-float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-4px); }
-}
-
-/* Hover micro-interactions for injected library components */
 .uilib-comp {
   box-sizing: border-box;
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
@@ -404,10 +366,6 @@ window.STUDIO_LIB_COMPONENTS_CSS = `
   transform: translate(-3px, -3px) !important;
   box-shadow: 7px 7px 0px #09090b !important;
 }
-.uilib-btn-brutal:active {
-  transform: translate(2px, 2px) !important;
-  box-shadow: 2px 2px 0px #09090b !important;
-}
 .uilib-btn-duolingo:active {
   transform: translateY(4px) !important;
   box-shadow: 0 0px 0 #15803d !important;
@@ -418,19 +376,7 @@ window.STUDIO_LIB_COMPONENTS_CSS = `
 }
 `;
 
-/**
- * Curated, authentic components representing the signature styles of the libraries in the user's screenshot.
- * Each component includes:
- * - id, name, libId, libName, category ('button' | 'card' | 'badge' | 'input' | 'hero' | 'pricing' | 'nav')
- * - tags: array of search keywords (both English & Vietnamese!)
- * - morphStyles: CSS key-value map so if the user already selected an element (e.g. a button) on their page,
- *   hovering/clicking can MORPH their existing element's style directly!
- * - html: Clean, self-contained HTML snippet to insert as a new element or preview on hover!
- */
 window.STUDIO_LIB_COMPONENTS = [
-  // ============================================================================
-  // 1. BUTTONS (NÚT BẤM TỪ CÁC THƯ VIỆN)
-  // ============================================================================
   {
     id: 'aceternity-moving-border-btn',
     name: 'Moving Border Glow Button',
@@ -443,11 +389,10 @@ window.STUDIO_LIB_COMPONENTS = [
       'color': '#f8fafc',
       'padding': '12px 26px',
       'border-radius': '999px',
-      'border': '1.5px solid rgba(139, 92, 246, 0.75)',
+      'border': '1.5px solid rgba(139, 92, 246, 0.8)',
       'box-shadow': '0 0 24px rgba(139, 92, 246, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
       'font-weight': '600',
-      'font-size': '14px',
-      'letter-spacing': '0.02em'
+      'font-size': '14px'
     },
     html: `<button type="button" class="uilib-comp uilib-btn-hover-lift" style="display:inline-flex;align-items:center;gap:10px;padding:12px 26px;background:linear-gradient(135deg,#09090b 0%,#18181b 100%);color:#f8fafc;border-radius:999px;border:1.5px solid rgba(139,92,246,0.8);box-shadow:0 0 25px rgba(139,92,246,0.45),inset 0 1px 0 rgba(255,255,255,0.2);font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;"><span style="width:8px;height:8px;border-radius:50%;background:#a855f7;box-shadow:0 0 10px #a855f7;"></span><span>Khám phá Aceternity</span><span style="opacity:0.7;">→</span></button>`
   },
@@ -582,8 +527,7 @@ window.STUDIO_LIB_COMPONENTS = [
       'border': '1px solid #10b981',
       'box-shadow': '0 0 18px rgba(16, 185, 129, 0.35), inset 0 0 12px rgba(16, 185, 129, 0.15)',
       'font-family': "'JetBrains Mono', monospace",
-      'font-weight': '600',
-      'letter-spacing': '0.06em'
+      'font-weight': '600'
     },
     html: `<button type="button" class="uilib-comp uilib-btn-hover-lift" style="display:inline-flex;align-items:center;gap:10px;padding:11px 22px;background:rgba(6,78,59,0.4);color:#34d399;border:1px solid #10b981;border-radius:6px;box-shadow:0 0 18px rgba(16,185,129,0.35),inset 0 0 12px rgba(16,185,129,0.15);font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;letter-spacing:0.06em;cursor:pointer;"><span>[ENCRYPT_ACCESS]</span><span>→</span></button>`
   },
@@ -601,8 +545,7 @@ window.STUDIO_LIB_COMPONENTS = [
       'border-radius': '14px',
       'border': 'none',
       'box-shadow': '0 5px 0 #15803d, 0 10px 20px rgba(34, 197, 94, 0.3)',
-      'font-weight': '800',
-      'letter-spacing': '0.03em'
+      'font-weight': '800'
     },
     html: `<button type="button" class="uilib-comp uilib-btn-duolingo" style="display:inline-flex;align-items:center;gap:8px;padding:12px 26px;background:#22c55e;color:#ffffff;border:none;border-radius:14px;box-shadow:0 5px 0 #15803d,0 10px 20px rgba(34,197,94,0.3);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;letter-spacing:0.03em;cursor:pointer;">🚀 BẮT ĐẦU NGAY</button>`
   },
@@ -620,8 +563,7 @@ window.STUDIO_LIB_COMPONENTS = [
       'border-radius': '999px',
       'border': '1px solid rgba(251, 191, 36, 0.5)',
       'box-shadow': '0 10px 25px -5px rgba(245, 158, 11, 0.25), inset 0 1px 0 rgba(254, 243, 199, 0.25)',
-      'font-weight': '600',
-      'letter-spacing': '0.04em'
+      'font-weight': '600'
     },
     html: `<button type="button" class="uilib-comp uilib-btn-hover-lift" style="display:inline-flex;align-items:center;gap:10px;padding:12px 26px;background:linear-gradient(135deg,#18181b 0%,#09090b 100%);color:#fbbf24;border:1px solid rgba(251,191,36,0.5);border-radius:999px;box-shadow:0 10px 25px -5px rgba(245,158,11,0.25),inset 0 1px 0 rgba(254,243,199,0.25);font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;letter-spacing:0.04em;cursor:pointer;">✦ LUXE EXCLUSIVE</button>`
   },
@@ -769,295 +711,6 @@ window.STUDIO_LIB_COMPONENTS = [
       'font-weight': '600'
     },
     html: `<button type="button" class="uilib-comp uilib-btn-hover-lift" style="display:inline-flex;align-items:center;gap:8px;padding:12px 26px;background:radial-gradient(circle at 50% 120%,rgba(6,182,212,0.45),#09090b 70%);color:#ecfeff;border:1px solid rgba(34,211,238,0.5);border-radius:999px;box-shadow:0 0 24px rgba(6,182,212,0.3);font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">✶ Star Border CTA</button>`
-  },
-  {
-    id: 'bootstrap-gradient-btn',
-    name: 'Bootstrap 5 Primary Pill',
-    libId: 'bootstrap5',
-    libName: 'Bootstrap v5.3',
-    category: 'button',
-    tags: ['button', 'nut bam', 'bootstrap', 'blue', 'primary', 'classic'],
-    morphStyles: {
-      'background': '#0d6efd',
-      'color': '#ffffff',
-      'padding': '10px 22px',
-      'border-radius': '50rem',
-      'border': '1px solid #0d6efd',
-      'box-shadow': '0 4px 10px rgba(13, 110, 253, 0.3)',
-      'font-weight': '500'
-    },
-    html: `<button type="button" class="uilib-comp uilib-btn-hover-lift" style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:#0d6efd;color:#ffffff;border:1px solid #0d6efd;border-radius:50rem;box-shadow:0 4px 10px rgba(13,110,253,0.3);font-family:system-ui,-apple-system,sans-serif;font-size:14px;font-weight:500;cursor:pointer;">Bootstrap Primary</button>`
-  },
-
-  // ============================================================================
-  // 2. BADGES & PILLS (NHÃN TRẠNG THÁI & HUY HIỆU)
-  // ============================================================================
-  {
-    id: 'magicui-animated-gradient-badge',
-    name: 'Animated Announcement Pill',
-    libId: 'magicui',
-    libName: 'Magic UI',
-    category: 'badge',
-    tags: ['badge', 'pill', 'nhan', 'magic ui', 'announcement', 'hero', 'gradient'],
-    morphStyles: {
-      'background': 'rgba(15, 23, 42, 0.85)',
-      'color': '#e2e8f0',
-      'padding': '6px 14px',
-      'border-radius': '999px',
-      'border': '1px solid rgba(139, 92, 246, 0.45)',
-      'box-shadow': '0 0 18px rgba(139, 92, 246, 0.22)'
-    },
-    html: `<div class="uilib-comp" style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;background:rgba(15,23,42,0.85);border:1px solid rgba(139,92,246,0.45);border-radius:999px;box-shadow:0 0 18px rgba(139,92,246,0.22);font-family:'Inter',sans-serif;font-size:12.5px;color:#e2e8f0;"><span>🎉</span><span style="background:linear-gradient(90deg,#c084fc,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700;">Ra mắt Phiên bản 4.0</span><span style="color:#94a3b8;">→</span></div>`
-  },
-  {
-    id: 'kiboui-live-status-badge',
-    name: 'Live Pulsing Status Pill',
-    libId: 'kiboui',
-    libName: 'Kibo UI',
-    category: 'badge',
-    tags: ['badge', 'pill', 'status', 'kibo ui', 'live', 'online', 'green', 'nhan'],
-    morphStyles: {
-      'background': 'rgba(16, 185, 129, 0.12)',
-      'color': '#34d399',
-      'padding': '5px 12px',
-      'border-radius': '999px',
-      'border': '1px solid rgba(16, 185, 129, 0.3)',
-      'font-size': '12px',
-      'font-weight': '600'
-    },
-    html: `<span class="uilib-comp" style="display:inline-flex;align-items:center;gap:8px;padding:5px 12px;background:rgba(16,185,129,0.12);color:#34d399;border:1px solid rgba(16,185,129,0.3);border-radius:999px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;"><span style="width:7px;height:7px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;animation:uilib-pulse-dot 1.8s infinite;"></span><span>Hệ thống hoạt động 99.9%</span></span>`
-  },
-  {
-    id: 'luxe-gold-shine-badge',
-    name: 'Luxe Metallic Gold Badge',
-    libId: 'luxe',
-    libName: 'Luxe UI',
-    category: 'badge',
-    tags: ['badge', 'pill', 'luxe', 'gold', 'vip', 'pro', 'nhan'],
-    morphStyles: {
-      'background': 'linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(15, 23, 42, 0.9))',
-      'color': '#fde68a',
-      'padding': '5px 12px',
-      'border-radius': '999px',
-      'border': '1px solid rgba(251, 191, 36, 0.45)',
-      'font-weight': '600',
-      'font-size': '12px'
-    },
-    html: `<span class="uilib-comp" style="display:inline-flex;align-items:center;gap:6px;padding:5px 13px;background:linear-gradient(135deg,rgba(251,191,36,0.16),rgba(9,9,11,0.92));color:#fde68a;border:1px solid rgba(251,191,36,0.45);border-radius:999px;font-family:'Inter',sans-serif;font-size:11.5px;font-weight:600;letter-spacing:0.04em;">✦ PRO ENTERPRISE</span>`
-  },
-
-  // ============================================================================
-  // 3. CARDS & BENTO (THẺ NỘI DUNG, BENTO GRID, PRICING, METRICS)
-  // ============================================================================
-  {
-    id: 'aceternity-spotlight-card',
-    name: 'Spotlight Aurora Feature Card',
-    libId: 'aceternity',
-    libName: 'Aceternity UI',
-    category: 'card',
-    tags: ['card', 'the', 'bento', 'aceternity', 'spotlight', 'dark', 'feature', 'box'],
-    morphStyles: {
-      'background': 'radial-gradient(400px circle at 20% 0%, rgba(139, 92, 246, 0.18), rgba(9, 9, 11, 0.96) 80%)',
-      'color': '#f4f4f5',
-      'padding': '28px',
-      'border-radius': '20px',
-      'border': '1px solid rgba(255, 255, 255, 0.1)',
-      'box-shadow': '0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.12)'
-    },
-    html: `<div class="uilib-comp uilib-card-hover" style="max-width:360px;padding:28px;background:radial-gradient(400px circle at 20% 0%,rgba(139,92,246,0.22),rgba(9,9,11,0.96) 80%);color:#f4f4f5;border:1px solid rgba(255,255,255,0.1);border-radius:20px;box-shadow:0 20px 50px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.12);font-family:'Inter',sans-serif;">
-      <div style="width:42px;height:42px;border-radius:12px;background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.4);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:16px;">⚡</div>
-      <h3 style="margin:0 0 8px;font-size:18px;font-weight:700;color:#ffffff;">Aceternity Spotlight</h3>
-      <p style="margin:0 0 18px;font-size:13.5px;line-height:1.6;color:#a1a1aa;">Hiệu ứng ánh sáng hội tụ góc trên kết hợp đường viền kính siêu mảnh chuẩn SaaS thế hệ mới.</p>
-      <span style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#c084fc;">Tìm hiểu thêm →</span>
-    </div>`
-  },
-  {
-    id: 'magicui-border-beam-card',
-    name: 'Border Beam Glow Card',
-    libId: 'magicui',
-    libName: 'Magic UI',
-    category: 'card',
-    tags: ['card', 'the', 'magic ui', 'border beam', 'glow', 'bento', 'feature'],
-    morphStyles: {
-      'background': 'linear-gradient(180deg, rgba(24, 24, 27, 0.9) 0%, rgba(9, 9, 11, 0.98) 100%)',
-      'color': '#f8fafc',
-      'padding': '28px',
-      'border-radius': '18px',
-      'border': '1px solid rgba(236, 72, 153, 0.45)',
-      'box-shadow': '0 0 35px -5px rgba(236, 72, 153, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15)'
-    },
-    html: `<div class="uilib-comp uilib-card-hover" style="max-width:360px;padding:28px;background:linear-gradient(180deg,rgba(24,24,27,0.92) 0%,rgba(9,9,11,0.98) 100%);color:#f8fafc;border:1px solid rgba(236,72,153,0.45);border-radius:18px;box-shadow:0 0 35px -5px rgba(236,72,153,0.28),inset 0 1px 0 rgba(255,255,255,0.15);font-family:'Inter',sans-serif;">
-      <div style="display:inline-block;padding:4px 10px;border-radius:999px;background:rgba(236,72,153,0.15);color:#f472b6;font-size:11px;font-weight:700;margin-bottom:14px;">✨ MAGIC BENTO</div>
-      <h3 style="margin:0 0 8px;font-size:18px;font-weight:700;">Tự động hóa Giao diện AI</h3>
-      <p style="margin:0;font-size:13.5px;line-height:1.6;color:#94a3b8;">Biến mọi ý tưởng thiết kế thành giao diện sống động chỉ bằng thao tác kéo thả trực quan.</p>
-    </div>`
-  },
-  {
-    id: 'shadcn-clean-card',
-    name: 'Shadcn Zinc Surface Card',
-    libId: 'shadcn',
-    libName: 'Shadcn UI',
-    category: 'card',
-    tags: ['card', 'the', 'shadcn', 'minimal', 'zinc', 'form', 'box'],
-    morphStyles: {
-      'background': '#09090b',
-      'color': '#fafafa',
-      'padding': '24px',
-      'border-radius': '12px',
-      'border': '1px solid #27272a',
-      'box-shadow': '0 4px 12px rgba(0, 0, 0, 0.25)'
-    },
-    html: `<div class="uilib-comp" style="max-width:350px;padding:24px;background:#09090b;color:#fafafa;border:1px solid #27272a;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.25);font-family:'Inter',sans-serif;">
-      <h4 style="margin:0 0 4px;font-size:16px;font-weight:600;color:#fafafa;">Khởi tạo Dự án Mới</h4>
-      <p style="margin:0 0 16px;font-size:13px;color:#a1a1aa;">Triển khai ứng dụng web của bạn chỉ với 1 cú nhấp chuột.</p>
-      <div style="display:flex;justify-content:flex-end;gap:8px;">
-        <button type="button" style="padding:8px 14px;background:transparent;color:#e4e4e7;border:1px solid #27272a;border-radius:6px;font-size:13px;cursor:pointer;">Hủy</button>
-        <button type="button" style="padding:8px 14px;background:#fafafa;color:#09090b;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;">Tiếp tục</button>
-      </div>
-    </div>`
-  },
-  {
-    id: 'alignui-kpi-metric-card',
-    name: 'AlignUI FinTech KPI Metric Card',
-    libId: 'alignui',
-    libName: 'AlignUI Design System',
-    category: 'pricing',
-    tags: ['card', 'metric', 'kpi', 'alignui', 'stats', 'thong ke', 'dashboard', 'fintech'],
-    morphStyles: {
-      'background': '#0c0c0f',
-      'color': '#f8fafc',
-      'padding': '22px',
-      'border-radius': '16px',
-      'border': '1px solid rgba(255,255,255,0.08)'
-    },
-    html: `<div class="uilib-comp uilib-card-hover" style="max-width:300px;padding:22px;background:#0c0c0f;color:#f8fafc;border:1px solid rgba(255,255,255,0.08);border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,0.3);font-family:'Inter',sans-serif;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <span style="font-size:12.5px;color:#94a3b8;font-weight:500;">Tổng Doanh Thu Tháng</span>
-        <span style="padding:3px 8px;background:rgba(16,185,129,0.15);color:#34d399;border-radius:999px;font-size:11px;font-weight:700;">+28.4% ↑</span>
-      </div>
-      <div style="font-size:28px;font-weight:800;letter-spacing:-0.02em;margin-bottom:6px;">$128,450</div>
-      <div style="font-size:12px;color:#64748b;">Tăng +$24,100 so với tháng trước</div>
-    </div>`
-  },
-  {
-    id: '21stdev-pricing-pro-card',
-    name: '21st.dev SaaS Pro Pricing Card',
-    libId: '21stdev',
-    libName: '21st.dev',
-    category: 'pricing',
-    tags: ['pricing', 'bang gia', 'card', '21st.dev', 'pro', 'saas'],
-    morphStyles: {
-      'background': 'linear-gradient(180deg, #18181b 0%, #09090b 100%)',
-      'color': '#ffffff',
-      'padding': '28px',
-      'border-radius': '20px',
-      'border': '1.5px solid #6366f1',
-      'box-shadow': '0 20px 50px rgba(99, 102, 241, 0.22)'
-    },
-    html: `<div class="uilib-comp uilib-card-hover" style="max-width:320px;padding:28px;background:linear-gradient(180deg,#18181b 0%,#09090b 100%);color:#ffffff;border:1.5px solid #6366f1;border-radius:20px;box-shadow:0 20px 50px rgba(99,102,241,0.22);font-family:'Inter',sans-serif;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <span style="font-size:14px;font-weight:700;color:#818cf8;text-transform:uppercase;">Gói Studio Pro</span>
-        <span style="padding:3px 10px;background:#4f46e5;color:#fff;border-radius:999px;font-size:11px;font-weight:700;">Phổ biến nhất</span>
-      </div>
-      <div style="font-size:36px;font-weight:800;margin-bottom:16px;">$29<span style="font-size:14px;color:#94a3b8;font-weight:400;">/tháng</span></div>
-      <ul style="list-style:none;padding:0;margin:0 0 22px;font-size:13.5px;color:#d4d4d8;line-height:2;">
-        <li>✓ Không giới hạn Component UI</li>
-        <li>✓ Xuất HTML & AI Prompt tự động</li>
-        <li>✓ Hỗ trợ 38+ Thư viện thiết kế</li>
-      </ul>
-      <button type="button" style="width:100%;padding:11px;background:#6366f1;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;">Nâng cấp ngay →</button>
-    </div>`
-  },
-
-  // ============================================================================
-  // 4. INPUTS & SEARCH BARS (Ô NHẬP LIỆU, AI PROMPT BAR, COMMAND SEARCH)
-  // ============================================================================
-  {
-    id: '21stdev-ai-prompt-input',
-    name: '21st.dev AI Command Prompt Box',
-    libId: '21stdev',
-    libName: '21st.dev',
-    category: 'input',
-    tags: ['input', 'search', 'ai', 'prompt', 'chat', '21st.dev', 'o nhap'],
-    morphStyles: {
-      'background': 'rgba(24, 24, 27, 0.9)',
-      'color': '#f4f4f5',
-      'padding': '12px 16px',
-      'border-radius': '16px',
-      'border': '1px solid rgba(139, 92, 246, 0.45)',
-      'box-shadow': '0 10px 30px rgba(0, 0, 0, 0.35)'
-    },
-    html: `<div class="uilib-comp" style="display:flex;align-items:center;gap:10px;max-width:440px;padding:10px 12px 10px 18px;background:rgba(24,24,27,0.92);border:1px solid rgba(139,92,246,0.45);border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,0.4);font-family:'Inter',sans-serif;">
-      <span style="color:#a855f7;font-size:16px;">✦</span>
-      <input type="text" placeholder="Hỏi AI hoặc tìm kiếm bất kỳ tính năng nào..." style="flex:1;background:transparent;border:none;color:#f4f4f5;font-size:13.5px;outline:none;" />
-      <button type="button" style="padding:8px 14px;background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;border:none;border-radius:10px;font-size:12.5px;font-weight:600;cursor:pointer;">Gửi ↵</button>
-    </div>`
-  },
-  {
-    id: 'originui-kbd-search-input',
-    name: 'Origin UI Command Search Input',
-    libId: 'originui',
-    libName: 'Origin UI (Originkit)',
-    category: 'input',
-    tags: ['input', 'search', 'tim kiem', 'origin ui', 'kbd', 'shortcut'],
-    morphStyles: {
-      'background': '#09090b',
-      'color': '#e4e4e7',
-      'padding': '10px 14px',
-      'border-radius': '10px',
-      'border': '1px solid #27272a'
-    },
-    html: `<div class="uilib-comp" style="display:inline-flex;align-items:center;gap:10px;min-width:280px;padding:9px 12px;background:#09090b;border:1px solid #27272a;border-radius:10px;font-family:'Inter',sans-serif;">
-      <span style="color:#71717a;font-size:14px;">🔍</span>
-      <input type="text" placeholder="Tìm nhanh component..." style="flex:1;background:transparent;border:none;color:#f4f4f5;font-size:13px;outline:none;" />
-      <kbd style="padding:2px 6px;background:#18181b;color:#a1a1aa;border:1px solid #27272a;border-radius:5px;font-family:monospace;font-size:11px;">⌘K</kbd>
-    </div>`
-  },
-
-  // ============================================================================
-  // 5. NAV & DOCKS (THANH ĐIỀU HƯỚNG, FLOATING DOCK, TABS)
-  // ============================================================================
-  {
-    id: 'skiperui-floating-dock',
-    name: 'Skiper Floating Glass Dock',
-    libId: 'skiperui',
-    libName: 'Skiper UI',
-    category: 'nav',
-    tags: ['nav', 'dock', 'menu', 'skiper ui', 'floating', 'glass', 'tabs'],
-    morphStyles: {
-      'background': 'rgba(15, 23, 42, 0.78)',
-      'backdrop-filter': 'blur(16px)',
-      'padding': '8px 14px',
-      'border-radius': '999px',
-      'border': '1px solid rgba(255, 255, 255, 0.14)',
-      'box-shadow': '0 16px 40px rgba(0, 0, 0, 0.45)'
-    },
-    html: `<nav class="uilib-comp" style="display:inline-flex;align-items:center;gap:6px;padding:7px 10px;background:rgba(9,9,11,0.85);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.12);border-radius:999px;box-shadow:0 16px 40px rgba(0,0,0,0.45);font-family:'Inter',sans-serif;">
-      <a href="#home" style="padding:7px 14px;background:#27272a;color:#ffffff;border-radius:999px;font-size:13px;font-weight:600;text-decoration:none;">Trang chủ</a>
-      <a href="#features" style="padding:7px 14px;color:#a1a1aa;border-radius:999px;font-size:13px;font-weight:500;text-decoration:none;">Tính năng</a>
-      <a href="#pricing" style="padding:7px 14px;color:#a1a1aa;border-radius:999px;font-size:13px;font-weight:500;text-decoration:none;">Bảng giá</a>
-      <a href="#cta" style="padding:7px 16px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#ffffff;border-radius:999px;font-size:13px;font-weight:600;text-decoration:none;">Bắt đầu</a>
-    </nav>`
-  },
-
-  // ============================================================================
-  // 6. HERO & TEXT EFFECTS (TIÊU ĐỀ GRADIENT, BANNER HERO)
-  // ============================================================================
-  {
-    id: 'eldora-morph-gradient-heading',
-    name: 'Aurora Gradient Display Heading',
-    libId: 'eldoraui',
-    libName: 'Eldora UI',
-    category: 'hero',
-    tags: ['hero', 'heading', 'tieu de', 'title', 'gradient', 'eldora', 'text'],
-    morphStyles: {
-      'background': 'linear-gradient(135deg, #ffffff 20%, #a5b4fc 60%, #c084fc 100%)',
-      '-webkit-background-clip': 'text',
-      '-webkit-text-fill-color': 'transparent',
-      'font-weight': '800',
-      'letter-spacing': '-0.03em'
-    },
-    html: `<h2 class="uilib-comp" style="margin:12px 0;font-family:'Plus Jakarta Sans',sans-serif;font-size:40px;font-weight:800;letter-spacing:-0.03em;line-height:1.15;background:linear-gradient(135deg,#ffffff 15%,#a5b4fc 55%,#ec4899 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Thiết kế Giao diện Thế hệ Mới</h2>`
   },
   {
     id: 'skiper-magnetic-pill-btn',
@@ -1225,101 +878,141 @@ window.STUDIO_LIB_COMPONENTS = [
     html: `<button type="button" class="uilib-comp uilib-btn-hover-lift" style="display:inline-flex;align-items:center;gap:8px;padding:11px 24px;background:#facc15;color:#09090b;border:none;border-radius:999px;box-shadow:0 8px 25px rgba(250,204,21,0.35);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;">⚡ Motion Spring</button>`
   },
   {
-    id: 'fontawesome-social-btn',
-    name: 'Font Awesome Icon CTA Button',
-    libId: 'fontawesome',
-    libName: 'Font Awesome 6',
+    id: 'bootstrap-gradient-btn',
+    name: 'Bootstrap 5 Primary Pill',
+    libId: 'bootstrap5',
+    libName: 'Bootstrap v5.3',
     category: 'button',
-    tags: ['button', 'nut bam', 'font awesome', 'icon', 'social'],
+    tags: ['button', 'nut bam', 'bootstrap', 'blue', 'primary', 'classic'],
     morphStyles: {
-      'background': '#1e293b',
-      'color': '#f8fafc',
-      'padding': '10px 20px',
-      'border-radius': '10px',
-      'border': '1px solid #334155',
+      'background': '#0d6efd',
+      'color': '#ffffff',
+      'padding': '10px 22px',
+      'border-radius': '50rem',
+      'border': '1px solid #0d6efd',
+      'box-shadow': '0 4px 10px rgba(13, 110, 253, 0.3)',
+      'font-weight': '500'
+    },
+    html: `<button type="button" class="uilib-comp uilib-btn-hover-lift" style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:#0d6efd;color:#ffffff;border:1px solid #0d6efd;border-radius:50rem;box-shadow:0 4px 10px rgba(13,110,253,0.3);font-family:system-ui,-apple-system,sans-serif;font-size:14px;font-weight:500;cursor:pointer;">Bootstrap Primary</button>`
+  },
+  {
+    id: 'magicui-animated-gradient-badge',
+    name: 'Animated Announcement Pill',
+    libId: 'magicui',
+    libName: 'Magic UI',
+    category: 'badge',
+    tags: ['badge', 'pill', 'nhan', 'magic ui', 'announcement', 'hero', 'gradient'],
+    morphStyles: {
+      'background': 'rgba(15, 23, 42, 0.85)',
+      'color': '#e2e8f0',
+      'padding': '6px 14px',
+      'border-radius': '999px',
+      'border': '1px solid rgba(139, 92, 246, 0.45)',
+      'box-shadow': '0 0 18px rgba(139, 92, 246, 0.22)'
+    },
+    html: `<div class="uilib-comp" style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;background:rgba(15,23,42,0.85);border:1px solid rgba(139,92,246,0.45);border-radius:999px;box-shadow:0 0 18px rgba(139,92,246,0.22);font-family:'Inter',sans-serif;font-size:12.5px;color:#e2e8f0;"><span>🎉</span><span style="background:linear-gradient(90deg,#c084fc,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700;">Ra mắt Phiên bản 4.0</span><span style="color:#94a3b8;">→</span></div>`
+  },
+  {
+    id: 'kiboui-live-status-badge',
+    name: 'Live Pulsing Status Pill',
+    libId: 'kiboui',
+    libName: 'Kibo UI',
+    category: 'badge',
+    tags: ['badge', 'pill', 'status', 'kibo ui', 'live', 'online', 'green', 'nhan'],
+    morphStyles: {
+      'background': 'rgba(16, 185, 129, 0.12)',
+      'color': '#34d399',
+      'padding': '5px 12px',
+      'border-radius': '999px',
+      'border': '1px solid rgba(16, 185, 129, 0.3)',
+      'font-size': '12px',
       'font-weight': '600'
     },
-    html: `<button type="button" class="uilib-comp uilib-btn-hover-lift" style="display:inline-flex;align-items:center;gap:10px;padding:10px 20px;background:#1e293b;color:#f8fafc;border:1px solid #334155;border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;"><span style="color:#38bdf8;">★</span><span>Font Awesome Action</span></button>`
+    html: `<span class="uilib-comp" style="display:inline-flex;align-items:center;gap:8px;padding:5px 12px;background:rgba(16,185,129,0.12);color:#34d399;border:1px solid rgba(16,185,129,0.3);border-radius:999px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;"><span style="width:7px;height:7px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;animation:uilib-pulse-dot 1.8s infinite;"></span><span>Hệ thống hoạt động 99.9%</span></span>`
   },
   {
-    id: 'mvpblocks-hero-banner',
-    name: 'MVPBlocks SaaS Launch Hero Banner',
-    libId: 'mvpblocks',
-    libName: 'MVPBlocks',
-    category: 'hero',
-    tags: ['hero', 'banner', 'mvpblocks', 'saas', 'landing', 'header'],
-    morphStyles: {
-      'background': 'radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.25), #09090b 75%)',
-      'color': '#ffffff',
-      'padding': '40px 32px',
-      'border-radius': '24px',
-      'border': '1px solid rgba(255,255,255,0.1)',
-      'text-align': 'center'
-    },
-    html: `<section class="uilib-comp" style="max-width:680px;margin:16px auto;padding:40px 32px;background:radial-gradient(circle at 50% 0%,rgba(99,102,241,0.25),#09090b 75%);color:#ffffff;border:1px solid rgba(255,255,255,0.1);border-radius:24px;text-align:center;font-family:'Inter',sans-serif;">
-      <span style="display:inline-block;padding:5px 14px;background:rgba(99,102,241,0.15);color:#818cf8;border:1px solid rgba(99,102,241,0.35);border-radius:999px;font-size:12px;font-weight:600;margin-bottom:16px;">🚀 MVPBlocks Launch Kit</span>
-      <h1 style="margin:0 0 14px;font-size:34px;font-weight:800;letter-spacing:-0.03em;line-height:1.2;">Ra mắt Sản phẩm SaaS Nhanh Gấp 10 Lần</h1>
-      <p style="margin:0 auto 24px;max-width:480px;font-size:15px;color:#94a3b8;line-height:1.6;">Kết hợp các khối giao diện dựng sẵn từ 38+ thư viện UI hàng đầu thế giới ngay trong trình kéo thả trực quan.</p>
-      <div style="display:inline-flex;gap:12px;">
-        <button type="button" style="padding:12px 24px;background:#6366f1;color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;">Bắt đầu ngay →</button>
-        <button type="button" style="padding:12px 24px;background:rgba(255,255,255,0.06);color:#e2e8f0;border:1px solid rgba(255,255,255,0.12);border-radius:10px;font-weight:600;cursor:pointer;">Xem bản mẫu</button>
-      </div>
-    </section>`
-  },
-  {
-    id: 'tailwindplus-bento-card',
-    name: 'Tailwind Plus Bento Grid Showcase',
-    libId: 'tailwindplus',
-    libName: 'Tailwind Plus (UI)',
+    id: 'aceternity-spotlight-card',
+    name: 'Spotlight Aurora Feature Card',
+    libId: 'aceternity',
+    libName: 'Aceternity UI',
     category: 'card',
-    tags: ['card', 'bento', 'grid', 'tailwind', 'feature', 'the'],
+    tags: ['card', 'the', 'bento', 'aceternity', 'spotlight', 'dark', 'feature', 'box'],
     morphStyles: {
-      'background': '#0f172a',
+      'background': 'radial-gradient(400px circle at 20% 0%, rgba(139, 92, 246, 0.18), rgba(9, 9, 11, 0.96) 80%)',
+      'color': '#f4f4f5',
+      'padding': '28px',
+      'border-radius': '20px',
+      'border': '1px solid rgba(255, 255, 255, 0.1)',
+      'box-shadow': '0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.12)'
+    },
+    html: `<div class="uilib-comp uilib-card-hover" style="max-width:360px;padding:24px;background:radial-gradient(400px circle at 20% 0%,rgba(139,92,246,0.22),rgba(9,9,11,0.96) 80%);color:#f4f4f5;border:1px solid rgba(255,255,255,0.1);border-radius:20px;box-shadow:0 20px 50px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.12);font-family:'Inter',sans-serif;"><div style="width:38px;height:38px;border-radius:10px;background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.4);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px;">⚡</div><h3 style="margin:0 0 6px;font-size:17px;font-weight:700;color:#ffffff;">Aceternity Spotlight</h3><p style="margin:0;font-size:13px;line-height:1.55;color:#a1a1aa;">Hiệu ứng ánh sáng hội tụ góc trên kết hợp đường viền kính siêu mảnh chuẩn SaaS.</p></div>`
+  },
+  {
+    id: 'magicui-border-beam-card',
+    name: 'Border Beam Glow Card',
+    libId: 'magicui',
+    libName: 'Magic UI',
+    category: 'card',
+    tags: ['card', 'the', 'magic ui', 'border beam', 'glow', 'bento', 'feature'],
+    morphStyles: {
+      'background': 'linear-gradient(180deg, rgba(24, 24, 27, 0.9) 0%, rgba(9, 9, 11, 0.98) 100%)',
       'color': '#f8fafc',
       'padding': '28px',
-      'border-radius': '24px',
-      'border': '1px solid rgba(56, 189, 248, 0.25)',
-      'box-shadow': '0 20px 40px rgba(0,0,0,0.4)'
+      'border-radius': '18px',
+      'border': '1px solid rgba(236, 72, 153, 0.45)',
+      'box-shadow': '0 0 35px -5px rgba(236, 72, 153, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15)'
     },
-    html: `<div class="uilib-comp uilib-card-hover" style="max-width:380px;padding:28px;background:linear-gradient(160deg,#0f172a 0%,#09090b 100%);color:#f8fafc;border:1px solid rgba(56,189,248,0.25);border-radius:24px;box-shadow:0 20px 40px rgba(0,0,0,0.4);font-family:'Inter',sans-serif;">
-      <div style="font-size:12px;font-weight:700;color:#38bdf8;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Hiệu suất Tức thì</div>
-      <h3 style="margin:0 0 10px;font-size:20px;font-weight:700;">Kiến trúc Bento Hiện Đại</h3>
-      <p style="margin:0 0 18px;font-size:13.5px;color:#94a3b8;line-height:1.6;">Bố cục lưới thông minh lấy cảm hứng từ Apple & Tailwind Plus giúp làm nổi bật các tính năng cốt lõi.</p>
-      <div style="padding:14px;background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.2);border-radius:14px;display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:12.5px;color:#bae6fd;font-weight:600;">⚡ Tốc độ phản hồi</span>
-        <span style="font-size:14px;font-weight:800;color:#38bdf8;">0.4ms</span>
-      </div>
-    </div>`
+    html: `<div class="uilib-comp uilib-card-hover" style="max-width:360px;padding:24px;background:linear-gradient(180deg,rgba(24,24,27,0.92) 0%,rgba(9,9,11,0.98) 100%);color:#f8fafc;border:1px solid rgba(236,72,153,0.45);border-radius:18px;box-shadow:0 0 35px -5px rgba(236,72,153,0.28),inset 0 1px 0 rgba(255,255,255,0.15);font-family:'Inter',sans-serif;"><div style="display:inline-block;padding:3px 9px;border-radius:999px;background:rgba(236,72,153,0.15);color:#f472b6;font-size:10.5px;font-weight:700;margin-bottom:10px;">✨ MAGIC BENTO</div><h3 style="margin:0 0 6px;font-size:17px;font-weight:700;">Tự động hóa Giao diện AI</h3><p style="margin:0;font-size:13px;line-height:1.55;color:#94a3b8;">Biến mọi ý tưởng thiết kế thành giao diện sống động chỉ bằng thao tác kéo thả trực quan.</p></div>`
   },
   {
-    id: 'swiper-testimonial-slide-card',
-    name: 'Swiper Interactive Testimonial Card',
-    libId: 'swiper',
-    libName: 'Swiper & Owl Carousel',
-    category: 'card',
-    tags: ['swiper', 'carousel', 'slider', 'testimonial', 'card', 'review'],
+    id: '21stdev-pricing-pro-card',
+    name: '21st.dev SaaS Pro Pricing Card',
+    libId: '21stdev',
+    libName: '21st.dev',
+    category: 'pricing',
+    tags: ['pricing', 'bang gia', 'card', '21st.dev', 'pro', 'saas'],
     morphStyles: {
-      'background': 'rgba(24, 24, 27, 0.92)',
-      'color': '#f4f4f5',
-      'padding': '26px',
-      'border-radius': '18px',
-      'border': '1px solid rgba(255,255,255,0.1)'
+      'background': 'linear-gradient(180deg, #18181b 0%, #09090b 100%)',
+      'color': '#ffffff',
+      'padding': '28px',
+      'border-radius': '20px',
+      'border': '1.5px solid #6366f1',
+      'box-shadow': '0 20px 50px rgba(99, 102, 241, 0.22)'
     },
-    html: `<div class="uilib-comp uilib-card-hover" style="max-width:360px;padding:26px;background:rgba(24,24,27,0.92);color:#f4f4f5;border:1px solid rgba(255,255,255,0.1);border-radius:18px;box-shadow:0 16px 36px rgba(0,0,0,0.35);font-family:'Inter',sans-serif;">
-      <div style="color:#facc15;font-size:14px;margin-bottom:12px;">★★★★★</div>
-      <p style="margin:0 0 18px;font-size:14px;line-height:1.6;color:#e4e4e7;font-style:italic;">"Chỉ cần gõ tìm button và rê chuột qua là thấy ngay nút của Aceternity và Magic UI áp thẳng lên web của tôi. Quá đỉnh!"</p>
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div>
-          <div style="font-size:13.5px;font-weight:700;color:#ffffff;">Alex Nguyễn</div>
-          <div style="font-size:12px;color:#71717a;">Founder @ DesignStudio</div>
-        </div>
-        <div style="display:flex;gap:6px;">
-          <span style="width:24px;height:6px;border-radius:99px;background:#6366f1;"></span>
-          <span style="width:6px;height:6px;border-radius:99px;background:#3f3f46;"></span>
-          <span style="width:6px;height:6px;border-radius:99px;background:#3f3f46;"></span>
-        </div>
-      </div>
-    </div>`
+    html: `<div class="uilib-comp uilib-card-hover" style="max-width:310px;padding:22px;background:linear-gradient(180deg,#18181b 0%,#09090b 100%);color:#ffffff;border:1.5px solid #6366f1;border-radius:20px;box-shadow:0 20px 50px rgba(99,102,241,0.22);font-family:'Inter',sans-serif;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span style="font-size:12px;font-weight:700;color:#818cf8;text-transform:uppercase;">Studio Pro</span><span style="padding:2px 8px;background:#4f46e5;color:#fff;border-radius:999px;font-size:10px;font-weight:700;">Hot</span></div><div style="font-size:30px;font-weight:800;margin-bottom:10px;">$29<span style="font-size:13px;color:#94a3b8;font-weight:400;">/tháng</span></div><button type="button" style="width:100%;padding:9px;background:#6366f1;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;">Nâng cấp ngay →</button></div>`
+  },
+  {
+    id: '21stdev-ai-prompt-input',
+    name: '21st.dev AI Command Prompt Box',
+    libId: '21stdev',
+    libName: '21st.dev',
+    category: 'input',
+    tags: ['input', 'search', 'ai', 'prompt', 'chat', '21st.dev', 'o nhap'],
+    morphStyles: {
+      'background': 'rgba(24, 24, 27, 0.9)',
+      'color': '#f4f4f5',
+      'padding': '12px 16px',
+      'border-radius': '16px',
+      'border': '1px solid rgba(139, 92, 246, 0.45)',
+      'box-shadow': '0 10px 30px rgba(0, 0, 0, 0.35)'
+    },
+    html: `<div class="uilib-comp" style="display:flex;align-items:center;gap:8px;min-width:260px;padding:8px 10px 8px 14px;background:rgba(24,24,27,0.92);border:1px solid rgba(139,92,246,0.45);border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,0.4);font-family:'Inter',sans-serif;"><span style="color:#a855f7;font-size:14px;">✦</span><input type="text" placeholder="Hỏi AI hoặc tìm kiếm..." style="flex:1;background:transparent;border:none;color:#f4f4f5;font-size:12.5px;outline:none;" /><button type="button" style="padding:6px 12px;background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Gửi ↵</button></div>`
+  },
+  {
+    id: 'skiperui-floating-dock',
+    name: 'Skiper Floating Glass Dock',
+    libId: 'skiperui',
+    libName: 'Skiper UI',
+    category: 'nav',
+    tags: ['nav', 'dock', 'menu', 'skiper ui', 'floating', 'glass', 'tabs'],
+    morphStyles: {
+      'background': 'rgba(15, 23, 42, 0.78)',
+      'backdrop-filter': 'blur(16px)',
+      'padding': '8px 14px',
+      'border-radius': '999px',
+      'border': '1px solid rgba(255, 255, 255, 0.14)',
+      'box-shadow': '0 16px 40px rgba(0, 0, 0, 0.45)'
+    },
+    html: `<nav class="uilib-comp" style="display:inline-flex;align-items:center;gap:4px;padding:6px 8px;background:rgba(9,9,11,0.85);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.12);border-radius:999px;box-shadow:0 16px 40px rgba(0,0,0,0.45);font-family:'Inter',sans-serif;"><a href="#home" style="padding:6px 12px;background:#27272a;color:#ffffff;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;">Trang chủ</a><a href="#features" style="padding:6px 12px;color:#a1a1aa;border-radius:999px;font-size:12px;font-weight:500;text-decoration:none;">Tính năng</a><a href="#cta" style="padding:6px 14px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#ffffff;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;">Bắt đầu</a></nav>`
   }
 ];
-
