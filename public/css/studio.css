@@ -545,12 +545,13 @@ button, select, input, textarea {
    TAB 0: 38+ UI LIBRARIES & COMPONENT HUB (Left Sidebar & Explorer)
    ========================================================================== */
 .uilib-hub-header {
-  padding: 9px 10px 7px;
+  padding: 9px 10px 8px;
   background: var(--bg-panel);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   gap: 7px;
+  flex-shrink: 0;
 }
 
 .uilib-search-box {
@@ -594,24 +595,20 @@ button, select, input, textarea {
   color: var(--text-main);
 }
 
-/* Category Filter Horizontal Scroll Pills */
+/* Category Filter Wrap Pills (No ugly horizontal scrollbar!) */
 .uilib-cat-bar {
   display: flex;
+  flex-wrap: wrap;
   gap: 4px;
-  overflow-x: auto;
-  padding-bottom: 2px;
-}
-.uilib-cat-bar::-webkit-scrollbar {
-  height: 3px;
 }
 
 .uilib-cat-pill {
-  padding: 4px 9px;
+  padding: 4px 8px;
   border-radius: 99px;
   background: var(--bg-card);
   color: var(--text-muted);
   border: 1px solid var(--border-color);
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
@@ -619,7 +616,7 @@ button, select, input, textarea {
 }
 .uilib-cat-pill:hover {
   color: var(--text-main);
-  border-color: rgba(139, 92, 246, 0.45);
+  border-color: var(--border-focus);
 }
 .uilib-cat-pill.active {
   background: var(--accent-grad);
@@ -657,10 +654,10 @@ button, select, input, textarea {
 }
 
 .uilib-action-pill {
-  padding: 5px 8px;
+  padding: 6px 8px;
   border-radius: 6px;
   background: var(--bg-card);
-  color: var(--text-muted);
+  color: var(--text-main);
   border: 1px solid var(--border-color);
   font-size: 11px;
   font-weight: 600;
@@ -674,21 +671,27 @@ button, select, input, textarea {
   background: var(--bg-hover);
 }
 .uilib-action-pill--accent {
-  background: rgba(139, 92, 246, 0.12);
-  color: #c4b5fd;
-  border-color: rgba(139, 92, 246, 0.35);
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--accent-hover);
+  border-color: rgba(99, 102, 241, 0.45);
+  font-weight: 700;
+}
+[data-studio-theme="daylight"] .uilib-action-pill--accent {
+  color: #4f46e5;
+  background: rgba(79, 70, 229, 0.1);
 }
 .uilib-action-pill--accent:hover {
-  background: rgba(139, 92, 246, 0.25);
-  color: #ffffff;
+  background: var(--accent-grad);
+  color: #ffffff !important;
+  border-color: transparent;
 }
 
-/* 1-Click CDN Bar */
+/* 1-Click CDN Bar (Wrapped cleanly, no scrollbar) */
 .uilib-cdn-bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 4px;
-  overflow-x: auto;
   padding-top: 2px;
 }
 .uilib-cdn-label {
@@ -714,58 +717,69 @@ button, select, input, textarea {
   color: var(--text-main);
 }
 .cdn-chip.active {
-  background: rgba(16, 185, 129, 0.16);
-  color: #34d399;
-  border-color: rgba(16, 185, 129, 0.45);
+  background: rgba(16, 185, 129, 0.18);
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.5);
+  font-weight: 700;
 }
 
 .uilib-results-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 5px 10px;
+  padding: 6px 10px;
   background: var(--bg-dark);
   border-bottom: 1px solid var(--border-color);
   font-size: 10.5px;
-  color: var(--text-dim);
+  color: var(--text-muted);
+  flex-shrink: 0;
+  gap: 6px;
 }
 .uilib-results-hint {
-  color: #a78bfa;
-  font-weight: 600;
+  color: var(--accent-hover);
+  font-weight: 700;
+  white-space: nowrap;
+}
+[data-studio-theme="daylight"] .uilib-results-hint {
+  color: #4f46e5;
 }
 
-/* Component Cards Feed */
+/* Component Cards Feed — CRITICAL: flex-shrink: 0 on cards so Flexbox never squishes them! */
 .uilib-components-list {
   flex: 1;
   overflow-y: auto;
-  padding: 8px;
+  padding: 10px 8px 24px;
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 12px;
 }
 
 .uilib-comp-card {
+  flex-shrink: 0;
+  min-height: 154px;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   overflow: hidden;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
   display: flex;
   flex-direction: column;
   box-shadow: var(--specular-top);
 }
 .uilib-comp-card:hover {
-  border-color: rgba(139, 92, 246, 0.65);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(139, 92, 246, 0.35);
-  transform: translateY(-1px);
+  border-color: rgba(139, 92, 246, 0.75);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(139, 92, 246, 0.4);
+  transform: translateY(-2px);
 }
 
 .uilib-comp-card__top {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 7px 10px;
   border-bottom: 1px solid var(--border-color);
+  background: var(--bg-panel);
   gap: 6px;
 }
 .uilib-comp-card__meta {
@@ -779,10 +793,11 @@ button, select, input, textarea {
   border-radius: 4px;
   font-size: 9.5px;
   font-weight: 800;
-  background: rgba(139, 92, 246, 0.16);
-  color: #c4b5fd;
-  border: 1px solid rgba(139, 92, 246, 0.35);
+  background: rgba(99, 102, 241, 0.16);
+  color: #818cf8;
+  border: 1px solid rgba(99, 102, 241, 0.35);
   white-space: nowrap;
+  flex-shrink: 0;
 }
 .uilib-comp-title {
   font-size: 11.5px;
@@ -793,9 +808,10 @@ button, select, input, textarea {
   white-space: nowrap;
 }
 .uilib-site-link {
+  flex-shrink: 0;
   font-size: 10px;
   font-weight: 600;
-  color: var(--text-dim);
+  color: var(--text-muted);
   text-decoration: none;
   padding: 2px 6px;
   border-radius: 4px;
@@ -811,33 +827,36 @@ button, select, input, textarea {
 
 /* Live Interactive Stage inside each Component Card */
 .uilib-comp-stage {
-  padding: 16px 12px;
-  background-color: #070709;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  flex-shrink: 0;
+  padding: 18px 12px;
+  background-color: #09090d;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 1px);
   background-size: 14px 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 78px;
+  min-height: 92px;
   overflow: hidden;
   position: relative;
+  cursor: pointer;
 }
 .uilib-comp-stage--scaled > * {
-  transform: scale(0.86);
+  transform: scale(0.84);
   transform-origin: center center;
 }
 
 .uilib-comp-card__actions {
+  flex-shrink: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
   border-top: 1px solid var(--border-color);
   background: var(--bg-panel);
 }
 .uilib-act-btn {
-  padding: 6px 8px;
+  padding: 7px 8px;
   background: transparent;
   border: none;
-  color: var(--text-muted);
+  color: var(--text-main);
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
@@ -851,16 +870,27 @@ button, select, input, textarea {
   border-right: 1px solid var(--border-color);
 }
 .uilib-act-btn:hover {
-  background: rgba(99, 102, 241, 0.14);
-  color: #ffffff;
+  background: rgba(99, 102, 241, 0.16);
+  color: var(--accent-hover);
+}
+[data-studio-theme="daylight"] .uilib-act-btn:hover {
+  color: #4f46e5;
+}
+.uilib-act-btn--primary {
+  color: var(--accent-hover);
+  font-weight: 700;
+}
+[data-studio-theme="daylight"] .uilib-act-btn--primary {
+  color: #4f46e5;
 }
 .uilib-act-btn--primary:hover {
   background: var(--accent-grad);
-  color: #ffffff;
+  color: #ffffff !important;
 }
 
 /* Directory Card for the 38 UI Libraries */
 .uilib-site-card {
+  flex-shrink: 0;
   padding: 10px 12px;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -1795,6 +1825,7 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
 }
 
 .uilib-dir-item {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1812,7 +1843,7 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
 }
 .uilib-dir-item.active {
   background: rgba(99, 102, 241, 0.2);
-  color: #fff;
+  color: var(--text-main);
   font-weight: 700;
 }
 
@@ -2061,16 +2092,19 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
   border-color: var(--border-focus);
   box-shadow: 0 0 0 2px var(--accent-glow);
 }
+.ui-live-select-label,
 .ui-live-select-trigger__text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.ui-live-select-arrow,
 .ui-live-select-trigger__arrow {
   font-size: 10px;
   color: var(--text-muted);
   transition: transform 0.15s ease;
 }
+.ui-live-select.open .ui-live-select-arrow,
 .ui-live-select.open .ui-live-select-trigger__arrow {
   transform: rotate(180deg);
   color: var(--accent-hover);
@@ -2082,46 +2116,55 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
   left: 0;
   right: 0;
   min-width: 215px;
-  max-height: 280px;
+  max-height: 260px;
   overflow-y: auto;
   background: var(--bg-panel);
   border: 1px solid var(--border-focus);
   border-radius: var(--radius-md);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.75);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
   z-index: 250;
   padding: 4px;
   display: none;
   flex-direction: column;
   gap: 2px;
 }
+.ui-live-select.flip-up .ui-live-select-menu {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
 .ui-live-select.open .ui-live-select-menu {
   display: flex;
 }
 .ui-live-select-item {
+  flex-shrink: 0;
   padding: 7px 10px;
   border-radius: 6px;
   color: var(--text-main);
   font-size: 12.5px;
   cursor: pointer;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
   transition: background 0.1s, transform 0.1s;
 }
 .ui-live-select-item:hover {
   background: rgba(99, 102, 241, 0.24);
-  color: #ffffff;
+  color: var(--text-main);
   transform: translateX(2px);
 }
+.ui-live-select-item.selected,
 .ui-live-select-item.active {
-  background: rgba(99, 102, 241, 0.35);
+  background: rgba(99, 102, 241, 0.28);
   border-left: 3px solid var(--accent);
   font-weight: 700;
 }
+.ui-live-select-item-sub,
 .ui-live-select-item__sub {
   font-size: 10px;
   color: var(--text-muted);
   font-family: 'Inter', sans-serif !important;
+  flex-shrink: 0;
 }
 
 /* Magic Presets Cards */
@@ -2131,6 +2174,7 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
   gap: 8px;
 }
 .magic-preset-card {
+  flex-shrink: 0;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
@@ -2147,9 +2191,10 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
   background: rgba(99, 102, 241, 0.14);
   transform: translateY(-2px);
 }
+.magic-preset-swatch,
 .magic-preset-preview {
-  width: 42px;
-  height: 32px;
+  width: 44px;
+  height: 34px;
   border-radius: 8px;
   flex-shrink: 0;
   display: flex;
@@ -2162,11 +2207,14 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
   flex: 1;
   text-align: left;
 }
+.magic-preset-info h4,
 .magic-preset-title {
   font-size: 12px;
   font-weight: 700;
   color: var(--text-main);
+  margin-bottom: 2px;
 }
+.magic-preset-info p,
 .magic-preset-desc {
   font-size: 10.5px;
   color: var(--text-muted);

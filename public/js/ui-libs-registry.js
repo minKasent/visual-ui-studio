@@ -10,7 +10,7 @@ window.STUDIO_UI_LIBRARIES = [
     name: 'Shadcn UI',
     url: 'https://ui.shadcn.com',
     category: 'Design System',
-    accent: '#fafafa',
+    accent: '#6366f1',
     badge: 'Nền tảng số 1',
     desc: 'Hệ thống component chuẩn mực nhất hiện nay với phong cách Zinc tối giản, tinh tế.'
   },
@@ -91,7 +91,7 @@ window.STUDIO_UI_LIBRARIES = [
     name: 'Luxe UI',
     url: 'https://www.luxeui.com',
     category: 'Luxury Dark',
-    accent: '#fbbf24',
+    accent: '#d97706',
     badge: 'Sang trọng Dark',
     desc: 'Phong cách kim loại đen tuyền (Obsidian Metallic) với ánh sáng quét ngang tinh xảo.'
   },
@@ -154,7 +154,7 @@ window.STUDIO_UI_LIBRARIES = [
     name: 'coss ui',
     url: 'https://coss.com',
     category: 'Ultra Minimal',
-    accent: '#e4e4e7',
+    accent: '#0284c7',
     badge: 'Linear Style',
     desc: 'Phong cách tối giản sắc nét kiểu Linear & Vercel với đường viền 1px mảnh.'
   },
@@ -262,7 +262,7 @@ window.STUDIO_UI_LIBRARIES = [
     name: 'Shadcn Blocks',
     url: 'https://www.shadcnblocks.com',
     category: 'Page Blocks',
-    accent: '#e2e8f0',
+    accent: '#4f46e5',
     badge: 'Section Đầy đủ',
     desc: 'Hàng trăm khối bố cục lớn (Hero, Feature Grid, Testimonial) chuẩn Shadcn.'
   },
@@ -280,7 +280,7 @@ window.STUDIO_UI_LIBRARIES = [
     name: 'Motion & Primitives',
     url: 'https://motion-primitives.com',
     category: 'Animation Engine',
-    accent: '#facc15',
+    accent: '#d97706',
     badge: 'Motion.dev',
     desc: 'Spring Button, Spotlight Card, Morphing Dialog và hiệu ứng chữ chuyển động.'
   },
