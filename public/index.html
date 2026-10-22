@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Visual UI Studio Pro v5.0 — Kéo Thả, Tự Nhận Diện UI &amp; Kho 38+ Thư Viện</title>
+  <title>Visual UI Studio Pro v6.0 — 247+ Official .TSX Registry &amp; 38+ UI Libraries</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Dancing+Script:wght@600;700&family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto:wght@300;400;500;700;900&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/studio.css?v=5.0" />
+  <link rel="stylesheet" href="./css/studio.css?v=6.0" />
 </head>
 <body>
   <!-- TOP NAVIGATION BAR (Shadcn + Luxe + Origin UI Aesthetic) -->
@@ -16,8 +16,8 @@
       <div class="brand" id="brand-home-logo" title="🏠 Click vào Logo để quay về Trang Chủ">
         <div class="brand__logo">✦</div>
         <div class="brand__text">
-          <span class="brand__title">Visual UI Studio <span class="pro-tag">v5.0 PRO</span></span>
-          <span class="brand__badge">38+ UI Libraries &amp; NameThat AI</span>
+          <span class="brand__title">Visual UI Studio <span class="pro-tag">v6.0 PRO</span></span>
+          <span class="brand__badge">247+ Official .TSX &amp; 38+ UI Libs</span>
         </div>
       </div>
 
@@ -937,20 +937,31 @@
                   <input type="text" id="import-comp-name" placeholder="VD: Nút bấm phát sáng 21st.dev" />
                 </div>
                 <div class="prop-field">
-                  <label>Phân loại</label>
+                  <label>Phân loại (NameThat UI Taxonomy)</label>
                   <select id="import-comp-cat">
                     <option value="button">🔘 Button (Nút bấm)</option>
+                    <option value="switch">🎛️ Switch / Toggle (Công tắc)</option>
+                    <option value="checkbox">☑️ Checkbox / Radio</option>
+                    <option value="input">⌨️ Input / Search / Form</option>
                     <option value="card">🃏 Card / Bento Box</option>
                     <option value="badge">🏷️ Badge / Pill</option>
-                    <option value="input">⌨️ Input / Form</option>
-                    <option value="pricing">💎 Pricing / KPI</option>
-                    <option value="hero">🚀 Hero / Navbar</option>
+                    <option value="nav">🧭 Navbar / Dock / Menu</option>
+                    <option value="tabs">🗂️ Tabs / Segmented</option>
+                    <option value="modal">🪟 Modal / Dialog / Drawer</option>
+                    <option value="avatar">👤 Avatar / User Group</option>
+                    <option value="alert">🔔 Alert / Toast / Banner</option>
+                    <option value="slider">🎚️ Slider / Progress</option>
+                    <option value="tooltip">💬 Tooltip / Popover</option>
+                    <option value="skeleton">⏳ Skeleton / Shimmer</option>
+                    <option value="pricing">💎 Pricing / Table / KPI</option>
+                    <option value="hero">🚀 Hero / Spotlight</option>
+                    <option value="testimonial">⭐ Testimonial / Marquee</option>
                   </select>
                 </div>
               </div>
               <div class="prop-field mt-8">
-                <label>Dán mã HTML hoặc React JSX / Tailwind vào đây:</label>
-                <textarea id="import-comp-code" rows="7" placeholder='<button className="px-6 py-3 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold shadow-lg hover:scale-105 transition">Nút bấm từ 21st.dev</button>'></textarea>
+                <label>Dán mã nguồn .TSX chính chủ (Shadcn / Origin UI / coss ui / KokonutUI) hoặc link Registry <code>.json</code>:</label>
+                <textarea id="import-comp-code" rows="7" placeholder='Dán trực tiếp file .tsx hoặc URL Registry (vd: https://coss.com/origin/r/comp-175.json hoặc https://ui.shadcn.com/r/styles/default/switch-demo.json)'></textarea>
               </div>
               <div class="prop-field mt-8">
                 <label>CSS bổ sung (Tùy chọn — nếu có <code>@keyframes</code> hoặc class riêng):</label>
@@ -970,11 +981,11 @@
             </div>
             <div class="custom-import-preview-box">
               <div class="label-row-between">
-                <label>👁️ Xem Trước Trực Tiếp Component Sắp Import:</label>
-                <span class="badge-count">Hỗ trợ tự dịch JSX &amp; Tailwind</span>
+                <label>👁️ Xem Trước Trực Tiếp Component (Biên dịch SSR .TSX + Lucide SVG):</label>
+                <span class="badge-count">SSR Compiler: Sucrase + Lucide Static</span>
               </div>
               <div id="import-live-preview-stage" class="import-live-preview-stage">
-                <span style="color:#71717a;font-size:13px;">Hãy dán code vào ô bên trái để xem trước ngay tại đây...</span>
+                <span style="color:#71717a;font-size:13px;">Hãy dán code .TSX / JSX / HTML hoặc link Registry JSON vào ô bên trái để biên dịch trực tiếp...</span>
               </div>
             </div>
           </div>
@@ -986,8 +997,8 @@
   <!-- TOAST NOTIFICATION -->
   <div id="toast-container" class="toast-container"></div>
 
-  <script src="./js/ui-libs-registry.js?v=5.1"></script>
-  <script src="./js/templates.js?v=5.1"></script>
-  <script src="./js/studio.js?v=5.1"></script>
+  <script src="./js/ui-libs-registry.js?v=6.0"></script>
+  <script src="./js/templates.js?v=6.0"></script>
+  <script src="./js/studio.js?v=6.0"></script>
 </body>
 </html>

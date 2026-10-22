@@ -2962,10 +2962,12 @@
         let needsResave = false;
         saved.slice().reverse().forEach(comp => {
           comp.isCustom = true;
-          const reCleaned = convertJsxToCleanHtml(comp.rawCode || comp.html);
-          if (reCleaned && reCleaned !== comp.html) {
-            comp.html = reCleaned;
-            needsResave = true;
+          if (!comp.isOfficial) {
+            const reCleaned = convertJsxToCleanHtml(comp.rawCode || comp.html);
+            if (reCleaned && reCleaned !== comp.html) {
+              comp.html = reCleaned;
+              needsResave = true;
+            }
           }
           if (!window.STUDIO_LIB_COMPONENTS.some(c => c.id === comp.id)) {
             window.STUDIO_LIB_COMPONENTS.unshift(comp);
@@ -3043,7 +3045,11 @@
 
     const temp = document.createElement('div');
     temp.innerHTML = comp.html || '';
-    const tplRoot = temp.firstElementChild;
+    const rawRoot = temp.firstElementChild;
+    const isOfficialSsrWrap = Boolean(rawRoot && rawRoot.classList && rawRoot.classList.contains('uilib-official-ssr'));
+    const tplRoot = isOfficialSsrWrap
+      ? (rawRoot.querySelector('button, a, [role="switch"], input, .uilib-shadcn-badge, .uilib-shadcn-card') || rawRoot.firstElementChild || rawRoot)
+      : rawRoot;
 
     // 1. Build merged style map from tplRoot inline styles + comp.morphStyles
     const mergedStyles = {};
@@ -3093,9 +3099,14 @@
         if (c.startsWith('uilib-')) el.classList.remove(c);
       });
       el.classList.add('uilib-comp');
-      Array.from(tplRoot.classList).forEach(c => {
-        if (c.startsWith('uilib-')) el.classList.add(c);
-      });
+      if (isOfficialSsrWrap) {
+        el.classList.add('uilib-official-ssr');
+        Array.from(tplRoot.classList).forEach(c => el.classList.add(c));
+      } else {
+        Array.from(tplRoot.classList).forEach(c => {
+          if (c.startsWith('uilib-')) el.classList.add(c);
+        });
+      }
 
       const animStr = (mergedStyles['animation'] || '') + ' ' + (comp.id || '');
       if (animStr.includes('rainbow')) el.classList.add('uilib-anim-rainbow');
@@ -3352,7 +3363,12 @@
           <button type="button" class="uilib-card-mini-btn uilib-card-mini-btn--del btn-del-custom" title="Xóa mẫu tự Import này khỏi Kho UI">🗑️ Xóa</button>
         </div>
       `
-      : `<a href="${libMeta.url}" target="_blank" rel="noopener" class="uilib-site-link" title="Mở trang chủ ${libMeta.name} (${libMeta.url})">↗ Web</a>`;
+      : `
+        <div class="uilib-card-top-actions">
+          ${comp.rawCode ? `<button type="button" class="uilib-card-mini-btn uilib-card-mini-btn--edit btn-view-official-tsx" title="Xem mã nguồn .TSX chính chủ từ Registry của ${libMeta.name} (${comp.officialUrl || libMeta.url})">📄 .TSX</button>` : ''}
+          <a href="${comp.officialUrl || libMeta.url}" target="_blank" rel="noopener" class="uilib-site-link" title="Mở nguồn / trang chủ ${libMeta.name} (${comp.officialUrl || libMeta.url})">↗ Web</a>
+        </div>
+      `;
 
     card.innerHTML = `
       <div class="uilib-comp-card__top">
@@ -3379,6 +3395,32 @@
       </div>
     `;
 
+    // Bind View Official .TSX Source button
+    const btnViewTsx = card.querySelector('.btn-view-official-tsx');
+    if (btnViewTsx) {
+      btnViewTsx.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        state.editingCustomCompId = null;
+        if (dom.modalUilibExplorer) dom.modalUilibExplorer.classList.remove('hidden');
+        document.querySelectorAll('.uilib-mtab').forEach(b => b.classList.toggle('active', b.dataset.umtab === 'umtab-import'));
+        document.querySelectorAll('.uilib-mtab-pane').forEach(p => {
+          p.classList.toggle('hidden', p.id !== 'umtab-import');
+          p.classList.toggle('active', p.id === 'umtab-import');
+        });
+        if (dom.importCompName) dom.importCompName.value = comp.name || '';
+        if (dom.importCompCat) dom.importCompCat.value = comp.category || 'button';
+        if (dom.importCompCode) {
+          dom.importCompCode.value = comp.rawCode || comp.html || '';
+        }
+        if (dom.importLivePreviewStage) {
+          state.lastSsrCompiledHtml = comp.html;
+          dom.importLivePreviewStage.innerHTML = comp.html;
+        }
+        showToast(`Đang xem mã nguồn .TSX chính chủ: ${comp.name}`, '📄');
+      });
+    }
+
     // Bind Edit & Delete buttons for custom imported components
     if (isCustom) {
       const btnEdit = card.querySelector('.btn-edit-custom');
@@ -3398,9 +3440,27 @@
       });
     }
 
-    // Prevent links/buttons inside the preview stage from navigating away
+    // Prevent links/buttons inside the preview stage from navigating away; allow interactive switch/checkbox toggle!
     const stageEl = card.querySelector('.uilib-comp-stage');
     stageEl.addEventListener('click', e => {
+      const sw = e.target.closest('button[role="switch"]');
+      if (sw) {
+        e.preventDefault();
+        e.stopPropagation();
+        const isChecked = sw.getAttribute('data-state') === 'checked';
+        const nextState = isChecked ? 'unchecked' : 'checked';
+        sw.setAttribute('data-state', nextState);
+        sw.setAttribute('aria-checked', String(!isChecked));
+        sw.classList.toggle('bg-primary', !isChecked);
+        sw.classList.toggle('bg-input', isChecked);
+        const thumb = sw.querySelector('span[data-state]');
+        if (thumb) {
+          thumb.setAttribute('data-state', nextState);
+          thumb.classList.toggle('translate-x-5', !isChecked);
+          thumb.classList.toggle('translate-x-0', isChecked);
+        }
+        return;
+      }
       e.preventDefault();
       e.stopPropagation();
       insertLibComponentToPage(comp);
@@ -4144,7 +4204,8 @@
       });
     }
 
-    // Live Preview & Save in Custom JSX/Tailwind/HTML Importer
+    // Live Preview & Save in Custom JSX/Tailwind/HTML + Official .TSX SSR Importer
+    let ssrCompileTimer = null;
     const updateCustomImportPreview = () => {
       if (!dom.importCompCode || !dom.importLivePreviewStage) return;
       const raw = dom.importCompCode.value.trim();
@@ -4154,11 +4215,58 @@
         syncLibraryCssEverywhere();
       }
       if (!raw) {
-        dom.importLivePreviewStage.innerHTML = `<span style="color:#71717a;font-size:13px;">Hãy dán code vào ô bên trái để xem trước ngay tại đây...</span>`;
+        state.lastSsrCompiledHtml = null;
+        dom.importLivePreviewStage.innerHTML = `<span style="color:#71717a;font-size:13px;">Hãy dán code .TSX / JSX / HTML hoặc link Registry JSON (vd: https://coss.com/origin/r/comp-175.json) vào ô bên trái...</span>`;
         return;
       }
-      const cleanHtml = convertJsxToCleanHtml(raw);
-      dom.importLivePreviewStage.innerHTML = cleanHtml;
+
+      // Fast client-side preview first
+      const fallbackHtml = `<div class="uilib-official-ssr">${convertJsxToCleanHtml(raw)}</div>`;
+      dom.importLivePreviewStage.innerHTML = fallbackHtml;
+      state.lastSsrCompiledHtml = fallbackHtml;
+
+      // Also run real Server-Side TSX/Registry compiler if input is URL or TSX/JSX
+      if (ssrCompileTimer) clearTimeout(ssrCompileTimer);
+      const isUrl = /^https?:\/\/\S+$/i.test(raw);
+      const looksLikeTsx = /import\s+|export\s+|function\s+|const\s+\w+\s*=|<[A-Z]\w+/m.test(raw);
+      if (isUrl || looksLikeTsx) {
+        ssrCompileTimer = setTimeout(async () => {
+          try {
+            if (isUrl) {
+              const res = await fetch('/api/fetch-registry-url', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: raw })
+              });
+              const data = await res.json();
+              const ssrHtml = data && (data.compiledHtml || data.html);
+              if (ssrHtml) {
+                const wrapped = ssrHtml.includes('uilib-official-ssr') ? ssrHtml : `<div class="uilib-official-ssr">${ssrHtml}</div>`;
+                state.lastSsrCompiledHtml = wrapped;
+                dom.importLivePreviewStage.innerHTML = wrapped;
+                if (dom.importCompName && !dom.importCompName.value.trim() && data.name) {
+                  dom.importCompName.value = data.name;
+                }
+              }
+            } else {
+              const res = await fetch('/api/compile-tsx', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: raw })
+              });
+              const data = await res.json();
+              const ssrHtml = data && (data.compiledHtml || data.html);
+              if (ssrHtml) {
+                const wrapped = ssrHtml.includes('uilib-official-ssr') ? ssrHtml : `<div class="uilib-official-ssr">${ssrHtml}</div>`;
+                state.lastSsrCompiledHtml = wrapped;
+                dom.importLivePreviewStage.innerHTML = wrapped;
+              }
+            }
+          } catch (_) {
+            // Keep fallbackHtml if offline
+          }
+        }, 180);
+      }
     };
 
     if (dom.importCompCode) {
@@ -4168,13 +4276,35 @@
       dom.importCompCss.addEventListener('input', updateCustomImportPreview);
     }
 
-    const handleSaveImportedComponent = (alsoInsertToPage = false) => {
+    const handleSaveImportedComponent = async (alsoInsertToPage = false) => {
       const rawCode = dom.importCompCode ? dom.importCompCode.value.trim() : '';
       if (!rawCode) {
-        showToast('Hãy dán đoạn mã HTML hoặc JSX vào ô trước!', '⚠️');
+        showToast('Hãy dán đoạn mã .TSX, JSX, HTML hoặc Registry URL vào ô trước!', '⚠️');
         return;
       }
-      const cleanHtml = convertJsxToCleanHtml(rawCode);
+      let cleanHtml = state.lastSsrCompiledHtml || `<div class="uilib-official-ssr">${convertJsxToCleanHtml(rawCode)}</div>`;
+      // Ensure fresh SSR compile if user clicked Save immediately after pasting
+      const isUrl = /^https?:\/\/\S+$/i.test(rawCode);
+      const looksLikeTsx = /import\s+|export\s+|function\s+|const\s+\w+\s*=|<[A-Z]\w+/m.test(rawCode);
+      if (isUrl || looksLikeTsx) {
+        try {
+          const endpoint = isUrl ? '/api/fetch-registry-url' : '/api/compile-tsx';
+          const payload = isUrl ? { url: rawCode } : { code: rawCode };
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          const ssrHtml = data && (data.compiledHtml || data.html);
+          if (ssrHtml) {
+            cleanHtml = ssrHtml.includes('uilib-official-ssr') ? ssrHtml : `<div class="uilib-official-ssr">${ssrHtml}</div>`;
+            if (isUrl && dom.importCompName && !dom.importCompName.value.trim() && data.name) {
+              dom.importCompName.value = data.name;
+            }
+          }
+        } catch (_) {}
+      }
       const name = (dom.importCompName && dom.importCompName.value.trim()) || `Custom Component #${Date.now().toString().slice(-4)}`;
       const category = (dom.importCompCat && dom.importCompCat.value) || 'button';
       const extraCss = dom.importCompCss ? dom.importCompCss.value.trim() : '';
@@ -4189,13 +4319,15 @@
       const newComp = {
         id: compId,
         isCustom: true,
+        isOfficial: true,
         name,
         libId: '21stdev',
-        libName: 'Custom Import',
+        libName: 'Custom .TSX Import',
         category,
         tags: [category, 'custom', 'import', 'tu import', name.toLowerCase()],
         morphStyles: {},
         rawCode,
+        tsxSource: rawCode,
         html: cleanHtml
       };
 
