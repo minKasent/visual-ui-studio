@@ -7,129 +7,115 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Dancing+Script:wght@600;700&family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto:wght@300;400;500;700;900&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/studio.css?v=6.9" />
+  <link rel="stylesheet" href="./css/studio.css?v=7.0" />
 </head>
 <body>
-  <!-- TOP NAVIGATION BAR (Shadcn + Luxe + Origin UI Aesthetic) -->
+  <!-- TOP NAVIGATION BAR (Minimalist Icon-First Figma / Framer / Origin UI Precision Bar) -->
   <header class="topbar">
     <div class="topbar__left">
-      <div class="brand" id="brand-home-logo" title="🏠 Click vào Logo để quay về Trang Chủ">
+      <div class="brand" id="brand-home-logo" title="Click vào Logo để quay về Trang Chủ">
         <div class="brand__logo">✦</div>
         <div class="brand__text">
-          <span class="brand__title">Visual UI Studio <span class="pro-tag">v6.0 PRO</span></span>
-          <span class="brand__badge">247+ Official .TSX &amp; 38+ UI Libs</span>
+          <span class="brand__title">Studio</span>
         </div>
       </div>
 
       <div class="divider-v"></div>
 
-      <!-- Source Selector -->
+      <!-- Source Selector (Clean Page Dropdown + Icon-Only Open/Demo Buttons) -->
       <div class="project-bar">
-        <button id="btn-change-folder" class="btn-ghost btn-sm" title="Đổi thư mục dự án trên máy tính">
-          📂 <span id="current-folder-label">d:\Khoa\Porfolio</span>
+        <button id="btn-change-folder" class="btn-ghost btn-sm hidden" title="Đổi thư mục dự án trên máy tính">
+          <span id="current-folder-label">d:\Khoa\Porfolio</span>
         </button>
         <select id="page-selector" class="select-control" title="Chọn file HTML trong dự án">
           <option value="">-- Chọn trang web --</option>
         </select>
-        <button id="btn-open-local-file" class="btn-ghost btn-sm" title="Thả hoặc chọn file HTML / Thư mục bất kỳ từ máy tính">
-          📥 Mở Web
-        </button>
-        <button id="btn-load-demo" class="btn-ghost btn-sm" title="Mở giao diện mẫu để thử nghiệm">
-          🎨 Trang Mẫu
-        </button>
+        <button id="btn-open-local-file" class="btn-icon" title="Mở file HTML hoặc đổi thư mục dự án từ máy tính">📂</button>
+        <button id="btn-load-demo" class="btn-icon" title="Mở giao diện mẫu (Demo UI) để thử nghiệm">🎨</button>
       </div>
     </div>
 
-    <!-- Center: Command Search + Viewport & Mode Controls -->
+    <!-- Center: Compact Search + Icon-Only Viewport + Zoom + Edit/Preview + Icon Tools -->
     <div class="topbar__center">
-      <!-- 21st.dev / Origin UI Command Search Button -->
-      <button type="button" id="btn-open-uilib-explorer" class="cmd-search-trigger" title="Tìm kiếm nhanh Button, Card, Input từ 38+ Thư viện UI (Ctrl+K)">
+      <button type="button" id="btn-open-uilib-explorer" class="cmd-search-trigger" title="Tìm kiếm nhanh Component từ 38+ Thư viện UI (Ctrl+K)">
         <span class="cmd-search-trigger__icon">🔍</span>
-        <span class="cmd-search-trigger__text">Tìm Component (button, card, Aceternity, Magic UI...)</span>
+        <span class="cmd-search-trigger__text">Tìm UI...</span>
         <kbd class="cmd-search-trigger__kbd">Ctrl+K</kbd>
       </button>
 
-      <!-- Official ReactBits.dev 3-Column Customize Panel Trigger -->
-      <button type="button" class="btn-secondary btn-sm btn-toggle-rb-dock" title="Mở Bảng Customize 3 cột chuẩn ReactBits.dev (218 Component Schemas & 3,960 thanh kéo Scrubber)" style="border-color:rgba(168,85,247,0.55);background:rgba(168,85,247,0.14);color:#f3e8ff;font-weight:700;">
-        🎛️ Customize (ReactBits)
-      </button>
-
-      <div class="segmented-group" id="viewport-switcher">
-        <button class="seg-btn active" data-viewport="100%" title="Màn hình máy tính (Desktop)">🖥️ Desktop</button>
-        <button class="seg-btn" data-viewport="768px" title="Máy tính bảng (Tablet 768px)">📱 Tablet</button>
-        <button class="seg-btn" data-viewport="390px" title="Điện thoại (Mobile 390px)">📲 Mobile</button>
+      <!-- Icon-Only Viewport Switcher (Desktop / Tablet / Mobile) -->
+      <div class="segmented-group seg-icon-only" id="viewport-switcher">
+        <button class="seg-btn active" data-viewport="100%" title="Màn hình máy tính (Desktop 100%)">🖥️</button>
+        <button class="seg-btn" data-viewport="768px" title="Máy tính bảng (Tablet 768px)">📱</button>
+        <button class="seg-btn" data-viewport="390px" title="Điện thoại (Mobile 390px)">📲</button>
       </div>
 
+      <!-- Compact Zoom Pill (Click percentage to reset to 100%) -->
       <div class="zoom-controls">
         <button id="btn-zoom-out" class="btn-icon" title="Thu nhỏ">−</button>
-        <span id="zoom-label" class="zoom-value">100%</span>
+        <span id="zoom-label" class="zoom-value" title="Click để đặt lại tỷ lệ 100%" onclick="document.getElementById('btn-zoom-reset').click()" style="cursor:pointer;">100%</span>
         <button id="btn-zoom-in" class="btn-icon" title="Phóng to">+</button>
-        <button id="btn-zoom-reset" class="btn-ghost btn-xs" title="Đặt lại 100%">1:1</button>
+        <button id="btn-zoom-reset" class="btn-ghost btn-xs hidden" title="Đặt lại 100%">1:1</button>
       </div>
 
-      <!-- Mode Switcher: Edit vs Preview -->
+      <!-- Compact Mode Switcher: Edit vs Preview -->
       <div class="segmented-group">
         <button id="mode-edit-btn" class="seg-btn active" title="Chế độ kéo thả & chỉnh sửa trực tiếp">
-          ✏️ Sửa UI
+          ✏️ Sửa
         </button>
         <button id="mode-preview-btn" class="seg-btn" title="Chế độ xem thử như trang web thật (bấm link, cuộn mượt)">
-          👁️ Xem Thử
+          👁️ Xem
         </button>
       </div>
 
-      <!-- Freeze Preloader / Animations Checkbox -->
-      <label class="toggle-pill" id="lbl-bypass-loader" title="Tự động ẩn màn hình chờ (Loader) và hiện đầy đủ các khối ẩn để dễ chỉnh sửa">
-        <input type="checkbox" id="chk-bypass-loader" checked />
-        <span id="txt-bypass-loader">Tắt Loader</span>
-      </label>
-
-      <!-- 1-Click Canvas Webpage Dark Mode Preview Toggle -->
-      <button type="button" id="btn-canvas-dark-mode" class="btn-secondary btn-xs" title="Bật/Tắt chế độ Dark Mode cho trang web đang chỉnh sửa trong khung Canvas">
-        🌓 Web Dark
-      </button>
-
-      <!-- 1-Click Apply Origin UI + Sonner Design System to Loaded Webpage -->
-      <button type="button" id="btn-apply-origin-system" class="btn-secondary btn-xs" title="Đồng bộ trọn bộ UI/UX chuẩn Origin UI (coss.com) + Sonner Toast, Alert, Button, Input, Card lên toàn bộ trang web đang mở">
-        ✦ Origin UI Kit
-      </button>
+      <!-- Icon-Only Canvas Utility Bar (Bypass Loader, Web Dark, Origin UI Kit, 3-Col Customize Dock) -->
+      <div class="topbar-icon-tools">
+        <label class="toggle-pill toggle-pill--icon" id="lbl-bypass-loader" title="Tự động ẩn màn hình chờ (Loader) và hiện đầy đủ các khối ẩn">
+          <input type="checkbox" id="chk-bypass-loader" checked />
+          <span id="txt-bypass-loader">⚡</span>
+        </label>
+        <button type="button" id="btn-canvas-dark-mode" class="btn-icon" title="Bật/Tắt giả lập chế độ Dark Mode cho trang web trên Canvas">🌓</button>
+        <button type="button" id="btn-apply-origin-system" class="btn-icon" title="Đồng bộ trọn bộ UI/UX chuẩn Origin UI + Sonner lên toàn bộ trang web">✦</button>
+        <button type="button" class="btn-icon btn-toggle-rb-dock" title="Mở Bảng Customize 3 cột chuẩn ReactBits.dev (218 Bộ & 3,960 thanh kéo)">🎛️</button>
+      </div>
     </div>
 
-    <!-- Right Actions: Language Switcher, Dark Mode Toggle, Studio Theme, Undo/Redo, AI Prompt, Save -->
+    <!-- Right Actions: Undo/Redo, Language, Theme Icon, AI Prompt, Export, Save -->
     <div class="topbar__right">
-      <!-- Bilingual Language Switcher (EN / VI — Industry Standard Terminology) -->
-      <div class="segmented-group lang-switcher" id="lang-switcher" title="Switch Language / Đổi ngôn ngữ (English / Tiếng Việt)">
-        <button type="button" class="seg-btn" data-lang="en" title="English (Figma / Framer / Webflow Standard Terminology)">EN</button>
-        <button type="button" class="seg-btn active" data-lang="vi" title="Tiếng Việt (Thuật ngữ Thiết kế UI/UX chuẩn)">VI</button>
+      <div class="history-btns">
+        <button id="btn-undo" class="btn-icon" title="Hoàn tác (Ctrl+Z)" disabled>↩</button>
+        <button id="btn-redo" class="btn-icon" title="Làm lại (Ctrl+Y)" disabled>↪</button>
       </div>
 
-      <!-- 1-Click Unified Dark / Light Mode Toggle -->
-      <button type="button" id="btn-dark-mode-toggle" class="btn-secondary btn-sm" title="Chuyển đổi nhanh chế độ Dark Mode / Light Mode cho toàn bộ Studio & Bảng Customize">
-        🌙 Dark
-      </button>
+      <div class="divider-v"></div>
 
-      <!-- tweakcn Studio Theme Switcher -->
-      <select id="studio-theme-select" class="select-control select-theme" title="Đổi giao diện của công cụ Studio (Cảm hứng từ tweakcn & Shadcn)">
+      <!-- Bilingual Language Switcher (EN / VI) -->
+      <div class="segmented-group lang-switcher" id="lang-switcher" title="Switch Language / Đổi ngôn ngữ (English / Tiếng Việt)">
+        <button type="button" class="seg-btn" data-lang="en" title="English">EN</button>
+        <button type="button" class="seg-btn active" data-lang="vi" title="Tiếng Việt">VI</button>
+      </div>
+
+      <!-- 1-Click Unified Dark / Light Mode Icon Toggle -->
+      <button type="button" id="btn-dark-mode-toggle" class="btn-icon" title="Đổi giao diện Sáng / Tối (Dark / Light Mode)">🌙</button>
+
+      <!-- Hidden Studio Theme Select (kept for state compatibility) -->
+      <select id="studio-theme-select" class="select-control select-theme hidden" title="Đổi giao diện của công cụ Studio">
         <option value="obsidian">🖤 Obsidian Dark</option>
         <option value="aurora">🌌 Aurora Cyber</option>
         <option value="claude">🧡 Claude Warm</option>
         <option value="daylight">☀️ Daylight Light</option>
       </select>
 
-      <div class="history-btns">
-        <button id="btn-undo" class="btn-icon" title="Hoàn tác (Ctrl+Z)" disabled>↩</button>
-        <button id="btn-redo" class="btn-icon" title="Làm lại (Ctrl+Y)" disabled>↪</button>
-      </div>
+      <div class="divider-v"></div>
 
-      <button id="btn-ai-prompt" class="btn-secondary btn-sm" title="Tự động tạo câu lệnh Prompt chi tiết mọi thay đổi để gửi cho AI">
-        🤖 Prompt AI <span id="change-count-badge" class="badge-count">0</span>
+      <button id="btn-ai-prompt" class="btn-secondary btn-sm btn-ai-compact" title="Tự động tạo câu lệnh Prompt chi tiết mọi thay đổi để gửi cho AI">
+        🤖 <span id="change-count-badge" class="badge-count">0</span>
       </button>
 
-      <button id="btn-download-html" class="btn-secondary btn-sm" title="Tải file HTML đã chỉnh sửa về máy">
-        ⬇️ Tải HTML
-      </button>
+      <button id="btn-download-html" class="btn-icon" title="Tải file HTML đã chỉnh sửa về máy">⬇️</button>
 
       <button id="btn-save-direct" class="btn-primary btn-sm" title="Lưu trực tiếp vào file gốc trên máy (Ctrl+S)">
-        💾 Lưu File Gốc
+        💾 Lưu
       </button>
     </div>
   </header>
@@ -151,16 +137,19 @@
       <!-- TAB 0 (DEFAULT ACTIVE): 38+ UI LIBRARIES & COMPONENT SEARCH ENGINE -->
       <div class="sidebar-panel active" id="tab-uilibs">
         <div class="uilib-hub-header">
-          <!-- Instant Search Bar + NameThat UI Checklist Trigger -->
+          <!-- Instant Search Bar + Icon-Only Quick Actions -->
           <div class="uilib-search-row">
             <div class="uilib-search-box" style="flex:1;">
               <span class="uilib-search-icon">🔍</span>
-              <input type="text" id="uilib-search-input" placeholder="Gõ: button, switch, card, magic..." autocomplete="off" />
+              <input type="text" id="uilib-search-input" placeholder="Tìm: button, card, input..." autocomplete="off" />
               <button type="button" id="btn-clear-uilib-search" class="uilib-clear-btn hidden" title="Xóa tìm kiếm">✕</button>
             </div>
-            <button type="button" id="btn-toggle-namethat-checklist" class="uilib-checklist-btn" title="Mở bảng Checklist các loại Component chuẩn NameThat UI (Button, Switch, Card, Checkbox, Modal, Tabs...)">
-              ☑️ Checklist <span id="namethat-checked-badge" class="namethat-badge hidden">0</span>
+            <button type="button" id="btn-toggle-namethat-checklist" class="uilib-checklist-btn uilib-icon-pill" title="Checklist phân loại Component chuẩn NameThat UI">
+              ☑️ <span id="namethat-checked-badge" class="namethat-badge hidden">0</span>
             </button>
+            <button type="button" id="btn-open-custom-import" class="uilib-action-pill uilib-action-pill--accent uilib-icon-pill" title="Dán code .TSX / JSX / HTML hoặc URL Registry JSON">📥</button>
+            <button type="button" id="btn-expand-uilib-modal" class="uilib-action-pill uilib-icon-pill" title="Mở kho thư viện toàn màn hình (Ctrl+K)">⤢</button>
+            <button type="button" id="btn-clear-custom-imports" class="uilib-action-pill uilib-action-pill--danger uilib-icon-pill hidden" title="Xóa toàn bộ mẫu tự Import">🗑️</button>
           </div>
 
           <!-- Expandable NameThat UI Checklist Drawer (Multi-select taxonomy from namethat.com / component.gallery) -->
@@ -201,38 +190,31 @@
             <button type="button" class="uilib-cat-pill" data-uicat="directory">38 Libs</button>
           </div>
 
-          <!-- Compact Filter & Action Row -->
-          <div class="uilib-controls-row">
-            <select id="uilib-lib-filter" class="uilib-select-sm" title="Lọc theo Thư viện UI">
-              <option value="all">Tất cả 38+ Thư viện</option>
-              <option value="custom">Đã Import (.TSX)</option>
-            </select>
-            <select id="uilib-hover-mode" class="uilib-select-sm" title="Chế độ xem thử khi rê chuột">
-              <option value="auto">Hover: Tự động</option>
-              <option value="morph">Hover: Áp Style</option>
-              <option value="insert">Hover: Chèn mới</option>
-            </select>
-          </div>
-
-          <!-- Compact Smart Toggles + Quick Actions in 1 Clean Bar -->
-          <div class="uilib-quick-bar">
-            <label class="uilib-smart-chk" title="Tự động lọc loại Component theo thẻ bạn đang chọn trên web">
-              <input type="checkbox" id="chk-auto-match-el" checked />
-              <span>Tự lọc</span>
-            </label>
-            <label class="uilib-smart-chk" title="Áp dụng luôn cả Animation, Hover & SVG Icon khi bấm Áp Style">
-              <input type="checkbox" id="chk-morph-with-fx" checked />
-              <span>Kèm FX/SVG</span>
-            </label>
-            <button type="button" id="btn-expand-uilib-modal" class="uilib-action-pill" title="Mở kho thư viện toàn màn hình (Ctrl+K)">⤢ Mở rộng</button>
-            <button type="button" id="btn-open-custom-import" class="uilib-action-pill uilib-action-pill--accent" title="Dán code .TSX / JSX hoặc URL Registry JSON">📥 Import .TSX</button>
-            <button type="button" id="btn-clear-custom-imports" class="uilib-action-pill uilib-action-pill--danger hidden" title="Xóa toàn bộ mẫu tự Import">🗑️</button>
-          </div>
-
-          <!-- Collapsible 1-Click CDN Bar (Hidden by default to keep UI ultra-clean) -->
+          <!-- Collapsible Advanced Filters & CDN Bar (Keeps Sidebar Ultra-Clean!) -->
           <details class="uilib-cdn-details">
-            <summary class="uilib-cdn-summary">⚡ Nạp thư viện CDN (Tailwind, Bootstrap, GSAP, Swiper...)</summary>
-            <div class="uilib-cdn-bar">
+            <summary class="uilib-cdn-summary">⚙️ Bộ lọc nâng cao &amp; Nạp CDN (Tailwind, GSAP...)</summary>
+            <div class="uilib-controls-row" style="margin-top:6px;">
+              <select id="uilib-lib-filter" class="uilib-select-sm" title="Lọc theo Thư viện UI">
+                <option value="all">Tất cả 38+ Thư viện</option>
+                <option value="custom">Đã Import (.TSX)</option>
+              </select>
+              <select id="uilib-hover-mode" class="uilib-select-sm" title="Chế độ xem thử khi rê chuột">
+                <option value="auto">Hover: Tự động</option>
+                <option value="morph">Hover: Áp Style</option>
+                <option value="insert">Hover: Chèn mới</option>
+              </select>
+            </div>
+            <div class="uilib-quick-bar" style="margin-top:6px;">
+              <label class="uilib-smart-chk" title="Tự động lọc loại Component theo thẻ bạn đang chọn trên web">
+                <input type="checkbox" id="chk-auto-match-el" checked />
+                <span>Tự lọc theo thẻ</span>
+              </label>
+              <label class="uilib-smart-chk" title="Áp dụng luôn cả Animation, Hover & SVG Icon khi bấm Áp Style">
+                <input type="checkbox" id="chk-morph-with-fx" checked />
+                <span>Kèm FX/SVG</span>
+              </label>
+            </div>
+            <div class="uilib-cdn-bar" style="margin-top:6px;">
               <button type="button" class="cdn-chip" data-inject-cdn="tailwind">Tailwind</button>
               <button type="button" class="cdn-chip" data-inject-cdn="bootstrap5">Bootstrap 5</button>
               <button type="button" class="cdn-chip" data-inject-cdn="fontawesome">FontAwesome</button>
@@ -345,7 +327,7 @@
 
     <!-- CENTER CANVAS AREA -->
     <main class="canvas-stage" id="canvas-stage">
-      <!-- Top Quick Guide Helper Bar -->
+      <!-- Slim Minimalist Canvas Statusbar -->
       <div class="canvas-statusbar">
         <div class="statusbar-left">
           <span class="status-dot"></span>
@@ -353,11 +335,6 @@
         </div>
         <div class="statusbar-center">
           <span id="live-preview-badge" class="live-preview-badge hidden">👁️ Đang xem thử trực tiếp...</span>
-          <span class="shortcut-tip"><kbd>Click + Kéo</kbd> Di chuyển</span>
-          <span class="shortcut-tip"><kbd>← ↑ → ↓</kbd> Nhích 1px</span>
-          <span class="shortcut-tip"><kbd>Double-Click</kbd> Sửa chữ</span>
-          <span class="shortcut-tip"><kbd>Ctrl+K</kbd> Kho 38 Lib UI</span>
-          <span class="shortcut-tip"><kbd>Delete</kbd> Xóa</span>
         </div>
         <div class="statusbar-right">
           <span id="live-coords-readout" class="coords-pill">X: 0px | Y: 0px | W: -- | H: --</span>
@@ -383,18 +360,18 @@
 
     <!-- RIGHT SIDEBAR: Visual Property Inspector -->
     <aside class="sidebar sidebar--right">
-      <div class="inspector-header">
+      <div class="inspector-header inspector-header--compact">
         <div class="inspector-title-row">
           <span class="inspector-badge" id="selected-tag-badge">NONE</span>
-          <span class="inspector-selector" id="selected-selector-label">Hãy chọn 1 phần tử trên web</span>
+          <span class="inspector-selector" id="selected-selector-label">Chọn 1 phần tử trên web</span>
         </div>
 
-        <!-- Quick Element Actions -->
+        <!-- Icon-Only Quick Element Actions (Single-Line Precision Bar) -->
         <div class="quick-element-actions" id="element-quick-actions">
-          <button id="btn-el-parent" class="btn-action" title="Chọn phần tử cha (Bao ngoài)" disabled>⬆️ Khối Cha</button>
-          <button id="btn-el-duplicate" class="btn-action" title="Nhân bản phần tử này (Ctrl+D)" disabled>📋 Nhân Bản</button>
-          <button id="btn-el-reset" class="btn-action btn-action--warning" title="Khôi phục phần tử này về nguyên trạng ban đầu" disabled>↺ Về Gốc</button>
-          <button id="btn-el-delete" class="btn-action btn-action--danger" title="Xóa phần tử này khỏi trang (Phím Delete)" disabled>🗑️ Xóa</button>
+          <button id="btn-el-parent" class="btn-action" title="Chọn phần tử cha (Bao ngoài)" disabled>⬆️</button>
+          <button id="btn-el-duplicate" class="btn-action" title="Nhân bản phần tử này (Ctrl+D)" disabled>📋</button>
+          <button id="btn-el-reset" class="btn-action btn-action--warning" title="Khôi phục phần tử này về nguyên trạng ban đầu" disabled>↺</button>
+          <button id="btn-el-delete" class="btn-action btn-action--danger" title="Xóa phần tử này khỏi trang (Phím Delete)" disabled>🗑️</button>
         </div>
       </div>
 
@@ -425,10 +402,10 @@
             🎛️ Customize
           </button>
           <button type="button" class="insp-mode-tab" data-insp-tab="insp-pane-design" title="Màu sắc, Kiểu chữ Live-Hover, Viền, Bóng & Icon SVG Lucide">
-            🎨 Giao Diện &amp; Chữ
+            🎨 Giao Diện
           </button>
           <button type="button" class="insp-mode-tab" data-insp-tab="insp-pane-layout" title="Tọa độ X/Y, Kích thước W/H, Padding, Margin & Flexbox">
-            📐 Bố Cục &amp; Tọa Độ
+            📐 Bố Cục
           </button>
         </div>
 
@@ -436,26 +413,21 @@
         <div id="insp-pane-reactbits" class="insp-mode-pane active">
           <section class="prop-group prop-group--flush">
             <div class="prop-group__header">
-              <span>🎛️ ReactBits Customize</span>
+              <span>🎛️ Customize</span>
               <div class="header-right-inline">
-                <button type="button" class="btn-reset-pill btn-rb-toggle-theme" title="Chuyển đổi Dark / Light Mode cho bảng Customize">🌙 Dark</button>
-                <button type="button" class="btn-reset-pill btn-rb-reset-props" title="Đặt lại toàn bộ thông số Customize về mặc định">↺ Reset</button>
-                <button type="button" class="btn-reset-pill btn-toggle-rb-dock" id="btn-sidebar-rb-dock" title="Mở rộng Bảng Customize 3 cột chuẩn ReactBits.dev" style="background:rgba(168,85,247,0.2);color:#e9d5ff;border-color:rgba(168,85,247,0.5);">⤢ Bảng 3 Cột</button>
+                <button type="button" class="btn-reset-pill btn-icon-pill btn-rb-toggle-theme" title="Chuyển đổi Dark / Light Mode cho bảng Customize">🌙</button>
+                <button type="button" class="btn-reset-pill btn-icon-pill btn-rb-reset-props" title="Đặt lại toàn bộ thông số Customize về mặc định">↺</button>
+                <button type="button" class="btn-reset-pill btn-icon-pill btn-toggle-rb-dock" id="btn-sidebar-rb-dock" title="Mở rộng Bảng Customize 3 cột chuẩn ReactBits.dev">⤢</button>
               </div>
             </div>
 
             <div style="display:flex;gap:5px;margin-bottom:7px;">
-              <select id="rb-sidebar-schema-selector" class="select-control" style="flex:1;font-size:11.5px;height:28px;" title="Chọn trong 218 bộ thông số Customize từ reactbits.dev"></select>
-              <button type="button" id="btn-sidebar-rb-insert" class="btn-secondary btn-xs btn-rb-insert-custom" title="Chèn mẫu ReactBits đã chỉnh sửa vào trang web" style="height:28px;padding:0 9px;">➕ Chèn</button>
+              <select id="rb-sidebar-schema-selector" class="select-control" style="flex:1;font-size:11.5px;height:28px;" title="Chọn bộ thông số Customize theo phần tử"></select>
+              <button type="button" id="btn-sidebar-rb-insert" class="btn-secondary btn-xs btn-icon-pill btn-rb-insert-custom" title="Chèn mẫu ReactBits đã chỉnh sửa vào trang web" style="height:28px;width:28px;padding:0;">➕</button>
             </div>
 
-            <!-- Compact Category Filter Pills for Master Controls -->
-            <div class="rb-sidebar-group-bar" id="rb-sidebar-group-pills">
-              <button type="button" class="rb-group-chip active" data-rb-group="all">Tất cả</button>
-              <button type="button" class="rb-group-chip" data-rb-group="ticket">🎫 Ticket &amp; Khung</button>
-              <button type="button" class="rb-group-chip" data-rb-group="cinema">🎬 Cinema &amp; Chữ</button>
-              <button type="button" class="rb-group-chip" data-rb-group="motion">🌀 3D &amp; Tilt</button>
-            </div>
+            <!-- Compact Context Badge -->
+            <div class="rb-sidebar-group-bar" id="rb-sidebar-group-pills"></div>
 
             <div class="rb-customize-scope" data-rb-theme="dark" style="border-radius:10px;overflow:hidden;border:1px solid var(--border-color);">
               <div id="rb-sidebar-options-grid" class="rb-preview-options rb-preview-options--sidebar"></div>
@@ -1043,10 +1015,10 @@
   <!-- TOAST NOTIFICATION -->
   <div id="toast-container" class="toast-container"></div>
 
-  <script src="./js/ui-libs-registry.js?v=6.9"></script>
-  <script src="./js/reactbits-customize.js?v=6.9"></script>
-  <script src="./js/templates.js?v=6.9"></script>
-  <script src="./js/studio.js?v=6.9"></script>
-  <script src="./js/i18n-theme.js?v=6.9"></script>
+  <script src="./js/ui-libs-registry.js?v=7.0"></script>
+  <script src="./js/reactbits-customize.js?v=7.0"></script>
+  <script src="./js/templates.js?v=7.0"></script>
+  <script src="./js/studio.js?v=7.0"></script>
+  <script src="./js/i18n-theme.js?v=7.0"></script>
 </body>
 </html>

@@ -68,17 +68,17 @@
     },
     {
       sel: '#btn-open-local-file',
-      html: { en: SVG.upload + ' <span>Open Web</span>', vi: SVG.upload + ' <span>Mở Web</span>' },
+      html: { en: SVG.folder, vi: SVG.folder },
       attr: 'title',
-      en: 'Open or drop any HTML file or project folder from your computer',
-      vi: 'Thả hoặc chọn file HTML / Thư mục bất kỳ từ máy tính'
+      en: 'Open HTML file or switch project folder from your computer',
+      vi: 'Mở file HTML hoặc đổi thư mục dự án từ máy tính'
     },
     {
       sel: '#btn-load-demo',
-      html: { en: SVG.layout + ' <span>Demo UI</span>', vi: SVG.layout + ' <span>Trang Mẫu</span>' },
+      html: { en: SVG.layout, vi: SVG.layout },
       attr: 'title',
-      en: 'Load Origin UI + Sonner interactive demo template',
-      vi: 'Mở giao diện mẫu chuẩn Origin UI + Sonner để thử nghiệm'
+      en: 'Load interactive Demo UI template',
+      vi: 'Mở giao diện mẫu (Demo UI) để thử nghiệm'
     },
     {
       sel: '#btn-open-uilib-explorer .cmd-search-trigger__icon',
@@ -87,67 +87,82 @@
     {
       sel: '#btn-open-uilib-explorer .cmd-search-trigger__text',
       text: {
-        en: 'Search Components (Button, Card, Origin UI, Magic UI...)',
-        vi: 'Tìm Component (button, card, Origin UI, Magic UI...)'
+        en: 'Search UI...',
+        vi: 'Tìm UI...'
       }
     },
     {
       sel: '.topbar__center .btn-toggle-rb-dock',
-      html: { en: SVG.sliders + ' <span>Customize</span>', vi: SVG.sliders + ' <span>Customize</span>' },
+      html: { en: SVG.sliders, vi: SVG.sliders },
       attr: 'title',
-      en: 'Open 3-Column ReactBits.dev Customize Dock (218 Component Schemas & 3,960 Scrubber Controls)',
-      vi: 'Mở Bảng Customize 3 cột chuẩn ReactBits.dev (218 Component Schemas & 3,960 thanh kéo Scrubber)'
+      en: 'Open 3-Column ReactBits.dev Customize Dock (218 Schemas & 3,960 Controls)',
+      vi: 'Mở Bảng Customize 3 cột chuẩn ReactBits.dev (218 Bộ & 3,960 thanh kéo)'
     },
     {
       sel: '#viewport-switcher [data-viewport="100%"]',
-      html: { en: SVG.monitor + ' <span>Desktop</span>', vi: SVG.monitor + ' <span>Desktop</span>' }
+      html: { en: SVG.monitor, vi: SVG.monitor },
+      attr: 'title',
+      en: 'Desktop Viewport (100%)',
+      vi: 'Màn hình máy tính (Desktop 100%)'
     },
     {
       sel: '#viewport-switcher [data-viewport="768px"]',
-      html: { en: SVG.tablet + ' <span>Tablet</span>', vi: SVG.tablet + ' <span>Tablet</span>' }
+      html: { en: SVG.tablet, vi: SVG.tablet },
+      attr: 'title',
+      en: 'Tablet Viewport (768px)',
+      vi: 'Máy tính bảng (Tablet 768px)'
     },
     {
       sel: '#viewport-switcher [data-viewport="390px"]',
-      html: { en: SVG.smartphone + ' <span>Mobile</span>', vi: SVG.smartphone + ' <span>Mobile</span>' }
+      html: { en: SVG.smartphone, vi: SVG.smartphone },
+      attr: 'title',
+      en: 'Mobile Viewport (390px)',
+      vi: 'Điện thoại (Mobile 390px)'
     },
     {
       sel: '#mode-edit-btn',
-      html: { en: SVG.pen + ' <span>Design</span>', vi: SVG.pen + ' <span>Sửa UI</span>' },
+      html: { en: SVG.pen + ' <span>Edit</span>', vi: SVG.pen + ' <span>Sửa</span>' },
       attr: 'title',
       en: 'Direct Visual Manipulation & Drag-and-Drop Mode',
       vi: 'Chế độ kéo thả & chỉnh sửa trực tiếp'
     },
     {
       sel: '#mode-preview-btn',
-      html: { en: SVG.eye + ' <span>Preview</span>', vi: SVG.eye + ' <span>Xem Thử</span>' },
+      html: { en: SVG.eye + ' <span>Preview</span>', vi: SVG.eye + ' <span>Xem</span>' },
       attr: 'title',
       en: 'Interactive Live Preview Mode (test links, hover states & scrolling)',
       vi: 'Chế độ xem thử như trang web thật (bấm link, cuộn mượt)'
     },
     {
       sel: '#txt-bypass-loader',
-      text: { en: 'Bypass Loader', vi: 'Tắt Loader' }
+      html: { en: SVG.zap, vi: SVG.zap }
+    },
+    {
+      sel: '#lbl-bypass-loader',
+      attr: 'title',
+      en: 'Bypass Preloader & Reveal Hidden Sections Automatically',
+      vi: 'Tự động ẩn màn hình chờ (Loader) và hiện các khối ẩn'
     },
     {
       sel: '#btn-ai-prompt',
       html: {
-        en: SVG.sparkles + ' <span>AI Prompt</span> <span id="change-count-badge" class="badge-count">0</span>',
-        vi: SVG.sparkles + ' <span>Prompt AI</span> <span id="change-count-badge" class="badge-count">0</span>'
+        en: SVG.sparkles + ' <span id="change-count-badge" class="badge-count">0</span>',
+        vi: SVG.sparkles + ' <span id="change-count-badge" class="badge-count">0</span>'
       },
       attr: 'title',
-      en: 'Generate structured AI Prompt & CSS Patch for Cursor / Claude / ChatGPT',
-      vi: 'Tự động tạo câu lệnh Prompt chi tiết mọi thay đổi để gửi cho AI'
+      en: 'Export AI Prompt & CSS Patch for Cursor / Claude / ChatGPT',
+      vi: 'Xuất câu lệnh Prompt chi tiết mọi thay đổi để gửi cho AI'
     },
     {
       sel: '#btn-download-html',
-      html: { en: SVG.download + ' <span>Export HTML</span>', vi: SVG.download + ' <span>Tải HTML</span>' },
+      html: { en: SVG.download, vi: SVG.download },
       attr: 'title',
       en: 'Download edited standalone HTML file',
       vi: 'Tải file HTML đã chỉnh sửa về máy'
     },
     {
       sel: '#btn-save-direct',
-      html: { en: SVG.save + ' <span>Save Source</span>', vi: SVG.save + ' <span>Lưu File Gốc</span>' },
+      html: { en: SVG.save + ' <span>Save</span>', vi: SVG.save + ' <span>Lưu</span>' },
       attr: 'title',
       en: 'Save changes directly to the source HTML file on disk (Ctrl+S)',
       vi: 'Lưu trực tiếp vào file gốc trên máy (Ctrl+S)'
@@ -157,12 +172,12 @@
     {
       sel: '.sidebar-tab[data-tab="tab-uilibs"]',
       html: {
-        en: SVG.grid + ' <span>Assets</span> <span class="tab-hot-dot"></span>',
-        vi: SVG.grid + ' <span>Kho UI</span> <span class="tab-hot-dot"></span>'
+        en: SVG.grid + ' <span>Assets</span>',
+        vi: SVG.grid + ' <span>Kho UI</span>'
       },
       attr: 'title',
-      en: 'Component Assets from 38+ UI Libraries (Origin UI, coss ui, Shadcn, Aceternity, Magic UI...)',
-      vi: 'Kho Component từ 38+ Thư viện UI (Origin UI, coss ui, Shadcn, Aceternity, Magic UI...)'
+      en: 'Component Assets from 38+ UI Libraries',
+      vi: 'Kho Component từ 38+ Thư viện UI'
     },
     {
       sel: '.sidebar-tab[data-tab="tab-layers"]',
@@ -170,7 +185,7 @@
     },
     {
       sel: '.sidebar-tab[data-tab="tab-add"]',
-      html: { en: SVG.plus + ' <span>Elements</span>', vi: SVG.plus + ' <span>Cơ Bản</span>' }
+      html: { en: SVG.plus + ' <span>Add</span>', vi: SVG.plus + ' <span>Thêm</span>' }
     },
     {
       sel: '.sidebar-tab[data-tab="tab-magic"]',
@@ -187,8 +202,8 @@
     {
       sel: '#uilib-search-input',
       attr: 'placeholder',
-      en: 'Search: button, switch, alert, toast, card...',
-      vi: 'Gõ: button, switch, alert, toast, card...'
+      en: 'Search: button, card, input...',
+      vi: 'Tìm: button, card, input...'
     },
     {
       sel: '.namethat-panel__header > span',
@@ -223,7 +238,7 @@
     },
     {
       sel: '#chk-auto-match-el + span',
-      text: { en: 'Auto-Filter', vi: 'Tự lọc' }
+      text: { en: 'Auto-Filter', vi: 'Tự lọc theo thẻ' }
     },
     {
       sel: '#chk-morph-with-fx + span',
@@ -231,17 +246,27 @@
     },
     {
       sel: '#btn-expand-uilib-modal',
-      html: { en: SVG.maximize + ' <span>Explore</span>', vi: SVG.maximize + ' <span>Mở rộng</span>' }
+      html: { en: SVG.maximize, vi: SVG.maximize },
+      attr: 'title',
+      en: 'Expand Full-Screen Component Hub (Ctrl+K)',
+      vi: 'Mở kho thư viện toàn màn hình (Ctrl+K)'
     },
     {
       sel: '#btn-open-custom-import',
-      html: { en: SVG.code + ' <span>Import .TSX</span>', vi: SVG.code + ' <span>Import .TSX</span>' }
+      html: { en: SVG.code, vi: SVG.code },
+      attr: 'title',
+      en: 'Import .TSX / JSX / HTML or Registry JSON URL',
+      vi: 'Dán code .TSX / JSX / HTML hoặc URL Registry JSON'
+    },
+    {
+      sel: '#btn-clear-custom-imports',
+      html: { en: SVG.trash, vi: SVG.trash }
     },
     {
       sel: '.uilib-cdn-summary',
       html: {
-        en: SVG.zap + ' <span>Inject CDN Libraries (Tailwind, Bootstrap, GSAP, Swiper...)</span>',
-        vi: SVG.zap + ' <span>Nạp thư viện CDN (Tailwind, Bootstrap, GSAP, Swiper...)</span>'
+        en: SVG.sliders + ' <span>Advanced Filters &amp; CDN (Tailwind, GSAP...)</span>',
+        vi: SVG.sliders + ' <span>Bộ lọc nâng cao &amp; Nạp CDN (Tailwind, GSAP...)</span>'
       }
     },
     {
@@ -350,18 +375,8 @@
     {
       sel: '.statusbar-center',
       html: {
-        en: '<span id="live-preview-badge" class="live-preview-badge hidden">Live Previewing...</span>' +
-            '<span class="shortcut-tip"><kbd>Drag</kbd> Move</span>' +
-            '<span class="shortcut-tip"><kbd>← ↑ → ↓</kbd> Nudge 1px</span>' +
-            '<span class="shortcut-tip"><kbd>Double-Click</kbd> Edit Text</span>' +
-            '<span class="shortcut-tip"><kbd>Ctrl+K</kbd> Component Hub</span>' +
-            '<span class="shortcut-tip"><kbd>Delete</kbd> Remove</span>',
-        vi: '<span id="live-preview-badge" class="live-preview-badge hidden">Đang xem thử trực tiếp...</span>' +
-            '<span class="shortcut-tip"><kbd>Click + Kéo</kbd> Di chuyển</span>' +
-            '<span class="shortcut-tip"><kbd>← ↑ → ↓</kbd> Nhích 1px</span>' +
-            '<span class="shortcut-tip"><kbd>Double-Click</kbd> Sửa chữ</span>' +
-            '<span class="shortcut-tip"><kbd>Ctrl+K</kbd> Kho 38 Lib UI</span>' +
-            '<span class="shortcut-tip"><kbd>Delete</kbd> Xóa</span>'
+        en: '<span id="live-preview-badge" class="live-preview-badge hidden">Live Previewing...</span>',
+        vi: '<span id="live-preview-badge" class="live-preview-badge hidden">Đang xem thử trực tiếp...</span>'
       }
     },
     {
@@ -375,28 +390,28 @@
     // ==================== RIGHT SIDEBAR: INSPECTOR HEADER & EMPTY STATE ====================
     {
       sel: '#btn-el-parent',
-      html: { en: SVG.arrowUp + ' <span>Parent</span>', vi: SVG.arrowUp + ' <span>Khối Cha</span>' },
+      html: { en: SVG.arrowUp, vi: SVG.arrowUp },
       attr: 'title',
       en: 'Select Parent Container Element',
       vi: 'Chọn phần tử cha (Bao ngoài)'
     },
     {
       sel: '#btn-el-duplicate',
-      html: { en: SVG.copy + ' <span>Duplicate</span>', vi: SVG.copy + ' <span>Nhân Bản</span>' },
+      html: { en: SVG.copy, vi: SVG.copy },
       attr: 'title',
       en: 'Duplicate Selected Element (Ctrl+D)',
       vi: 'Nhân bản phần tử này (Ctrl+D)'
     },
     {
       sel: '#btn-el-reset',
-      html: { en: SVG.reset + ' <span>Reset</span>', vi: SVG.reset + ' <span>Về Gốc</span>' },
+      html: { en: SVG.reset, vi: SVG.reset },
       attr: 'title',
       en: 'Restore Element to Initial State',
       vi: 'Khôi phục phần tử này về nguyên trạng ban đầu'
     },
     {
       sel: '#btn-el-delete',
-      html: { en: SVG.trash + ' <span>Delete</span>', vi: SVG.trash + ' <span>Xóa</span>' },
+      html: { en: SVG.trash, vi: SVG.trash },
       attr: 'title',
       en: 'Remove Element from DOM (Delete Key)',
       vi: 'Xóa phần tử này khỏi trang (Phím Delete)'
@@ -446,14 +461,14 @@
     },
     {
       sel: '.insp-mode-tab[data-insp-tab="insp-pane-design"]',
-      html: { en: SVG.palette + ' <span>Design &amp; Type</span>', vi: SVG.palette + ' <span>Giao Diện &amp; Chữ</span>' },
+      html: { en: SVG.palette + ' <span>Design</span>', vi: SVG.palette + ' <span>Giao Diện</span>' },
       attr: 'title',
       en: 'Typography, Fill & Stroke Swatches, Corner Radius, Shadows & Lucide Vector Icons',
       vi: 'Màu sắc, Kiểu chữ Live-Hover, Viền, Bóng & Icon SVG Lucide'
     },
     {
       sel: '.insp-mode-tab[data-insp-tab="insp-pane-layout"]',
-      html: { en: SVG.move + ' <span>Layout &amp; Pos</span>', vi: SVG.move + ' <span>Bố Cục &amp; Tọa Độ</span>' },
+      html: { en: SVG.move + ' <span>Layout</span>', vi: SVG.move + ' <span>Bố Cục</span>' },
       attr: 'title',
       en: 'Coordinates X/Y, Dimensions W/H, Transform, Padding, Margin & Auto Layout (Flexbox)',
       vi: 'Tọa độ X/Y, Kích thước W/H, Padding, Margin & Flexbox'
@@ -462,15 +477,28 @@
     // Pane 1: ReactBits Customize
     {
       sel: '#insp-pane-reactbits .prop-group__header > span',
-      html: { en: SVG.sliders + ' <span>ReactBits Customize</span>', vi: SVG.sliders + ' <span>ReactBits Customize</span>' }
+      html: { en: SVG.sliders + ' <span>Customize</span>', vi: SVG.sliders + ' <span>Customize</span>' }
+    },
+    {
+      sel: '#insp-pane-reactbits .btn-rb-reset-props',
+      html: { en: SVG.reset, vi: SVG.reset },
+      attr: 'title',
+      en: 'Reset all Customize controls to default',
+      vi: 'Đặt lại toàn bộ thông số Customize về mặc định'
     },
     {
       sel: '#btn-sidebar-rb-dock',
-      html: { en: SVG.maximize + ' <span>3-Col Dock</span>', vi: SVG.maximize + ' <span>Bảng 3 Cột</span>' }
+      html: { en: SVG.maximize, vi: SVG.maximize },
+      attr: 'title',
+      en: 'Expand 3-Column Customize Dock',
+      vi: 'Mở rộng Bảng Customize 3 Cột'
     },
     {
       sel: '#btn-sidebar-rb-insert',
-      html: { en: SVG.plus + ' <span>Insert</span>', vi: SVG.plus + ' <span>Chèn</span>' }
+      html: { en: SVG.plus, vi: SVG.plus },
+      attr: 'title',
+      en: 'Insert customized component onto webpage',
+      vi: 'Chèn mẫu đã tùy chỉnh vào trang web'
     },
     {
       sel: '.rb-group-chip[data-rb-group="all"]',
@@ -922,12 +950,13 @@
       btnFolder.innerHTML = SVG.folder + ' <span id="current-folder-label">' + currentPath + '</span>';
     }
 
-    // Update #btn-toggle-namethat-checklist text while preserving badge
+    // Update #btn-toggle-namethat-checklist icon while preserving badge
     const chkBtn = document.getElementById('btn-toggle-namethat-checklist');
     if (chkBtn) {
       const badge = document.getElementById('namethat-checked-badge');
       const badgeHtml = badge ? badge.outerHTML : '<span id="namethat-checked-badge" class="namethat-badge hidden">0</span>';
-      chkBtn.innerHTML = SVG.checkSquare + ' <span>' + (currentLang === 'en' ? 'Taxonomy' : 'Checklist') + '</span> ' + badgeHtml;
+      chkBtn.innerHTML = SVG.checkSquare + badgeHtml;
+      chkBtn.title = currentLang === 'en' ? 'UI Taxonomy Checklist (NameThat Standard)' : 'Checklist phân loại Component chuẩn NameThat UI';
     }
 
     // Update ReactBits Customize Panel labels & dropdowns
@@ -961,27 +990,26 @@
     const isDark = isStudioInDarkMode();
     const btnDarkToggle = document.getElementById('btn-dark-mode-toggle');
     if (btnDarkToggle) {
-      btnDarkToggle.innerHTML = isDark
-        ? SVG.moon + ' <span>Dark</span>'
-        : SVG.sun + ' <span>Light</span>';
+      btnDarkToggle.innerHTML = isDark ? SVG.moon : SVG.sun;
+      btnDarkToggle.title = currentLang === 'en'
+        ? (isDark ? 'Dark Mode Active (Click for Light Mode)' : 'Light Mode Active (Click for Dark Mode)')
+        : (isDark ? 'Đang ở chế độ Tối (Bấm để sang Sáng)' : 'Đang ở chế độ Sáng (Bấm để sang Tối)');
     }
     const btnCanvasDark = document.getElementById('btn-canvas-dark-mode');
     if (btnCanvasDark) {
       btnCanvasDark.classList.toggle('active', canvasDarkActive);
-      btnCanvasDark.innerHTML = (canvasDarkActive ? SVG.moon : SVG.sun) + ' <span>' + (
-        currentLang === 'en'
-          ? (canvasDarkActive ? 'Web: Dark' : 'Web Dark')
-          : (canvasDarkActive ? 'Web: Tối' : 'Web Dark')
-      ) + '</span>';
+      btnCanvasDark.innerHTML = canvasDarkActive ? SVG.moon : SVG.sun;
+      btnCanvasDark.title = currentLang === 'en'
+        ? (canvasDarkActive ? 'Webpage Dark Mode: ON' : 'Simulate Dark Mode on Webpage Canvas')
+        : (canvasDarkActive ? 'Đang bật Dark Mode cho trang web' : 'Bật/Tắt giả lập Dark Mode cho trang web trên Canvas');
     }
     const btnOriginKit = document.getElementById('btn-apply-origin-system');
     if (btnOriginKit) {
       btnOriginKit.classList.toggle('active', canvasOriginKitActive);
-      btnOriginKit.innerHTML = SVG.sparkles + ' <span>' + (
-        currentLang === 'en'
-          ? (canvasOriginKitActive ? 'Origin UI: Active' : 'Origin UI Kit')
-          : (canvasOriginKitActive ? 'Origin UI: Bật' : 'Origin UI Kit')
-      ) + '</span>';
+      btnOriginKit.innerHTML = SVG.sparkles;
+      btnOriginKit.title = currentLang === 'en'
+        ? (canvasOriginKitActive ? 'Origin UI Kit: Active on Webpage' : 'Apply Origin UI + Sonner Design System to Webpage')
+        : (canvasOriginKitActive ? 'Origin UI Kit: Đang bật trên trang web' : 'Đồng bộ chuẩn Origin UI + Sonner lên toàn bộ trang web');
     }
   }
 

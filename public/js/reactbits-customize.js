@@ -39773,10 +39773,10 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
     const moonSvg = '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>';
     const sunSvg = '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>';
     document.querySelectorAll('.btn-rb-toggle-theme, #btn-rb-toggle-theme').forEach(btn => {
-      if (rbState.theme === 'dark') {
-        btn.innerHTML = moonSvg + ' <span>Dark</span>';
+      if (btn.id === 'btn-rb-toggle-theme') {
+        btn.innerHTML = rbState.theme === 'dark' ? (moonSvg + ' <span>Dark</span>') : (sunSvg + ' <span>Light</span>');
       } else {
-        btn.innerHTML = sunSvg + ' <span>Light</span>';
+        btn.innerHTML = rbState.theme === 'dark' ? moonSvg : sunSvg;
       }
     });
   }
@@ -39867,18 +39867,18 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
         container: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>'
       };
       const labelsVi = {
-        text: 'Chế độ Văn bản (Chỉ hiện thông số Text)',
-        button: 'Chế độ Nút bấm & Link (Button Controls)',
-        image: 'Chế độ Hình ảnh & Media (Image Controls)',
-        input: 'Chế độ Ô nhập liệu (Input Controls)',
-        container: 'Chế độ Khung & Bố cục (Container Controls)'
+        text: 'Văn bản (Text)',
+        button: 'Nút bấm & Link (Button)',
+        image: 'Hình ảnh & Media (Image)',
+        input: 'Ô nhập liệu (Input)',
+        container: 'Khung & Bố cục (Container)'
       };
       const labelsEn = {
-        text: 'Text Mode (Typography Controls Only)',
-        button: 'Button & Link Mode (Action Controls Only)',
-        image: 'Image & Media Mode (Visual Controls Only)',
-        input: 'Input & Field Mode (Form Controls Only)',
-        container: 'Container & Card Mode (Box Controls Only)'
+        text: 'Text & Typography',
+        button: 'Button & Action Link',
+        image: 'Image & Media',
+        input: 'Input & Form Field',
+        container: 'Container & Layout Box'
       };
       const badgeText = (lang === 'en' ? labelsEn[ctx] : labelsVi[ctx]) || labelsVi.text;
       const svgIcon = ctxIcons[ctx] || ctxIcons.text;
