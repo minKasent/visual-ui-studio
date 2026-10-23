@@ -1462,7 +1462,23 @@ button, select, input, textarea {
   background: var(--bg-hover);
   transform: translateY(-2px);
 }
-.add-block-icon { font-size: 20px; }
+.add-block-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2px;
+}
+.add-block-card:hover .add-block-icon {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+  border-color: transparent;
+}
 .add-block-title { font-size: 11.5px; font-weight: 700; }
 .add-block-desc { font-size: 10px; color: var(--text-dim); }
 
@@ -2045,6 +2061,10 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
   gap: 4px;
 }
 .align-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
   background: var(--bg-input);
   border: 1px solid var(--border-color);
   color: var(--text-muted);
@@ -2052,6 +2072,7 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
   border-radius: 5px;
   cursor: pointer;
   font-size: 11px;
+  transition: all 0.14s ease;
 }
 .align-btn:hover,
 .align-btn.active {
@@ -2331,7 +2352,18 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
   padding: 16px;
   text-align: center;
 }
-.import-option__icon { font-size: 28px; margin-bottom: 6px; }
+.import-option__icon {
+  width: 42px;
+  height: 42px;
+  margin: 0 auto 8px;
+  border-radius: 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 .import-option h4 { font-size: 13px; margin-bottom: 4px; }
 .import-option p { font-size: 11.5px; color: var(--text-muted); }
 
@@ -2798,49 +2830,53 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
 
 .rb-customize-scope,
 .rb-customize-scope[data-rb-theme="light"] {
-  --rb-bg-frame: #fafafa;
+  --rb-bg-frame: #f4f4f5;
   --rb-bg-options: #ffffff;
-  --rb-border-frame: #e7e7e9;
-  --rb-border-options: rgba(24, 24, 27, 0.12);
-  --rb-surface-track: rgba(24, 24, 27, 0.055);
-  --rb-surface-ghost: rgba(24, 24, 27, 0.07);
-  --rb-surface-hover: rgba(24, 24, 27, 0.11);
-  --rb-slider-fill: rgba(24, 24, 27, 0.09);
-  --rb-slider-thumb: #71717a;
-  --rb-tick-color: #d1d1d4;
-  --rb-text-primary: #18181b;
+  --rb-border-frame: #e4e4e7;
+  --rb-border-options: #e4e4e7;
+  --rb-surface-track: #f4f4f5;
+  --rb-surface-ghost: rgba(24, 24, 27, 0.06);
+  --rb-surface-hover: #e4e4e7;
+  --rb-slider-fill: linear-gradient(90deg, rgba(24, 24, 27, 0.05) 0%, rgba(24, 24, 27, 0.11) 100%);
+  --rb-slider-edge: rgba(24, 24, 27, 0.35);
+  --rb-slider-thumb: #18181b;
+  --rb-tick-color: rgba(24, 24, 27, 0.14);
+  --rb-text-primary: #09090b;
   --rb-text-muted: #52525b;
-  --rb-heading-color: #3f3f46;
+  --rb-heading-color: #18181b;
   --rb-switch-track: #d4d4d8;
-  --rb-switch-track-checked: #52525b;
+  --rb-switch-track-checked: #18181b;
   --rb-switch-knob: #ffffff;
   --rb-switch-knob-checked: #ffffff;
   --rb-dropdown-bg: #ffffff;
-  --rb-dropdown-border: #e7e7e9;
+  --rb-dropdown-border: #e4e4e7;
   --rb-dropdown-hover: #f4f4f5;
+  --rb-val-pill-bg: rgba(24, 24, 27, 0.06);
 }
 
 .rb-customize-scope[data-rb-theme="dark"] {
-  --rb-bg-frame: #16131d;
-  --rb-bg-options: #120f17;
-  --rb-border-frame: rgba(255, 255, 255, 0.08);
-  --rb-border-options: rgba(255, 255, 255, 0.06);
-  --rb-surface-track: rgba(255, 255, 255, 0.05);
-  --rb-surface-ghost: rgba(255, 255, 255, 0.08);
-  --rb-surface-hover: rgba(255, 255, 255, 0.12);
-  --rb-slider-fill: rgba(255, 255, 255, 0.08);
-  --rb-slider-thumb: rgba(255, 255, 255, 0.9);
-  --rb-tick-color: #2f293a;
-  --rb-text-primary: #ffffff;
+  --rb-bg-frame: #0c0c0e;
+  --rb-bg-options: #111114;
+  --rb-border-frame: #232329;
+  --rb-border-options: #232329;
+  --rb-surface-track: #16161b;
+  --rb-surface-ghost: rgba(255, 255, 255, 0.06);
+  --rb-surface-hover: #1f1f26;
+  --rb-slider-fill: linear-gradient(90deg, rgba(139, 92, 246, 0.12) 0%, rgba(139, 92, 246, 0.24) 100%);
+  --rb-slider-edge: rgba(167, 139, 250, 0.65);
+  --rb-slider-thumb: #fafafa;
+  --rb-tick-color: rgba(255, 255, 255, 0.12);
+  --rb-text-primary: #fafafa;
   --rb-text-muted: #a1a1aa;
-  --rb-heading-color: #f4f4f5;
-  --rb-switch-track: #37313f;
-  --rb-switch-track-checked: #d4d4d8;
+  --rb-heading-color: #fafafa;
+  --rb-switch-track: #27272a;
+  --rb-switch-track-checked: #fafafa;
   --rb-switch-knob: #a1a1aa;
-  --rb-switch-knob-checked: #27222e;
-  --rb-dropdown-bg: #1b1722;
-  --rb-dropdown-border: #2f293a;
-  --rb-dropdown-hover: #2d2638;
+  --rb-switch-knob-checked: #09090b;
+  --rb-dropdown-bg: #111114;
+  --rb-dropdown-border: #2e2e36;
+  --rb-dropdown-hover: #1f1f26;
+  --rb-val-pill-bg: rgba(0, 0, 0, 0.28);
 }
 
 /* Floating / Bottom 3-Column ReactBits Customize Dock */
@@ -3003,7 +3039,7 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
   padding: 10px;
 }
 
-/* Official ReactBits Scrubber Track */
+/* Official ReactBits Scrubber Track — Refined Zero-Collision Precision CAD Scrubber */
 .rb-customize-scope .scrubber {
   position: relative;
   width: 100%;
@@ -3012,16 +3048,27 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
 
 .rb-customize-scope .scrubber-track {
   position: relative;
-  height: 40px;
+  height: 35px;
   border-radius: 7px;
   background: var(--rb-surface-track);
-  border: 1px solid transparent;
-  cursor: pointer;
+  border: 1px solid var(--rb-border-options);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  cursor: ew-resize;
   overflow: hidden;
   touch-action: pan-y;
   outline: none;
+  transition: border-color 0.14s ease, background 0.14s ease;
 }
 
+.rb-customize-scope .scrubber-track:hover,
+.rb-customize-scope .scrubber-track[data-active="true"] {
+  border-color: var(--border-strong, #3f3f46);
+}
+
+.rb-customize-scope .scrubber-track--select,
+.rb-customize-scope .scrubber-track--switch {
+  cursor: pointer;
+}
 .rb-customize-scope .scrubber-track--select {
   overflow: visible;
 }
@@ -3035,74 +3082,90 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
   position: absolute;
   inset: 0;
   right: auto;
-  border-radius: 7px;
+  border-radius: 6px 0 0 6px;
   background: var(--rb-slider-fill);
+  border-right: 1.5px solid var(--rb-slider-edge, rgba(167, 139, 250, 0.55));
   pointer-events: none;
+  z-index: 1;
 }
 
 .rb-customize-scope .scrubber-ticks {
   position: absolute;
-  inset: 0;
+  left: 0;
+  right: 0;
+  bottom: 2px;
+  height: 4px;
   pointer-events: none;
+  z-index: 1;
 }
 
 .rb-customize-scope .scrubber-tick {
   position: absolute;
-  top: 50%;
+  bottom: 0;
   width: 1px;
-  height: 8px;
+  height: 3px;
   border-radius: 999px;
   background: var(--rb-tick-color);
-  transform: translateX(-50%) translateY(-50%);
+  transform: translateX(-50%);
 }
 
+/* Thumb only highlights at bottom edge when dragging so it NEVER slices through the label text */
 .rb-customize-scope .scrubber-thumb-wrapper {
   position: absolute;
-  top: 50%;
-  transform: translateX(-50%) translateY(-50%);
-  margin-left: -6px;
+  bottom: 0;
+  transform: translateX(-50%);
   pointer-events: none;
-  z-index: 3;
+  z-index: 2;
 }
 
 .rb-customize-scope .scrubber-thumb {
-  width: 5px;
-  height: 26px;
+  width: 8px;
+  height: 3px;
   border-radius: 999px;
   background: var(--rb-slider-thumb);
-  opacity: 0.38;
-  transform: scaleX(0.75) scaleY(0.75);
-  transition: opacity 0.18s cubic-bezier(0.23, 1, 0.32, 1), transform 0.18s cubic-bezier(0.23, 1, 0.32, 1);
+  opacity: 0;
+  transition: opacity 0.15s ease;
 }
 
-.rb-customize-scope .scrubber-track[data-active="true"] .scrubber-thumb {
-  opacity: 0.92;
-  transform: scaleX(1) scaleY(1);
+.rb-customize-scope .scrubber-track[data-dragging="true"] .scrubber-thumb {
+  opacity: 0.95;
 }
 
 .rb-customize-scope .scrubber-label {
   position: absolute;
   top: 50%;
-  left: 12px;
+  left: 10px;
   transform: translateY(-50%);
+  max-width: 66%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--rb-text-muted);
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 500;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.005em;
   pointer-events: none;
   z-index: 4;
+}
+
+.rb-customize-scope .scrubber-track:hover .scrubber-label,
+.rb-customize-scope .scrubber-track[data-active="true"] .scrubber-label {
+  color: var(--rb-text-primary);
 }
 
 .rb-customize-scope .scrubber-value {
   position: absolute;
   top: 50%;
-  right: 12px;
+  right: 8px;
   transform: translateY(-50%);
   color: var(--rb-text-primary);
+  font-family: 'JetBrains Mono', monospace;
   font-variant-numeric: tabular-nums;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--rb-val-pill-bg, rgba(0, 0, 0, 0.24));
+  padding: 2px 6px;
+  border-radius: 4px;
   pointer-events: none;
   z-index: 4;
 }

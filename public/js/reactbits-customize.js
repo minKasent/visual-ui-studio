@@ -38706,7 +38706,7 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
   };
 
   const rbState = {
-    theme: localStorage.getItem('studio_rb_theme') || 'dark',
+    theme: (document.documentElement.getAttribute('data-studio-theme') === 'daylight') ? 'light' : 'dark',
     activeSchemaId: 'context-text',
     activeContextType: 'text',
     filterGroup: 'all',
@@ -38797,8 +38797,8 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
     text: {
       id: 'context-text',
       compName: 'ContextText',
-      title: '🔤 Tùy chỉnh Văn bản & Kiểu chữ (Text & Typography)',
-      enTitle: '🔤 Text & Typography Controls',
+      title: '✦ Tùy chỉnh Văn bản & Kiểu chữ (Text & Typography)',
+      enTitle: '✦ Text & Typography Controls',
       category: 'TextAnimations',
       docsUrl: 'https://reactbits.dev/text-animations/split-text',
       controls: [
@@ -38826,8 +38826,8 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
     button: {
       id: 'context-button',
       compName: 'ContextButton',
-      title: '🔘 Tùy chỉnh Nút bấm & Tương tác (Button & Action)',
-      enTitle: '🔘 Button, Link & Badge Controls',
+      title: '✦ Tùy chỉnh Nút bấm & Tương tác (Button & Action)',
+      enTitle: '✦ Button, Link & Badge Controls',
       category: 'Animations',
       docsUrl: 'https://reactbits.dev',
       controls: [
@@ -38854,8 +38854,8 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
     image: {
       id: 'context-image',
       compName: 'ContextImage',
-      title: '🖼️ Tùy chỉnh Hình ảnh & Media (Image & Visuals)',
-      enTitle: '🖼️ Image, Avatar & Media Controls',
+      title: '✦ Tùy chỉnh Hình ảnh & Media (Image & Visuals)',
+      enTitle: '✦ Image, Avatar & Media Controls',
       category: 'Components',
       docsUrl: 'https://reactbits.dev',
       controls: [
@@ -38882,8 +38882,8 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
     input: {
       id: 'context-input',
       compName: 'ContextInput',
-      title: '⌨️ Tùy chỉnh Ô nhập liệu & Form (Input & Field)',
-      enTitle: '⌨️ Input, Select & Form Controls',
+      title: '✦ Tùy chỉnh Ô nhập liệu & Form (Input & Field)',
+      enTitle: '✦ Input, Select & Form Controls',
       category: 'Components',
       docsUrl: 'https://reactbits.dev',
       controls: [
@@ -38906,8 +38906,8 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
     container: {
       id: 'context-container',
       compName: 'ContextContainer',
-      title: '📦 Tùy chỉnh Khung, Thẻ & Bố cục (Card & Container)',
-      enTitle: '📦 Card, Section & Container Controls',
+      title: '✦ Tùy chỉnh Khung, Thẻ & Bố cục (Card & Container)',
+      enTitle: '✦ Card, Section & Container Controls',
       category: 'Components',
       docsUrl: 'https://reactbits.dev',
       controls: [
@@ -39770,12 +39770,13 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
     document.querySelectorAll('.rb-customize-scope').forEach(el => {
       el.setAttribute('data-rb-theme', rbState.theme);
     });
-    const lang = (window.getStudioLang && window.getStudioLang()) || localStorage.getItem('studio_lang') || 'vi';
+    const moonSvg = '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>';
+    const sunSvg = '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>';
     document.querySelectorAll('.btn-rb-toggle-theme, #btn-rb-toggle-theme').forEach(btn => {
       if (rbState.theme === 'dark') {
-        btn.textContent = '🌙 Dark';
+        btn.innerHTML = moonSvg + ' <span>Dark</span>';
       } else {
-        btn.textContent = lang === 'en' ? '☀️ Light' : '☀️ Light ( Sáng )';
+        btn.innerHTML = sunSvg + ' <span>Light</span>';
       }
     });
   }
@@ -39858,24 +39859,32 @@ window.STUDIO_REACTBITS_CUSTOMIZE_CATALOG = [
       const lang = (window.getStudioLang && window.getStudioLang()) || localStorage.getItem('studio_lang') || 'vi';
       const ctx = contextType || rbState.activeContextType || 'text';
       const tag = el && el.tagName ? '<' + el.tagName.toLowerCase() + '>' : '';
+      const ctxIcons = {
+        text: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" x2="15" y1="20" y2="20"/><line x1="12" x2="12" y1="4" y2="20"/></svg>',
+        button: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="12" x="2" y="6" rx="6"/><circle cx="16" cy="12" r="2"/></svg>',
+        image: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>',
+        input: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="12" x="2" y="6" rx="2"/><path d="M6 10h.01"/><path d="M10 10h.01"/><path d="M14 10h.01"/></svg>',
+        container: '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>'
+      };
       const labelsVi = {
-        text: '🔤 Chế độ Văn bản (Chỉ hiện thông số Text)',
-        button: '🔘 Chế độ Nút bấm & Link (Button Controls)',
-        image: '🖼️ Chế độ Hình ảnh & Media (Image Controls)',
-        input: '⌨️ Chế độ Ô nhập liệu (Input Controls)',
-        container: '📦 Chế độ Khung & Bố cục (Container Controls)'
+        text: 'Chế độ Văn bản (Chỉ hiện thông số Text)',
+        button: 'Chế độ Nút bấm & Link (Button Controls)',
+        image: 'Chế độ Hình ảnh & Media (Image Controls)',
+        input: 'Chế độ Ô nhập liệu (Input Controls)',
+        container: 'Chế độ Khung & Bố cục (Container Controls)'
       };
       const labelsEn = {
-        text: '🔤 Text Mode (Typography Controls Only)',
-        button: '🔘 Button & Link Mode (Action Controls Only)',
-        image: '🖼️ Image & Media Mode (Visual Controls Only)',
-        input: '⌨️ Input & Field Mode (Form Controls Only)',
-        container: '📦 Container & Card Mode (Box Controls Only)'
+        text: 'Text Mode (Typography Controls Only)',
+        button: 'Button & Link Mode (Action Controls Only)',
+        image: 'Image & Media Mode (Visual Controls Only)',
+        input: 'Input & Field Mode (Form Controls Only)',
+        container: 'Container & Card Mode (Box Controls Only)'
       };
       const badgeText = (lang === 'en' ? labelsEn[ctx] : labelsVi[ctx]) || labelsVi.text;
+      const svgIcon = ctxIcons[ctx] || ctxIcons.text;
       bar.innerHTML =
-        '<span class="rb-group-chip active" style="cursor:default;pointer-events:none;flex:1;justify-content:center;">' +
-        badgeText + (tag ? ' • ' + tag.replace(/</g, '&lt;').replace(/>/g, '&gt;') : '') +
+        '<span class="rb-group-chip active" style="cursor:default;pointer-events:none;flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;">' +
+        svgIcon + ' <span>' + badgeText + (tag ? ' • ' + tag.replace(/</g, '&lt;').replace(/>/g, '&gt;') : '') + '</span>' +
         '</span>';
     };
 

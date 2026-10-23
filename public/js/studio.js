@@ -1034,114 +1034,130 @@
         }
         .__ui_hover_box {
           position: fixed;
-          border: 1.5px dashed #06b6d4;
-          background: rgba(6, 182, 212, 0.04);
+          border: 1.5px dashed #8b5cf6;
+          background: rgba(139, 92, 246, 0.04);
           pointer-events: none;
           display: none;
-          border-radius: 2px;
+          border-radius: 3px;
           transition: none;
         }
         .__ui_hover_label {
           position: absolute;
-          top: -22px;
+          top: -23px;
           left: -1px;
-          background: #0891b2;
-          color: #fff;
-          font-size: 10.5px;
+          background: rgba(9, 9, 11, 0.92);
+          backdrop-filter: blur(8px);
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          color: #f4f4f5;
+          font-size: 10px;
           font-weight: 600;
-          padding: 2px 6px;
-          border-radius: 3px;
+          padding: 2px 7px;
+          border-radius: 5px;
           white-space: nowrap;
-          font-family: monospace;
+          font-family: 'JetBrains Mono', monospace;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
         }
         .__ui_select_box {
           position: fixed;
-          border: 2px solid #6366f1;
-          background: rgba(99, 102, 241, 0.03);
+          border: 1.5px solid #8b5cf6;
+          background: rgba(139, 92, 246, 0.025);
           pointer-events: none;
           display: none;
-          box-shadow: 0 0 0 1px rgba(255,255,255,0.25);
+          box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22);
         }
         .__ui_select_hud {
           position: absolute;
-          top: -32px;
+          top: -34px;
           left: -2px;
-          background: #0f172a;
-          border: 1px solid rgba(99, 102, 241, 0.7);
-          color: #ffffff;
+          background: rgba(9, 9, 11, 0.94);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          color: #fafafa;
           font-size: 11px;
-          font-weight: 600;
-          padding: 3px 6px;
-          border-radius: 6px;
+          font-weight: 500;
+          padding: 3px 5px;
+          border-radius: 8px;
           white-space: nowrap;
-          box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+          box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.08);
           display: flex;
           align-items: center;
-          gap: 5px;
+          gap: 3px;
           pointer-events: auto;
-          font-family: 'Inter', sans-serif;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
         .__ui_hud_info {
           font-family: 'JetBrains Mono', monospace;
           font-size: 10.5px;
-          color: #38bdf8;
-          padding-right: 5px;
-          border-right: 1px solid rgba(255,255,255,0.16);
+          font-weight: 600;
+          color: #c4b5fd;
+          padding: 0 6px 0 3px;
+          border-right: 1px solid rgba(255, 255, 255, 0.12);
+          margin-right: 2px;
         }
         .__ui_hud_btn {
-          background: rgba(255,255,255,0.08);
-          border: none;
-          color: #e2e8f0;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          height: 22px;
+          background: transparent;
+          border: 1px solid transparent;
+          color: #d4d4d8;
           font-size: 10.5px;
-          font-weight: 600;
-          padding: 2px 6px;
-          border-radius: 4px;
+          font-weight: 500;
+          padding: 0 6px;
+          border-radius: 5px;
           cursor: pointer;
+          transition: all 0.12s ease;
+        }
+        .__ui_hud_btn svg {
+          width: 11.5px;
+          height: 11.5px;
+          stroke-width: 2;
+          flex-shrink: 0;
         }
         .__ui_hud_btn:hover {
-          background: #6366f1;
-          color: #fff;
+          background: rgba(255, 255, 255, 0.1);
+          color: #ffffff;
         }
         .__ui_hud_btn--warn {
-          background: rgba(245, 158, 11, 0.2);
           color: #fcd34d;
-          border: 1px solid rgba(245, 158, 11, 0.4);
         }
         .__ui_hud_btn--warn:hover {
-          background: #f59e0b;
-          color: #0b0e14;
+          background: rgba(245, 158, 11, 0.18);
+          border-color: rgba(245, 158, 11, 0.35);
+          color: #fde68a;
         }
         .__ui_hud_btn--danger {
-          background: rgba(239, 68, 68, 0.22);
-          color: #fca5a5;
-          border: 1px solid rgba(239, 68, 68, 0.45);
+          color: #fda4af;
         }
         .__ui_hud_btn--danger:hover {
-          background: #ef4444;
-          color: #fff;
+          background: rgba(244, 63, 94, 0.2);
+          border-color: rgba(244, 63, 94, 0.4);
+          color: #fecdd3;
         }
         .__ui_handle {
           position: absolute;
-          width: 9px;
-          height: 9px;
+          width: 8px;
+          height: 8px;
           background: #ffffff;
-          border: 2px solid #6366f1;
-          border-radius: 2px;
+          border: 1.5px solid #8b5cf6;
+          border-radius: 2.5px;
           pointer-events: auto;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+          transition: transform 0.12s ease, background 0.12s ease;
         }
         .__ui_handle:hover {
-          background: #6366f1;
+          background: #8b5cf6;
           transform: scale(1.25);
         }
-        .__ui_handle--nw { top: -5px; left: -5px; cursor: nwse-resize; }
-        .__ui_handle--n  { top: -5px; left: calc(50% - 4.5px); cursor: ns-resize; }
-        .__ui_handle--ne { top: -5px; right: -5px; cursor: nesw-resize; }
-        .__ui_handle--e  { top: calc(50% - 4.5px); right: -5px; cursor: ew-resize; }
-        .__ui_handle--se { bottom: -5px; right: -5px; cursor: nwse-resize; }
-        .__ui_handle--s  { bottom: -5px; left: calc(50% - 4.5px); cursor: ns-resize; }
-        .__ui_handle--sw { bottom: -5px; left: -5px; cursor: nesw-resize; }
-        .__ui_handle--w  { top: calc(50% - 4.5px); left: -5px; cursor: ew-resize; }
+        .__ui_handle--nw { top: -4.5px; left: -4.5px; cursor: nwse-resize; }
+        .__ui_handle--n  { top: -4.5px; left: calc(50% - 4px); cursor: ns-resize; }
+        .__ui_handle--ne { top: -4.5px; right: -4.5px; cursor: nesw-resize; }
+        .__ui_handle--e  { top: calc(50% - 4px); right: -4.5px; cursor: ew-resize; }
+        .__ui_handle--se { bottom: -4.5px; right: -4.5px; cursor: nwse-resize; }
+        .__ui_handle--s  { bottom: -4.5px; left: calc(50% - 4px); cursor: ns-resize; }
+        .__ui_handle--sw { bottom: -4.5px; left: -4.5px; cursor: nesw-resize; }
+        .__ui_handle--w  { top: calc(50% - 4px); left: -4.5px; cursor: ew-resize; }
 
         .__ui_snap_line_v, .__ui_snap_line_h {
           position: fixed;
@@ -1165,11 +1181,26 @@
       <div class="__ui_select_box" id="__ui_select_box">
         <div class="__ui_select_hud" id="__ui_select_hud">
           <span class="__ui_hud_info" id="__ui_hud_info">TAG</span>
-          <button type="button" class="__ui_hud_btn" data-hud-act="parent" title="Chọn khối cha (Esc)">⬆️ Cha</button>
-          <button type="button" class="__ui_hud_btn" data-hud-act="edit" title="Sửa chữ trực tiếp (Double-click)">✍️ Sửa</button>
-          <button type="button" class="__ui_hud_btn" data-hud-act="dup" title="Nhân bản phần tử này">📋 Nhân bản</button>
-          <button type="button" class="__ui_hud_btn __ui_hud_btn--warn" data-hud-act="reset" title="Khôi phục phần tử về nguyên bản gốc">↺ Gốc</button>
-          <button type="button" class="__ui_hud_btn __ui_hud_btn--danger" data-hud-act="delete" title="Xóa phần tử này khỏi trang (Delete)">🗑️ Xóa</button>
+          <button type="button" class="__ui_hud_btn" data-hud-act="parent" title="Chọn khối cha (Esc)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+            <span data-hud-lbl="parent">Cha</span>
+          </button>
+          <button type="button" class="__ui_hud_btn" data-hud-act="edit" title="Sửa chữ trực tiếp (Double-click)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/></svg>
+            <span data-hud-lbl="edit">Sửa</span>
+          </button>
+          <button type="button" class="__ui_hud_btn" data-hud-act="dup" title="Nhân bản phần tử này (Ctrl+D)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            <span data-hud-lbl="dup">Nhân bản</span>
+          </button>
+          <button type="button" class="__ui_hud_btn __ui_hud_btn--warn" data-hud-act="reset" title="Khôi phục phần tử về nguyên bản gốc">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            <span data-hud-lbl="reset">Gốc</span>
+          </button>
+          <button type="button" class="__ui_hud_btn __ui_hud_btn--danger" data-hud-act="delete" title="Xóa phần tử này khỏi trang (Delete)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            <span data-hud-lbl="delete">Xóa</span>
+          </button>
         </div>
         <div class="__ui_handle __ui_handle--nw" data-resize="nw"></div>
         <div class="__ui_handle __ui_handle--n" data-resize="n"></div>
@@ -1302,6 +1333,21 @@
 
       if (overlayRefs.hudInfo) {
         overlayRefs.hudInfo.textContent = `${getFriendlyElementLabel(state.selectedEl)} (${dx >= 0 ? '+' + dx : dx}, ${dy >= 0 ? '+' + dy : dy})`;
+      }
+      if (overlayRefs.selectHud) {
+        const tag = state.selectedEl.tagName.toLowerCase();
+        const editBtn = overlayRefs.selectHud.querySelector('[data-hud-act="edit"]');
+        if (editBtn) {
+          editBtn.style.display = ['img', 'svg', 'video', 'canvas', 'input', 'select'].includes(tag) ? 'none' : 'inline-flex';
+        }
+        const lang = (window.getStudioLang && window.getStudioLang()) || localStorage.getItem('studio_lang') || 'vi';
+        const hudLabels = lang === 'en'
+          ? { parent: 'Parent', edit: 'Edit', dup: 'Duplicate', reset: 'Reset', delete: 'Delete' }
+          : { parent: 'Cha', edit: 'Sửa', dup: 'Nhân bản', reset: 'Gốc', delete: 'Xóa' };
+        Object.keys(hudLabels).forEach(k => {
+          const sp = overlayRefs.selectHud.querySelector(`[data-hud-lbl="${k}"]`);
+          if (sp && sp.textContent !== hudLabels[k]) sp.textContent = hudLabels[k];
+        });
       }
     } else {
       overlayRefs.selectBox.style.display = 'none';
@@ -1886,8 +1932,14 @@
       state.autoDetectedCategory = detectedCat;
       if (detectedCat && dom.uilibDetectedBanner && dom.uilibDetectedText) {
         const taxonomy = (window.STUDIO_NAMETHAT_CATEGORIES || []).find(t => t.id === detectedCat);
-        const catLabel = taxonomy ? `${taxonomy.icon} ${taxonomy.name} (${taxonomy.vnName})` : detectedCat.toUpperCase();
-        dom.uilibDetectedText.innerHTML = `🎯 Đang chọn <code>&lt;${tag}&gt;</code> ➔ Gợi ý: <strong>${catLabel}</strong>`;
+        const lang = (window.getStudioLang && window.getStudioLang()) || localStorage.getItem('studio_lang') || 'vi';
+        const catLabel = taxonomy
+          ? (lang === 'en' ? taxonomy.name : `${taxonomy.name} (${taxonomy.vnName})`)
+          : detectedCat.toUpperCase();
+        const targetSvg = '<svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>';
+        dom.uilibDetectedText.innerHTML = lang === 'en'
+          ? `${targetSvg} Selected <code>&lt;${tag}&gt;</code> → <strong>${catLabel}</strong>`
+          : `${targetSvg} Đang chọn <code>&lt;${tag}&gt;</code> ➔ <strong>${catLabel}</strong>`;
         dom.uilibDetectedBanner.classList.remove('hidden');
       } else if (dom.uilibDetectedBanner) {
         dom.uilibDetectedBanner.classList.add('hidden');
@@ -2092,7 +2144,7 @@
         delBtn.type = 'button';
         delBtn.className = 'tree-del-btn';
         delBtn.title = 'Xóa phần tử này';
-        delBtn.textContent = '🗑️';
+        delBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>';
         delBtn.addEventListener('click', e => {
           e.stopPropagation();
           selectElement(node);
@@ -2147,8 +2199,8 @@
       item.className = 'change-item';
       item.innerHTML = `
         <div class="change-item__top">
-          <div class="change-item__selector">➕ Khối mới: ${nodeInfo.id}</div>
-          <button type="button" class="change-item__revert" title="Xóa khối mới thêm này">🗑️ Xóa</button>
+          <div class="change-item__selector">+ Khối mới: ${nodeInfo.id}</div>
+          <button type="button" class="change-item__revert" title="Xóa khối mới thêm này">✕ Xóa</button>
         </div>
         <div class="change-item__desc">Chèn tại: ${nodeInfo.parentSelector}</div>
       `;
@@ -2187,22 +2239,22 @@
       item.className = 'change-item';
       const summaryParts = [];
       if (rec.deleted) {
-        summaryParts.push('🗑️ Đã ẩn/xóa phần tử');
+        summaryParts.push('Đã ẩn/xóa phần tử');
       } else {
-        if (rec.styles['translate']) summaryParts.push(`📍 Dịch tọa độ: ${rec.styles['translate']}`);
+        if (rec.styles['translate']) summaryParts.push(`Dịch tọa độ: ${rec.styles['translate']}`);
         if (rec.styles['background-color'] || rec.styles['background']) {
-          summaryParts.push(`🎨 Nền: ${rec.styles['background'] || rec.styles['background-color']}`);
+          summaryParts.push(`Nền: ${rec.styles['background'] || rec.styles['background-color']}`);
         }
-        if (rec.styles['color']) summaryParts.push(`🎨 Màu chữ: ${rec.styles['color']}`);
-        if (rec.styles['font-family']) summaryParts.push(`🔤 Font: ${rec.styles['font-family']}`);
-        if (rec.styles['font-size']) summaryParts.push(`🔤 Cỡ chữ: ${rec.styles['font-size']}`);
+        if (rec.styles['color']) summaryParts.push(`Màu chữ: ${rec.styles['color']}`);
+        if (rec.styles['font-family']) summaryParts.push(`Font: ${rec.styles['font-family']}`);
+        if (rec.styles['font-size']) summaryParts.push(`Cỡ chữ: ${rec.styles['font-size']}`);
         if (rec.styles['width'] || rec.styles['height']) {
-          summaryParts.push(`📐 Kích thước: ${rec.styles['width'] || 'auto'} × ${rec.styles['height'] || 'auto'}`);
+          summaryParts.push(`Kích thước: ${rec.styles['width'] || 'auto'} × ${rec.styles['height'] || 'auto'}`);
         }
-        if (rec.styles['border-radius']) summaryParts.push(`🔲 Bo góc: ${rec.styles['border-radius']}`);
-        if (rec.textChanged !== null) summaryParts.push(`✍️ Đổi chữ: "${rec.textChanged.slice(0, 30)}"`);
+        if (rec.styles['border-radius']) summaryParts.push(`Bo góc: ${rec.styles['border-radius']}`);
+        if (rec.textChanged !== null) summaryParts.push(`Đổi chữ: "${rec.textChanged.slice(0, 30)}"`);
         if (summaryParts.length === 0 && styleKeys.length > 0) {
-          summaryParts.push(`⚡ Chỉnh CSS: ${styleKeys.join(', ')}`);
+          summaryParts.push(`Chỉnh CSS: ${styleKeys.join(', ')}`);
         }
       }
 
@@ -2484,7 +2536,7 @@
       state.files.forEach(f => {
         const opt = document.createElement('option');
         opt.value = f.relativePath;
-        opt.textContent = `📄 ${f.name}`;
+        opt.textContent = f.name;
         dom.pageSelector.appendChild(opt);
       });
 
