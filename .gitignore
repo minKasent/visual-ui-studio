@@ -1,3 +1,5 @@
 node_modules/
 *.bak
 .DS_Store
+.github-repos/
+.studio-github-auth.json

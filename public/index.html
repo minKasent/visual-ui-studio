@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Dancing+Script:wght@600;700&family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto:wght@300;400;500;700;900&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/studio.css?v=7.3" />
+  <link rel="stylesheet" href="./css/studio.css?v=7.4" />
 </head>
 <body>
   <!-- TOP NAVIGATION BAR (Minimalist Icon-First Figma / Framer / Origin UI Precision Bar) -->
@@ -845,6 +845,7 @@
             <button type="button" class="url-chip" data-sample-url="https://minkasent.github.io">minkasent.github.io</button>
             <button type="button" class="url-chip" data-sample-url="https://github.com/minKasent/minKasent.github.io">github.com/minKasent/minKasent.github.io</button>
             <button type="button" class="url-chip" data-sample-url="https://example.com">example.com</button>
+            <button type="button" id="btn-switch-to-gh-repos" class="url-chip url-chip--accent">🐙 Chọn từ Repo GitHub của bạn →</button>
           </div>
 
           <div id="clone-url-status" class="studio-status-banner hidden"></div>
@@ -896,33 +897,52 @@
     </div>
   </div>
 
-  <!-- MODAL 2: EXPORT AI PROMPT & CSS PATCH -->
+  <!-- MODAL 2: MAXPING AI PROMPT ARCHITECT & MULTI-FRAMEWORK CODE SYNC -->
   <div id="modal-ai-prompt" class="modal-backdrop hidden">
     <div class="modal-card modal-card--lg">
       <div class="modal-header">
-        <h3>Prompt Chuẩn Cho AI &amp; Mã CSS Đã Tinh Chỉnh</h3>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <h3>✨ Maxping AI Prompt Architect &amp; Code Sync</h3>
+          <span id="prompt-context-badge" class="url-cloner-badge">Sẵn sàng</span>
+        </div>
         <button class="btn-icon modal-close" data-close="modal-ai-prompt">✕</button>
       </div>
       <div class="modal-body">
-        <p class="modal-desc">
-          Bạn có thể bấm <strong>"Lưu File Gốc"</strong> ở góc trên bên phải để áp dụng ngay mà không cần hỏi AI!
-          Hoặc nếu bạn muốn gửi cho AI (Cursor, Antigravity, ChatGPT, Claude) đồng bộ vào dự án React/Next.js/Vue, hãy copy bản Prompt chi tiết bên dưới:
-        </p>
         <div class="prompt-tabs">
-          <button class="prompt-tab active" data-ptab="ptab-prompt">Prompt Gửi Cho AI</button>
-          <button class="prompt-tab" data-ptab="ptab-css">Mã CSS Đã Sinh Tự Động</button>
+          <button class="prompt-tab active" data-ptab="ptab-prompt">🔥 Master Prompt (AI Agent)</button>
+          <button class="prompt-tab" data-ptab="ptab-tailwind">⚛️ React / Next + Tailwind</button>
+          <button class="prompt-tab" data-ptab="ptab-flutter">📱 Flutter / Dart UI</button>
+          <button class="prompt-tab" data-ptab="ptab-audit">✨ Auto Nâng Cấp UI/UX</button>
+          <button class="prompt-tab" data-ptab="ptab-css">🎨 CSS Patch</button>
         </div>
+
         <div id="ptab-prompt" class="ptab-content active">
-          <textarea id="ai-prompt-output" rows="12" readonly></textarea>
-          <div class="modal-actions mt-8">
-            <button id="btn-copy-ai-prompt" class="btn-primary">📋 Copy Prompt Cho AI</button>
-          </div>
+          <textarea id="ai-prompt-output" rows="13" readonly></textarea>
+        </div>
+        <div id="ptab-tailwind" class="ptab-content hidden">
+          <textarea id="ai-tailwind-output" rows="13" readonly></textarea>
+        </div>
+        <div id="ptab-flutter" class="ptab-content hidden">
+          <textarea id="ai-flutter-output" rows="13" readonly></textarea>
+        </div>
+        <div id="ptab-audit" class="ptab-content hidden">
+          <textarea id="ai-audit-output" rows="13" readonly></textarea>
         </div>
         <div id="ptab-css" class="ptab-content hidden">
-          <textarea id="css-patch-output" rows="12" readonly></textarea>
-          <div class="modal-actions mt-8">
-            <button id="btn-copy-css-patch" class="btn-secondary">📋 Copy Mã CSS</button>
+          <textarea id="css-patch-output" rows="13" readonly></textarea>
+        </div>
+
+        <div class="prompt-actions-bar">
+          <div class="prompt-actions-left">
+            <button type="button" id="btn-copy-ai-prompt" class="btn-primary btn-sm">📋 Copy Tab Này</button>
+            <button type="button" id="btn-copy-css-patch" class="btn-secondary btn-sm">🎨 Copy CSS</button>
+            <button type="button" id="btn-save-prompt-file" class="btn-secondary btn-sm" title="Lưu thẳng file VISUAL-UI-PROMPT.md vào thư mục dự án để Cursor / Antigravity / Claude đọc trực tiếp">
+              💾 Lưu VISUAL-UI-PROMPT.md vào Project
+            </button>
           </div>
+          <button type="button" id="btn-save-and-push-from-prompt" class="btn-secondary btn-sm">
+            🚀 Lưu Web &amp; Push GitHub
+          </button>
         </div>
       </div>
     </div>
@@ -1108,10 +1128,10 @@
           </details>
         </div>
 
-        <!-- 2. REPOSITORY LINK -->
-        <div class="import-box import-box--compact">
+        <!-- 2. REPOSITORY EXPLORER (EDIT UI FROM EXISTING GITHUB REPOS + HAS UI / NO UI BADGES) -->
+        <div class="import-box import-box--compact" id="gh-repos-explorer-box">
           <div class="url-cloner-header">
-            <span class="compact-box-label" style="margin:0;">Kho lưu trữ (GitHub Repository)</span>
+            <span class="compact-box-label" style="margin:0;">Kho lưu trữ của bạn — Chọn Repo để Sửa UI hoặc Liên kết</span>
             <span id="gh-repo-status-badge" class="url-cloner-badge">Đang kiểm tra...</span>
           </div>
 
@@ -1119,12 +1139,33 @@
             Nhánh: <strong>main</strong> • Đang kiểm tra kết nối...
           </div>
 
-          <div class="folder-path-row mt-6">
+          <!-- Filter & Search Bar for GitHub Repos -->
+          <div class="gh-repo-filter-bar mt-8">
+            <div class="gh-repo-filter-pills">
+              <button type="button" class="gh-filter-pill active" data-gh-filter="all">Tất cả</button>
+              <button type="button" class="gh-filter-pill" data-gh-filter="has-ui">✦ Có UI</button>
+              <button type="button" class="gh-filter-pill" data-gh-filter="no-ui">🚫 No UI</button>
+            </div>
+            <label class="gh-fork-toggle" title="Ẩn các repo Fork từ người khác để chỉ hiện dự án của bạn">
+              <input type="checkbox" id="chk-gh-hide-forks" checked />
+              <span>Chỉ dự án của tôi</span>
+            </label>
+            <input type="text" id="input-gh-repo-search" class="gh-repo-search-input" placeholder="Tìm repo (vd: pharmawms, phim, spring...)" />
+          </div>
+
+          <!-- Interactive Scrollable List of Repos with Has-UI / No-UI Badges & 1-Click Edit UI -->
+          <div id="gh-repos-explorer-list" class="gh-repos-explorer-list">
+            <div class="gh-repos-empty">Đang tải danh sách Repository từ GitHub...</div>
+          </div>
+
+          <!-- Quick Dropdown / Custom Remote URL Bar -->
+          <div class="folder-path-row mt-8">
             <select id="select-gh-user-repos" class="select-control" style="max-width:210px;">
-              <option value="">-- Chọn Repo --</option>
+              <option value="">-- Chọn nhanh Repo --</option>
             </select>
             <input type="text" id="input-gh-remote-url" placeholder="https://github.com/username/repo.git" />
-            <button type="button" id="btn-gh-link-repo" class="btn-secondary btn-sm">Liên kết</button>
+            <button type="button" id="btn-gh-open-selected-repo-ui" class="btn-primary btn-sm" title="Tải & Mở giao diện của Repo đang chọn lên Studio để chỉnh sửa">🎨 Sửa UI</button>
+            <button type="button" id="btn-gh-link-repo" class="btn-secondary btn-sm" title="Chỉ gắn Remote URL vào thư mục hiện tại">Liên kết</button>
           </div>
         </div>
 
@@ -1151,10 +1192,10 @@
   <!-- TOAST NOTIFICATION -->
   <div id="toast-container" class="toast-container"></div>
 
-  <script src="./js/ui-libs-registry.js?v=7.3"></script>
-  <script src="./js/reactbits-customize.js?v=7.3"></script>
-  <script src="./js/templates.js?v=7.3"></script>
-  <script src="./js/studio.js?v=7.3"></script>
-  <script src="./js/i18n-theme.js?v=7.3"></script>
+  <script src="./js/ui-libs-registry.js?v=7.4"></script>
+  <script src="./js/reactbits-customize.js?v=7.4"></script>
+  <script src="./js/templates.js?v=7.4"></script>
+  <script src="./js/studio.js?v=7.4"></script>
+  <script src="./js/i18n-theme.js?v=7.4"></script>
 </body>
 </html>

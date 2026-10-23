@@ -401,12 +401,12 @@ async function cloneAndRewriteWebpage(rawInputUrl, customFileName = '') {
 // ============================================================================
 // 2. GITHUB AUTHENTICATION, REPOSITORY LINKING & AUTO-PUSH ENGINE
 // ============================================================================
-function runCmd(cmd, args, cwd) {
+function runCmd(cmd, args, cwd, timeoutMs = 25000) {
   return execFileSync(cmd, args, {
     cwd: cwd || currentWorkspaceDir,
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
-    timeout: 25000
+    timeout: timeoutMs
   }).trim();
 }
 
@@ -447,6 +447,158 @@ function githubApiRequest(endpoint, token, method = 'GET', bodyObj = null) {
   });
 }
 
+function classifyGithubRepoUi(r) {
+  const name = (r.name || '').trim();
+  const lowerName = name.toLowerCase();
+  const ownerLogin = ((r.owner && r.owner.login) || 'minkasent').toLowerCase();
+  const lang = (r.language || '').trim();
+  const lowerLang = lang.toLowerCase();
+  const desc = (r.description || '').trim();
+  const lowerDesc = desc.toLowerCase();
+  const homepage = (r.homepage || '').trim();
+  const hasPages = Boolean(r.has_pages);
+  const isFork = Boolean(r.fork);
+
+  // 1. Explicit No-UI Repo Detection (Profile README, Backend Microservices, CLI, Tests, Algorithms, Notebooks)
+  const noUiExactNames = new Set([
+    ownerLogin,
+    'daily_commit',
+    'pair-extraordinaire',
+    'chronos-dev',
+    'skills-introduction-to-git',
+    'community-jokes',
+    'hacktoberfest-2026',
+    'microservice-f-ndk',
+    'microservice-v',
+    'spring_v',
+    'spring_c',
+    'testing_gk',
+    'testing',
+    'bigdata',
+    'nestjs-super',
+    '.net_qlsv',
+    'rust-sdk',
+    'cli',
+    'components-contrib',
+    'dapr',
+    'workers-sdk',
+    'oh-my-posh',
+    'quickstarts'
+  ]);
+
+  if (lowerName === ownerLogin) {
+    return {
+      hasUi: false,
+      uiCategory: 'no-ui',
+      uiBadge: '🚫 No UI',
+      uiDetail: 'No UI • Profile README'
+    };
+  }
+
+  if (
+    noUiExactNames.has(lowerName) ||
+    /\b(microservice|backend|rest api|unit test|test suite|command-line|cli|flight recorder|notebook|sdk)\b/i.test(lowerDesc)
+  ) {
+    let reason = 'No UI • Backend / Code';
+    if (lowerLang === 'java' || lowerName.includes('spring') || lowerName.includes('microservice')) {
+      reason = 'No UI • Java / Spring Backend';
+    } else if (lowerName.includes('test')) {
+      reason = 'No UI • Automated Testing';
+    } else if (lowerName.includes('nestjs')) {
+      reason = 'No UI • NestJS Backend API';
+    } else if (lowerLang === 'jupyter notebook' || lowerName.includes('bigdata')) {
+      reason = 'No UI • Data / Notebook';
+    } else if (lowerLang === 'c#') {
+      reason = 'No UI • C# / .NET';
+    } else if (lowerLang === 'shell' || lowerDesc.includes('cli') || lowerDesc.includes('terminal')) {
+      reason = 'No UI • CLI / Shell';
+    } else if (!lang) {
+      reason = 'No UI • Docs / Config';
+    }
+    return {
+      hasUi: false,
+      uiCategory: 'no-ui',
+      uiBadge: '🚫 No UI',
+      uiDetail: reason
+    };
+  }
+
+  // 2. Direct HTML / CSS / Static Web UI Repos
+  if (
+    lowerLang === 'html' ||
+    lowerLang === 'css' ||
+    lowerLang === 'scss' ||
+    lowerName.endsWith('.github.io') ||
+    lowerName.includes('landing-page') ||
+    lowerName.includes('website') ||
+    lowerName === 'helicorp' ||
+    lowerName === 'visual-ui-studio'
+  ) {
+    return {
+      hasUi: true,
+      uiCategory: 'html',
+      uiBadge: '🌐 Web HTML',
+      uiDetail: hasPages || homepage ? 'Có UI • HTML/CSS (Live Web)' : `Có UI • ${lang || 'HTML/CSS'}`
+    };
+  }
+
+  // 3. Flutter / Dart Mobile UI Repos
+  if (lowerLang === 'dart' || lowerDesc.includes('flutter') || lowerName.includes('flutter')) {
+    return {
+      hasUi: true,
+      uiCategory: 'mobile',
+      uiBadge: '📱 Flutter UI',
+      uiDetail: 'Có UI • Flutter / Dart App'
+    };
+  }
+
+  // 4. React / Next.js / TypeScript / JS Web App UI Repos
+  if (
+    lowerLang === 'typescript' ||
+    lowerLang === 'javascript' ||
+    lowerLang === 'vue' ||
+    lowerLang === 'svelte' ||
+    Boolean(homepage) ||
+    hasPages ||
+    /\b(web app|frontend|next\.js|react|ui|interface|landing|website|portal)\b/i.test(lowerDesc)
+  ) {
+    return {
+      hasUi: true,
+      uiCategory: 'webapp',
+      uiBadge: '⚛️ React / Web UI',
+      uiDetail: homepage ? `Có UI • ${lang || 'Web App'} (Live)` : `Có UI • ${lang || 'React / Next.js'}`
+    };
+  }
+
+  // 5. Fallback: No UI detected
+  return {
+    hasUi: false,
+    uiCategory: 'no-ui',
+    uiBadge: '🚫 No UI',
+    uiDetail: lang ? `No UI • ${lang}` : 'No UI • Chưa có giao diện',
+    isFork
+  };
+}
+
+function formatGithubRepoItem(r) {
+  const uiInfo = classifyGithubRepoUi(r);
+  return {
+    name: r.name,
+    fullName: r.full_name,
+    private: Boolean(r.private),
+    fork: Boolean(r.fork),
+    cloneUrl: r.clone_url,
+    htmlUrl: r.html_url,
+    homepage: r.homepage || '',
+    hasPages: Boolean(r.has_pages),
+    language: r.language || '',
+    description: r.description || '',
+    defaultBranch: r.default_branch || 'main',
+    updatedAt: r.updated_at || '',
+    ...uiInfo
+  };
+}
+
 async function detectGithubAuthAndRepos() {
   if (githubSession.loggedOutManually) {
     return { loggedIn: false, authMethod: null, user: null, repos: [] };
@@ -456,7 +608,7 @@ async function detectGithubAuthAndRepos() {
   if (githubSession.token) {
     try {
       const user = await githubApiRequest('/user', githubSession.token);
-      const repos = await githubApiRequest('/user/repos?sort=updated&per_page=25', githubSession.token);
+      const repos = await githubApiRequest('/user/repos?sort=updated&per_page=100', githubSession.token);
       githubSession.user = {
         login: user.login,
         name: user.name || user.login,
@@ -465,20 +617,18 @@ async function detectGithubAuthAndRepos() {
         publicRepos: user.public_repos
       };
       saveGithubSession();
+      const formattedRepos = Array.isArray(repos) ? repos.map(formatGithubRepoItem) : [];
+      // Sort so user's own (non-fork) repos with UI appear first, then user's No-UI repos, then forks
+      formattedRepos.sort((a, b) => {
+        if (a.fork !== b.fork) return a.fork ? 1 : -1;
+        if (a.hasUi !== b.hasUi) return a.hasUi ? -1 : 1;
+        return 0;
+      });
       return {
         loggedIn: true,
         authMethod: 'token',
         user: githubSession.user,
-        repos: Array.isArray(repos)
-          ? repos.map(r => ({
-              name: r.name,
-              fullName: r.full_name,
-              private: r.private,
-              cloneUrl: r.clone_url,
-              htmlUrl: r.html_url,
-              defaultBranch: r.default_branch
-            }))
-          : []
+        repos: formattedRepos
       };
     } catch (_) {
       githubSession.token = '';
@@ -492,17 +642,15 @@ async function detectGithubAuthAndRepos() {
     const user = JSON.parse(userJson);
     let repos = [];
     try {
-      const reposJson = runCmd('gh', ['api', 'user/repos?sort=updated&per_page=25'], __dirname);
+      const reposJson = runCmd('gh', ['api', 'user/repos?sort=updated&per_page=100'], __dirname);
       const parsedRepos = JSON.parse(reposJson);
       if (Array.isArray(parsedRepos)) {
-        repos = parsedRepos.map(r => ({
-          name: r.name,
-          fullName: r.full_name,
-          private: r.private,
-          cloneUrl: r.clone_url,
-          htmlUrl: r.html_url,
-          defaultBranch: r.default_branch
-        }));
+        repos = parsedRepos.map(formatGithubRepoItem);
+        repos.sort((a, b) => {
+          if (a.fork !== b.fork) return a.fork ? 1 : -1;
+          if (a.hasUi !== b.hasUi) return a.hasUi ? -1 : 1;
+          return 0;
+        });
       }
     } catch (_) {}
 
@@ -647,6 +795,512 @@ function commitAndPushWorkspace(options = {}) {
       reason: err.stderr ? String(err.stderr).trim() : (err.message || 'Lỗi khi push lên GitHub')
     };
   }
+}
+
+const SKIP_DIRS = new Set([
+  'node_modules',
+  '.git',
+  '.next',
+  'dist',
+  'build',
+  'coverage',
+  '.dart_tool',
+  'android',
+  'ios',
+  'windows',
+  'linux',
+  'macos',
+  'target',
+  'vendor',
+  '.github-repos'
+]);
+
+function scanRepoSourceSummary(dirPath) {
+  const sourceFiles = [];
+  const extractedStrings = new Set();
+  const extractedComponentNames = [];
+  const extractedColors = new Set();
+  let customCssBlocks = '';
+
+  function walkSource(dir, depth = 0) {
+    if (depth > 4 || sourceFiles.length > 40) return;
+    let entries = [];
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch (_) {
+      return;
+    }
+    for (const ent of entries) {
+      if (SKIP_DIRS.has(ent.name) || ent.name.startsWith('.')) continue;
+      const full = path.join(dir, ent.name);
+      if (ent.isDirectory()) {
+        walkSource(full, depth + 1);
+      } else if (/\.(tsx|jsx|vue|svelte|dart|css|scss)$/i.test(ent.name)) {
+        const rel = path.relative(dirPath, full).replace(/\\/g, '/');
+        sourceFiles.push(rel);
+        try {
+          const stat = fs.statSync(full);
+          if (stat.size < 180000) {
+            const content = fs.readFileSync(full, 'utf8');
+            if (/\.css$/i.test(ent.name) && customCssBlocks.length < 40000 && !content.includes('@tailwind')) {
+              customCssBlocks += `\n/* ${rel} */\n` + content.slice(0, 12000);
+            }
+            const baseComp = ent.name.replace(/\.(tsx|jsx|vue|svelte|dart|css|scss)$/i, '');
+            if (!/\.(css|scss)$/i.test(ent.name) && !baseComp.endsWith('.g') && extractedComponentNames.length < 12) {
+              let niceCompName = '';
+              if (/^[A-Z][a-zA-Z0-9_]+$/.test(baseComp)) {
+                niceCompName = baseComp;
+              } else if (/^(page|layout|index)$/i.test(baseComp)) {
+                const parentSeg = path.basename(path.dirname(full)).replace(/[^a-zA-Z0-9]/g, ' ');
+                const pascalParent = parentSeg
+                  .split(/\s+/)
+                  .filter(Boolean)
+                  .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+                  .join('');
+                niceCompName = (pascalParent || 'Main') + (baseComp.charAt(0).toUpperCase() + baseComp.slice(1));
+              } else if (/(screen|widget|button|card|page|view|dialog|modal|bar|header|footer|item|tile)/i.test(baseComp)) {
+                niceCompName = baseComp
+                  .split(/[-_]+/)
+                  .filter(Boolean)
+                  .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+                  .join('');
+              }
+              if (niceCompName && !extractedComponentNames.some(c => c.name === niceCompName)) {
+                extractedComponentNames.push({ name: niceCompName, file: rel });
+              }
+            }
+            // Extract hex colors
+            const hexes = content.match(/#[0-9a-fA-F]{6}\b/g) || [];
+            hexes.slice(0, 8).forEach(h => extractedColors.add(h.toLowerCase()));
+            // Extract visible UI strings from JSX/Dart
+            const textMatches = content.match(/>([^<>{}\n]{3,65})</g) || [];
+            textMatches.slice(0, 8).forEach(m => {
+              const t = m.slice(1, -1).trim();
+              if (t && !/^[0-9\s.,:;+-]+$/.test(t) && extractedStrings.size < 18) {
+                extractedStrings.add(t);
+              }
+            });
+            const dartTextMatches = content.match(/Text\(\s*['"]([^'"]{3,60})['"]/g) || [];
+            dartTextMatches.slice(0, 8).forEach(m => {
+              const inner = m.replace(/^Text\(\s*['"]|['"]$/g, '').trim();
+              if (inner && !inner.includes('$') && extractedStrings.size < 18) {
+                extractedStrings.add(inner);
+              }
+            });
+          }
+        } catch (_) {}
+      }
+    }
+  }
+
+  walkSource(dirPath);
+  return {
+    sourceFiles,
+    extractedComponentNames,
+    extractedStrings: Array.from(extractedStrings),
+    extractedColors: Array.from(extractedColors),
+    customCssBlocks
+  };
+}
+
+function synthesizeRepoUiCanvasHtml(dirPath, repoMeta = {}) {
+  const scan = scanRepoSourceSummary(dirPath);
+  const repoName = repoMeta.name || path.basename(dirPath);
+  const fullName = repoMeta.fullName || `minKasent/${repoName}`;
+  const desc = repoMeta.description || `Giao diện trực quan được trích xuất & tổng hợp từ kho lưu trữ ${fullName}`;
+  const uiCategory = repoMeta.uiCategory || 'webapp';
+  const lang = repoMeta.language || 'TypeScript';
+  const primaryColor = scan.extractedColors[0] || (uiCategory === 'mobile' ? '#0ea5e9' : '#8b5cf6');
+  const accentColor = scan.extractedColors[1] || '#10b981';
+
+  const compCardsHtml = (
+    scan.extractedComponentNames.length > 0
+      ? scan.extractedComponentNames.slice(0, 6)
+      : [
+          { name: 'HeroBanner', file: uiCategory === 'mobile' ? 'lib/screens/home_screen.dart' : 'src/components/HeroBanner.tsx' },
+          { name: 'FeatureGrid', file: uiCategory === 'mobile' ? 'lib/widgets/feature_card.dart' : 'src/components/FeatureGrid.tsx' },
+          { name: 'ActionModal', file: uiCategory === 'mobile' ? 'lib/screens/detail_screen.dart' : 'src/components/ActionModal.tsx' }
+        ]
+  )
+    .map((c, idx) => {
+      const sampleText = scan.extractedStrings[idx] || `Khối giao diện ${c.name} trong dự án ${repoName}`;
+      return `
+      <div class="repo-ui-card" data-source-file="${c.file}">
+        <div class="repo-ui-card__top">
+          <span class="repo-ui-badge">&lt;${c.name} /&gt;</span>
+          <code class="repo-ui-file">${c.file}</code>
+        </div>
+        <h3 class="repo-ui-card__title">${c.name.replace(/([A-Z])/g, ' $1').trim()}</h3>
+        <p class="repo-ui-card__desc">${sampleText}</p>
+        <div class="repo-ui-card__actions">
+          <button class="repo-btn-primary">Tương tác chính</button>
+          <button class="repo-btn-ghost">Chi tiết →</button>
+        </div>
+      </div>`;
+    })
+    .join('\n');
+
+  const filePillsHtml = scan.sourceFiles
+    .slice(0, 12)
+    .map(f => `<span class="repo-source-pill">${f}</span>`)
+    .join('\n');
+
+  const html = `<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${repoName} — Visual UI Studio Canvas (${fullName})</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --repo-primary: ${primaryColor};
+      --repo-accent: ${accentColor};
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #09090b;
+      color: #fafafa;
+      min-height: 100vh;
+      padding: 36px 28px 72px;
+      line-height: 1.55;
+    }
+    .repo-shell { max-width: 1080px; margin: 0 auto; }
+    .repo-navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 22px;
+      background: rgba(24, 24, 27, 0.85);
+      border: 1px solid #27272a;
+      border-radius: 14px;
+      backdrop-filter: blur(12px);
+      margin-bottom: 32px;
+    }
+    .repo-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+    }
+    .repo-brand-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--repo-primary);
+      box-shadow: 0 0 12px var(--repo-primary);
+    }
+    .repo-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      font-size: 13.5px;
+      color: #a1a1aa;
+    }
+    .repo-hero {
+      padding: 44px 36px;
+      border-radius: 20px;
+      background: radial-gradient(circle at top right, rgba(139, 92, 246, 0.18), rgba(16, 185, 129, 0.05) 55%, #121215 100%);
+      border: 1px solid #27272a;
+      margin-bottom: 28px;
+    }
+    .repo-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: 11.5px;
+      font-weight: 700;
+      background: rgba(139, 92, 246, 0.16);
+      color: #c4b5fd;
+      border: 1px solid rgba(139, 92, 246, 0.35);
+      margin-bottom: 16px;
+    }
+    .repo-hero h1 {
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+    .repo-hero p {
+      font-size: 15.5px;
+      color: #a1a1aa;
+      max-width: 720px;
+      margin-bottom: 24px;
+    }
+    .repo-cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .repo-btn-primary {
+      background: var(--repo-primary);
+      color: #ffffff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 13.5px;
+      cursor: pointer;
+    }
+    .repo-btn-ghost {
+      background: #18181b;
+      color: #e4e4e7;
+      border: 1px solid #2f2f35;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 13.5px;
+      cursor: pointer;
+    }
+    .repo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .repo-ui-card {
+      background: #121215;
+      border: 1px solid #27272a;
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .repo-ui-card__top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .repo-ui-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: #a78bfa;
+      background: rgba(139, 92, 246, 0.14);
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .repo-ui-file {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      color: #71717a;
+    }
+    .repo-ui-card__title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #fafafa;
+    }
+    .repo-ui-card__desc {
+      font-size: 13px;
+      color: #a1a1aa;
+      flex: 1;
+    }
+    .repo-ui-card__actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .repo-source-bar {
+      background: #121215;
+      border: 1px solid #27272a;
+      border-radius: 14px;
+      padding: 16px 20px;
+    }
+    .repo-source-bar h4 {
+      font-size: 12.5px;
+      color: #a1a1aa;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .repo-source-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .repo-source-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      padding: 4px 9px;
+      border-radius: 6px;
+      background: #18181b;
+      border: 1px solid #27272a;
+      color: #d4d4d8;
+    }
+    ${scan.customCssBlocks}
+  </style>
+</head>
+<body data-github-repo="${fullName}" data-repo-lang="${lang}" data-repo-ui-type="${uiCategory}">
+  <div class="repo-shell">
+    <nav class="repo-navbar">
+      <div class="repo-brand">
+        <span class="repo-brand-dot"></span>
+        <span>${repoName}</span>
+      </div>
+      <div class="repo-nav-links">
+        <span>Trang chủ</span>
+        <span>Components (${scan.extractedComponentNames.length || 3})</span>
+        <span>Source (${scan.sourceFiles.length} files)</span>
+        <button class="repo-btn-primary">Bắt đầu ngay</button>
+      </div>
+    </nav>
+
+    <section class="repo-hero">
+      <span class="repo-tag">✦ ${fullName} • ${lang || 'Web UI'}</span>
+      <h1>${repoName.replace(/[-_]/g, ' ')}</h1>
+      <p>${desc}</p>
+      <div class="repo-cta-row">
+        <button class="repo-btn-primary">Khám phá Giao diện</button>
+        <button class="repo-btn-ghost">Xem Tài liệu &amp; Cấu trúc</button>
+      </div>
+    </section>
+
+    <section class="repo-grid">
+      ${compCardsHtml}
+    </section>
+
+    <section class="repo-source-bar">
+      <h4>Các File Giao Diện Nguồn Trong Repo (${scan.sourceFiles.length} file được liên kết với Prompt AI)</h4>
+      <div class="repo-source-pills">
+        ${filePillsHtml || '<span class="repo-source-pill">index.html</span>'}
+      </div>
+    </section>
+  </div>
+</body>
+</html>`;
+
+  const outFileName = repoMeta.hasUi === false ? 'index.html' : 'studio-ui-canvas.html';
+  const outPath = path.join(dirPath, outFileName);
+  fs.writeFileSync(outPath, html, 'utf8');
+  return {
+    fileName: outFileName,
+    sourceFiles: scan.sourceFiles,
+    extractedComponents: scan.extractedComponentNames
+  };
+}
+
+async function openAndPrepareGithubRepoUi(repoMeta = {}) {
+  const repoName = (repoMeta.name || '').trim();
+  const fullName = (repoMeta.fullName || '').trim();
+  const cloneUrl = (repoMeta.cloneUrl || `https://github.com/${fullName}.git`).trim();
+  if (!repoName && !fullName) {
+    throw new Error('Thiếu tên GitHub Repository.');
+  }
+
+  // 1. Resolve Local Directory for this repository
+  let targetDir = '';
+  const lowerName = repoName.toLowerCase();
+  if (lowerName === 'minkasent.github.io' && fs.existsSync('d:\\Khoa\\Porfolio')) {
+    targetDir = 'd:\\Khoa\\Porfolio';
+  } else if (lowerName === 'visual-ui-studio') {
+    targetDir = __dirname;
+  } else if (fs.existsSync(path.join('d:\\Khoa', repoName))) {
+    targetDir = path.join('d:\\Khoa', repoName);
+  } else {
+    const reposRoot = path.join(__dirname, '.github-repos');
+    if (!fs.existsSync(reposRoot)) {
+      fs.mkdirSync(reposRoot, { recursive: true });
+    }
+    targetDir = path.join(reposRoot, repoName);
+  }
+
+  // 2. Clone repository if not yet on disk
+  if (!fs.existsSync(path.join(targetDir, '.git'))) {
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+    }
+    let effectiveCloneUrl = cloneUrl;
+    if (githubSession.token && /^https:\/\/github\.com\//i.test(effectiveCloneUrl)) {
+      effectiveCloneUrl = effectiveCloneUrl.replace(
+        /^https:\/\/github\.com\//i,
+        `https://x-access-token:${githubSession.token}@github.com/`
+      );
+    }
+    try {
+      runCmd('git', ['clone', '--depth', '1', effectiveCloneUrl, targetDir], __dirname, 60000);
+      // Reset clean remote URL without embedded token
+      runCmd('git', ['remote', 'set-url', 'origin', cloneUrl], targetDir);
+    } catch (cloneErr) {
+      throw new Error(`Không thể git clone repo ${fullName}: ${cloneErr.message}`);
+    }
+  }
+
+  // 3. Switch active workspace to this repo's local directory
+  currentWorkspaceDir = path.resolve(targetDir);
+
+  // 4. Inspect existing HTML files in this repo
+  let htmlFiles = listHtmlFiles(currentWorkspaceDir);
+  let realVisualHtmlFiles = htmlFiles.filter(f => {
+    try {
+      const full = path.join(currentWorkspaceDir, f.relativePath);
+      const raw = fs.readFileSync(full, 'utf8');
+      const isEmptySpaShell =
+        raw.length < 2400 &&
+        /<div\s+id=["'](root|app)["']\s*>\s*<\/div>/i.test(raw) &&
+        (raw.match(/<(section|nav|header|footer|main|article|h1|h2|button)\b/gi) || []).length < 2;
+      return !isEmptySpaShell;
+    } catch (_) {
+      return false;
+    }
+  });
+
+  let primaryFile = '';
+  let modeUsed = 'native-html';
+  let sourceSummary = scanRepoSourceSummary(currentWorkspaceDir);
+
+  if (realVisualHtmlFiles.length > 0 && !repoMeta.forceSynthesize) {
+    const preferred =
+      realVisualHtmlFiles.find(f => f.relativePath === 'index-creative-developer.html') ||
+      realVisualHtmlFiles.find(f => f.relativePath === 'index.html') ||
+      realVisualHtmlFiles.find(f => f.relativePath.endsWith('index.html')) ||
+      realVisualHtmlFiles[0];
+    primaryFile = preferred.relativePath;
+  } else if (repoMeta.homepage && /^https?:\/\//i.test(repoMeta.homepage) && !repoMeta.homepage.includes('localhost')) {
+    // Try cloning live deployed homepage into the repo folder first
+    try {
+      const cloned = await cloneAndRewriteWebpage(repoMeta.homepage, 'studio-live-ui.html');
+      primaryFile = cloned.relativePath;
+      modeUsed = 'live-homepage';
+    } catch (_) {
+      const synth = synthesizeRepoUiCanvasHtml(currentWorkspaceDir, repoMeta);
+      primaryFile = synth.fileName;
+      modeUsed = 'synthesized-canvas';
+    }
+  } else {
+    // Synthesize an interactive Visual UI Canvas from the repo's actual .tsx / .jsx / .dart / .css files
+    const synth = synthesizeRepoUiCanvasHtml(currentWorkspaceDir, repoMeta);
+    primaryFile = synth.fileName;
+    modeUsed = repoMeta.hasUi === false ? 'starter-ui-for-noui' : 'synthesized-canvas';
+  }
+
+  htmlFiles = listHtmlFiles(currentWorkspaceDir);
+
+  return {
+    success: true,
+    workspaceDir: currentWorkspaceDir,
+    primaryFile,
+    modeUsed,
+    repoMeta: {
+      name: repoName,
+      fullName,
+      language: repoMeta.language || '',
+      uiCategory: repoMeta.uiCategory || 'webapp',
+      uiBadge: repoMeta.uiBadge || '',
+      hasUi: repoMeta.hasUi !== false,
+      sourceFiles: sourceSummary.sourceFiles.slice(0, 30),
+      extractedComponents: sourceSummary.extractedComponentNames
+    },
+    files: htmlFiles,
+    git: getWorkspaceGitStatus(currentWorkspaceDir)
+  };
 }
 
 const server = http.createServer(async (req, res) => {
@@ -833,6 +1487,41 @@ const server = http.createServer(async (req, res) => {
         gitPush: pushResult,
         git: getWorkspaceGitStatus(currentWorkspaceDir)
       });
+    }
+
+    // API: Open & Edit UI directly from any existing GitHub Repository in the user's account
+    if (req.method === 'POST' && pathname === '/api/github/open-repo-ui') {
+      const body = await readJsonBody(req);
+      try {
+        const result = await openAndPrepareGithubRepoUi(body || {});
+        return sendJson(res, 200, result);
+      } catch (err) {
+        return sendJson(res, 400, {
+          error: err.message || 'Không thể mở giao diện từ GitHub Repository này.'
+        });
+      }
+    }
+
+    // API: Save Generated Maxping AI Prompt directly into the active project workspace (VISUAL-UI-PROMPT.md)
+    if (req.method === 'POST' && pathname === '/api/save-prompt') {
+      const body = await readJsonBody(req);
+      const promptContent = body.promptContent || '';
+      const fileName = path.basename(body.fileName || 'VISUAL-UI-PROMPT.md');
+      if (!promptContent) {
+        return sendJson(res, 400, { error: 'Nội dung Prompt trống.' });
+      }
+      try {
+        const targetPath = path.join(currentWorkspaceDir, fileName);
+        fs.writeFileSync(targetPath, promptContent, 'utf8');
+        return sendJson(res, 200, {
+          success: true,
+          savedPath: targetPath,
+          fileName,
+          workspaceDir: currentWorkspaceDir
+        });
+      } catch (err) {
+        return sendJson(res, 500, { error: `Không thể lưu file Prompt: ${err.message}` });
+      }
     }
 
     // API: Save edited HTML directly back to source file on disk (+ Optional Auto-Push to GitHub!)

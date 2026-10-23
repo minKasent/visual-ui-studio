@@ -2307,42 +2307,206 @@
     return blocks.join('\n\n');
   }
 
-  function generateAiPromptText() {
+  function convertCssStylesToTailwindClasses(stylesObj = {}) {
+    const classes = [];
+    Object.entries(stylesObj).forEach(([prop, rawVal]) => {
+      const val = String(rawVal || '').trim();
+      if (!val) return;
+      const safeArbitrary = val.replace(/\s+/g, '_');
+      switch (prop) {
+        case 'color':
+          classes.push(`text-[${safeArbitrary}]`);
+          break;
+        case 'background-color':
+          classes.push(val === 'transparent' ? 'bg-transparent' : `bg-[${safeArbitrary}]`);
+          break;
+        case 'background':
+        case 'background-image':
+          if (val !== 'none') classes.push(`bg-[${safeArbitrary}]`);
+          break;
+        case 'font-size':
+          classes.push(`text-[${safeArbitrary}]`);
+          break;
+        case 'font-weight':
+          classes.push(`font-[${safeArbitrary}]`);
+          break;
+        case 'line-height':
+          classes.push(`leading-[${safeArbitrary}]`);
+          break;
+        case 'letter-spacing':
+          classes.push(`tracking-[${safeArbitrary}]`);
+          break;
+        case 'text-align':
+          classes.push(`text-${val}`);
+          break;
+        case 'border-radius':
+          classes.push(`rounded-[${safeArbitrary}]`);
+          break;
+        case 'border-width':
+          classes.push(`border-[${safeArbitrary}]`);
+          break;
+        case 'border-color':
+          classes.push(`border-[${safeArbitrary}]`);
+          break;
+        case 'padding':
+          classes.push(`p-[${safeArbitrary}]`);
+          break;
+        case 'padding-top':
+          classes.push(`pt-[${safeArbitrary}]`);
+          break;
+        case 'padding-right':
+          classes.push(`pr-[${safeArbitrary}]`);
+          break;
+        case 'padding-bottom':
+          classes.push(`pb-[${safeArbitrary}]`);
+          break;
+        case 'padding-left':
+          classes.push(`pl-[${safeArbitrary}]`);
+          break;
+        case 'margin':
+          classes.push(`m-[${safeArbitrary}]`);
+          break;
+        case 'gap':
+          classes.push(`gap-[${safeArbitrary}]`);
+          break;
+        case 'width':
+          classes.push(`w-[${safeArbitrary}]`);
+          break;
+        case 'height':
+          classes.push(`h-[${safeArbitrary}]`);
+          break;
+        case 'opacity':
+          classes.push(`opacity-[${safeArbitrary}]`);
+          break;
+        case 'box-shadow':
+          classes.push(`shadow-[${safeArbitrary}]`);
+          break;
+        case 'backdrop-filter':
+          classes.push(`backdrop-blur-md`);
+          break;
+        case 'display':
+          classes.push(val === 'none' ? 'hidden' : val);
+          break;
+        case 'justify-content':
+          classes.push(`justify-${val.replace('flex-', '')}`);
+          break;
+        case 'align-items':
+          classes.push(`items-${val.replace('flex-', '')}`);
+          break;
+        case 'transform': {
+          const tx = val.match(/translate3d\(\s*([^,]+),\s*([^,]+)/i);
+          if (tx) {
+            if (tx[1].trim() !== '0px') classes.push(`translate-x-[${tx[1].trim()}]`);
+            if (tx[2].trim() !== '0px') classes.push(`translate-y-[${tx[2].trim()}]`);
+          }
+          const rot = val.match(/rotate\(([^)]+)\)/i);
+          if (rot) classes.push(`rotate-[${rot[1].trim()}]`);
+          const sc = val.match(/scale\(([^)]+)\)/i);
+          if (sc) classes.push(`scale-[${sc[1].trim()}]`);
+          break;
+        }
+        default:
+          classes.push(`[${prop}:${safeArbitrary}]`);
+      }
+    });
+    return classes.join(' ');
+  }
+
+  function getActiveRepoContextSummary() {
+    const doc = dom.iframe?.contentDocument;
+    const bodyRepo = doc?.body?.getAttribute('data-github-repo') || '';
+    const gitStatus = state.githubStatus?.git || {};
+    const repoMeta = state.activeGithubRepoMeta || {};
+    const repoName =
+      repoMeta.fullName ||
+      bodyRepo ||
+      (gitStatus.repoShortName || '')
+        .replace(/^https?:\/\/github\.com\//i, '')
+        .replace(/\.git$/i, '') ||
+      'Local Project';
+    const branch = gitStatus.branch || 'main';
     const fileLabel = state.currentFile || 'index.html';
+    const lang = repoMeta.language || doc?.body?.getAttribute('data-repo-lang') || 'HTML/CSS/JS';
+    const sourceFiles = Array.isArray(repoMeta.sourceFiles) ? repoMeta.sourceFiles : [];
+    return { repoName, branch, fileLabel, lang, sourceFiles, workspaceDir: state.workspaceDir };
+  }
+
+  function generateAiPromptText() {
+    const ctx = getActiveRepoContextSummary();
     const lines = [
-      `Hãy cập nhật giao diện cho file \`${fileLabel}\` theo đúng các thông số tọa độ và thuộc tính UI tôi đã căn chỉnh trực quan như sau:`,
+      `# 🎯 BẢN ĐẶC TẢ CẬP NHẬT UI/UX CHính XÁC (VISUAL UI STUDIO MAXPING SPEC)`,
+      ``,
+      `## 1. Bối Cảnh Dự Án & Kho Lưu Trữ (Project & Repository Context)`,
+      `- **GitHub Repository**: \`${ctx.repoName}\` (Nhánh: \`${ctx.branch}\`)`,
+      `- **Thư mục Local Workspace**: \`${ctx.workspaceDir}\``,
+      `- **File Giao Diện Đích**: \`${ctx.fileLabel}\``,
+      `- **Ngôn ngữ / Tech Stack**: \`${ctx.lang}\``,
+      ...(ctx.sourceFiles.length > 0
+        ? [`- **Các File Component Nguồn Liên Quan Trong Repo**: ${ctx.sourceFiles.slice(0, 10).map(f => `\`${f}\``).join(', ')}`]
+        : []),
       ``
     ];
 
-    let idx = 1;
+    const activeEdits = [];
     state.editsMap.forEach(rec => {
       const entries = Object.entries(rec.styles);
       if (entries.length === 0 && rec.textChanged === null && Object.keys(rec.attrChanges).length === 0 && !rec.deleted) {
         return;
       }
-      lines.push(`### ${idx}. Phần tử \`${rec.selector}\` (${rec.label})`);
-      if (rec.deleted) {
-        lines.push(`- **Hành động**: Xóa hoặc ẩn phần tử này (\`display: none\`).`);
-      } else {
-        if (rec.textChanged !== null) {
-          lines.push(`- **Đổi nội dung văn bản thành**: \`${rec.textChanged.trim()}\``);
-        }
-        Object.entries(rec.attrChanges).forEach(([attr, val]) => {
-          lines.push(`- **Đổi thuộc tính \`${attr}\` thành**: \`${val}\``);
-        });
-        if (entries.length > 0) {
-          lines.push(`- **Cập nhật CSS**:`);
-          entries.forEach(([k, v]) => {
-            lines.push(`  - \`${k}: ${v};\``);
-          });
-        }
-      }
-      lines.push(``);
-      idx++;
+      activeEdits.push({ rec, entries });
     });
 
+    if (activeEdits.length > 0) {
+      lines.push(`## 2. Bảng Tóm Tắt Thay Đổi Trực Quan (${activeEdits.length} Phần Tử)`);
+      lines.push(`| # | Phần Tử / Selector | Hành Động | Class Tailwind Tương Đương |`);
+      lines.push(`|---|---|---|---|`);
+      activeEdits.forEach(({ rec, entries }, i) => {
+        const actionType = rec.deleted
+          ? '🗑️ Xóa / Ẩn'
+          : [
+              rec.textChanged !== null ? '✏️ Đổi Text' : '',
+              entries.length > 0 ? `🎨 ${entries.length} thuộc tính CSS` : ''
+            ]
+              .filter(Boolean)
+              .join(' + ');
+        const tw = rec.deleted ? 'hidden' : convertCssStylesToTailwindClasses(rec.styles) || '—';
+        lines.push(`| ${i + 1} | \`${rec.selector}\` (${rec.label}) | ${actionType} | \`${tw}\` |`);
+      });
+      lines.push(``);
+
+      lines.push(`## 3. Chi Tiết Thông Số Cần Áp Dụng Từng Phần Tử`);
+      activeEdits.forEach(({ rec, entries }, idx) => {
+        lines.push(`### 3.${idx + 1}. Phần tử \`${rec.selector}\` (${rec.label})`);
+        if (rec.deleted) {
+          lines.push(`- **Hành động**: Xóa phần tử khỏi DOM hoặc áp dụng \`display: none\` (\`hidden\`).`);
+        } else {
+          if (rec.textChanged !== null) {
+            lines.push(`- **Cập nhật nội dung văn bản (Text Content)**: \`"${rec.textChanged.trim()}"\``);
+          }
+          Object.entries(rec.attrChanges).forEach(([attr, val]) => {
+            lines.push(`- **Cập nhật thuộc tính HTML \`${attr}\`**: \`"${val}"\``);
+          });
+          if (entries.length > 0) {
+            const twClasses = convertCssStylesToTailwindClasses(rec.styles);
+            if (twClasses) {
+              lines.push(`- **Tailwind CSS JIT Classes**: \`${twClasses}\``);
+            }
+            lines.push(`- **Thuộc tính CSS chuẩn**:`);
+            entries.forEach(([k, v]) => {
+              lines.push(`  - \`${k}: ${v};\``);
+            });
+          }
+        }
+        lines.push(``);
+      });
+    } else {
+      lines.push(`## 2. Trạng Thái Chỉnh Sửa Thủ Công`);
+      lines.push(`- Hiện chưa có thao tác kéo thả lẻ nào. Hãy thực hiện **Nâng cấp UI/UX Toàn Diện** cho \`${ctx.fileLabel}\` theo mục bên dưới.`);
+      lines.push(``);
+    }
+
     if (state.injectedCdns.size > 0) {
-      lines.push(`### Các Thư Viện UI / CDN Đã Kích Hoạt Trong \`<head>\`:`);
+      lines.push(`## 4. Các Thư Viện UI / CDN Đã Kích Hoạt Trong \`<head>\``);
       state.injectedCdns.forEach(cdnKey => {
         const def = CDN_DEFINITIONS[cdnKey];
         if (def) {
@@ -2353,24 +2517,220 @@
     }
 
     if (state.addedNodes.length > 0) {
-      lines.push(`### Các Component / Phần tử mới được chèn thêm từ Thư viện UI:`);
-      state.addedNodes.forEach(node => {
+      lines.push(`## 5. Các Component Mới Được Chèn Từ Thư Viện UI (${state.addedNodes.length} Component)`);
+      state.addedNodes.forEach((node, idx) => {
         const libTag = node.libName ? ` **[Thư viện: ${node.libName} — ${node.compName || node.id}]**` : '';
-        lines.push(`- Chèn vào trong \`${node.parentSelector}\`${libTag}: \`${node.html}\``);
+        lines.push(`### Component ${idx + 1}: Chèn vào \`${node.parentSelector}\`${libTag}`);
+        lines.push('```html');
+        lines.push(node.html.trim());
+        lines.push('```');
+        lines.push(``);
       });
-      lines.push(``);
     }
 
     const cssPatch = generateCssPatchString();
     if (cssPatch) {
-      lines.push(`---`);
-      lines.push(`### Mã CSS tổng hợp (Có thể áp dụng trực tiếp):`);
+      lines.push(`## 6. Mã CSS Tổng Hợp (Production-Ready Patch)`);
       lines.push('```css');
       lines.push(cssPatch);
       lines.push('```');
+      lines.push(``);
+    }
+
+    lines.push(`## 7. Quy Tắc Thực Thi Bắt Buộc Cho AI Agent (Cursor / Antigravity / Claude)`);
+    lines.push(`1. **Bảo toàn Logic**: Giữ nguyên toàn bộ \`id\`, \`data-*\`, event listener, và state logic hiện có của dự án.`);
+    lines.push(`2. **Đồng bộ Source Component**: Nếu dự án dùng React/Next.js/Vue/Flutter (${ctx.sourceFiles.length > 0 ? ctx.sourceFiles.slice(0, 5).map(f => `\`${f}\``).join(', ') : `\`${ctx.fileLabel}\``}), hãy áp dụng các thay đổi vào đúng file component gốc thay vì chỉ sửa bản build tĩnh.`);
+    lines.push(`3. **Chuẩn hóa Responsive**: Nếu phần tử có \`transform: translate3d(x, y, 0)\` dùng để căn chỉnh bố cục, hãy ưu tiên chuyển thành khoảng cách Flexbox/Grid (\`gap\`, \`margin\`, \`padding\`) hoặc giữ nguyên tỷ lệ hiển thị mượt trên Desktop & Mobile.`);
+
+    return lines.join('\n');
+  }
+
+  function generateTailwindReactPromptText() {
+    const ctx = getActiveRepoContextSummary();
+    const lines = [
+      `# ⚛️ PROMPT ĐỒNG BỘ SANG REACT / NEXT.JS (.TSX) & TAILWIND CSS`,
+      `- **Repo**: \`${ctx.repoName}\` • **File**: \`${ctx.fileLabel}\``,
+      ...(ctx.sourceFiles.length > 0
+        ? [`- **Các file Component .TSX/.JSX trong Repo**: ${ctx.sourceFiles.filter(f => /\.(tsx|jsx|vue|svelte)$/i.test(f)).slice(0, 10).map(f => `\`${f}\``).join(', ') || ctx.sourceFiles.slice(0, 6).map(f => `\`${f}\``).join(', ')}`]
+        : []),
+      ``,
+      `Hãy cập nhật các Component React / Next.js tương ứng với bộ class Tailwind CSS JIT đã tinh chỉnh trực quan dưới đây:`,
+      ``
+    ];
+
+    let count = 0;
+    state.editsMap.forEach(rec => {
+      const entries = Object.entries(rec.styles);
+      if (entries.length === 0 && rec.textChanged === null && !rec.deleted) return;
+      count++;
+      const tw = rec.deleted ? 'hidden' : convertCssStylesToTailwindClasses(rec.styles);
+      lines.push(`### ${count}. \`${rec.selector}\` (${rec.label})`);
+      if (rec.textChanged !== null) {
+        lines.push(`- **JSX Children / Text**: \`${rec.textChanged.trim()}\``);
+      }
+      lines.push(`- **className mới cần thêm/cập nhật**:`);
+      lines.push('```tsx');
+      lines.push(`<${rec.tagName || 'div'} className="${tw}">`);
+      lines.push(`  ${rec.textChanged !== null ? rec.textChanged.trim() : '{children}'}`);
+      lines.push(`</${rec.tagName || 'div'}>`);
+      lines.push('```');
+      lines.push(``);
+    });
+
+    if (state.addedNodes.length > 0) {
+      lines.push(`### Các Component UI Library Mới Cần Chuyển Sang JSX:`);
+      state.addedNodes.forEach(node => {
+        const jsxHtml = (node.html || '')
+          .replace(/\bclass=/g, 'className=')
+          .replace(/\bfor=/g, 'htmlFor=');
+        lines.push(`- **${node.compName || node.id}** (${node.libName || 'UI Lib'}) trong \`${node.parentSelector}\`:`);
+        lines.push('```tsx');
+        lines.push(jsxHtml.trim());
+        lines.push('```');
+      });
+    }
+
+    if (count === 0 && state.addedNodes.length === 0) {
+      lines.push(`*(Chưa có thay đổi thủ công nào — hãy chỉnh sửa bất kỳ phần tử nào trên Canvas để tự động sinh mã Tailwind CSS & JSX tại đây!)*`);
     }
 
     return lines.join('\n');
+  }
+
+  function generateFlutterDartPromptText() {
+    const ctx = getActiveRepoContextSummary();
+    const dartFiles = ctx.sourceFiles.filter(f => /\.dart$/i.test(f));
+    const lines = [
+      `# 📱 PROMPT ĐỒNG BỘ SANG FLUTTER / DART WIDGET TREE`,
+      `- **Repo**: \`${ctx.repoName}\``,
+      ...(dartFiles.length > 0 ? [`- **Các file Dart trong Repo**: ${dartFiles.slice(0, 10).map(f => `\`${f}\``).join(', ')}`] : []),
+      ``,
+      `Hãy cập nhật các Widget Flutter (\`Container\`, \`BoxDecoration\`, \`TextStyle\`, \`Padding\`) theo đúng thông số đã căn chỉnh trực quan:`,
+      ``
+    ];
+
+    function hexToFlutterColor(val) {
+      const m = String(val || '').match(/#([0-9a-fA-F]{6})\b/);
+      if (m) return `const Color(0xFF${m[1].toUpperCase()})`;
+      return `Colors.deepPurpleAccent`;
+    }
+
+    let count = 0;
+    state.editsMap.forEach(rec => {
+      const entries = Object.entries(rec.styles);
+      if (entries.length === 0 && rec.textChanged === null && !rec.deleted) return;
+      count++;
+      const s = rec.styles || {};
+      const bg = s['background-color'] ? `color: ${hexToFlutterColor(s['background-color'])},` : '';
+      const radiusNum = parseFloat(s['border-radius']) || 0;
+      const radius = radiusNum > 0 ? `borderRadius: BorderRadius.circular(${radiusNum}),` : '';
+      const fontSize = parseFloat(s['font-size']) || 15;
+      const textColor = s['color'] ? `color: ${hexToFlutterColor(s['color'])},` : '';
+
+      lines.push(`### ${count}. Widget tương ứng với \`${rec.selector}\` (${rec.label})`);
+      lines.push('```dart');
+      lines.push(`Container(`);
+      if (s['padding']) {
+        const pVal = parseFloat(s['padding']) || 12;
+        lines.push(`  padding: const EdgeInsets.all(${pVal}),`);
+      }
+      if (bg || radius) {
+        lines.push(`  decoration: BoxDecoration(`);
+        if (bg) lines.push(`    ${bg}`);
+        if (radius) lines.push(`    ${radius}`);
+        lines.push(`  ),`);
+      }
+      lines.push(`  child: Text(`);
+      lines.push(`    ${JSON.stringify(rec.textChanged !== null ? rec.textChanged.trim() : rec.label)},`);
+      lines.push(`    style: TextStyle(`);
+      lines.push(`      fontSize: ${fontSize},`);
+      if (textColor) lines.push(`      ${textColor}`);
+      lines.push(`      fontWeight: FontWeight.w600,`);
+      lines.push(`    ),`);
+      lines.push(`  ),`);
+      lines.push(`)`);
+      lines.push('```');
+      lines.push(``);
+    });
+
+    if (count === 0) {
+      lines.push(`*(Chưa có thay đổi thủ công nào — hãy chỉnh màu sắc, bo góc, cỡ chữ hoặc vị trí trên Canvas để tự động sinh mã Flutter Widget tại đây!)*`);
+    }
+
+    return lines.join('\n');
+  }
+
+  function generateAutoUiUxAuditPromptText() {
+    const ctx = getActiveRepoContextSummary();
+    const doc = dom.iframe?.contentDocument;
+    const title = doc?.title || ctx.fileLabel;
+    const headingsCount = doc ? doc.querySelectorAll('h1, h2, h3').length : 0;
+    const buttonsCount = doc ? doc.querySelectorAll('button, a.btn, [role="button"]').length : 0;
+    const imagesCount = doc ? doc.querySelectorAll('img, svg').length : 0;
+    const sectionsCount = doc ? doc.querySelectorAll('section, header, footer, nav, main').length : 0;
+
+    const sampleHeadings = doc
+      ? Array.from(doc.querySelectorAll('h1, h2, h3'))
+          .slice(0, 6)
+          .map(h => `"${(h.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 60)}"`)
+          .filter(Boolean)
+      : [];
+
+    return [
+      `# ✨ MASTER PROMPT: KIỂM ĐỊNH & NÂNG CẤP TOÀN DIỆN UI/UX CHUẨN LINEAR / VERCEL / APPLE`,
+      ``,
+      `Bạn là **Principal UI/UX Design Engineer & Frontend Architect**. Hãy phân tích và nâng cấp toàn diện giao diện của dự án dưới đây lên đẳng cấp thiết kế hiện đại nhất (Linear, Vercel, Raycast, Shadcn/Origin UI, Aceternity UI):`,
+      ``,
+      `## 1. Thông Tin Giao Diện & Cấu Trúc DOM Hiện Tại`,
+      `- **Repository**: \`${ctx.repoName}\` (Nhánh: \`${ctx.branch}\`)`,
+      `- **File đang mở**: \`${ctx.fileLabel}\` — Tiêu đề: **${title}**`,
+      `- **Ngôn ngữ / Stack**: \`${ctx.lang}\``,
+      `- **Thống kê cấu trúc DOM**: \`${sectionsCount}\` phân vùng bố cục (\`section/nav/header\`), \`${headingsCount}\` tiêu đề (\`H1–H3\`), \`${buttonsCount}\` nút tương tác, \`${imagesCount}\` hình ảnh/icon SVG.`,
+      ...(sampleHeadings.length > 0 ? [`- **Các tiêu đề chính trên trang**: ${sampleHeadings.join(' • ')}`] : []),
+      ...(ctx.sourceFiles.length > 0 ? [`- **Các file nguồn trong dự án**: ${ctx.sourceFiles.slice(0, 12).map(f => `\`${f}\``).join(', ')}`] : []),
+      ``,
+      `## 2. Yêu Cầu Nâng Cấp UI/UX Toàn Diện (5 Hạng Mục Trọng Tâm)`,
+      `1. **Hệ thống Typography & Phân cấp Thị giác (Visual Hierarchy)**:`,
+      `   - Tinh chỉnh \`letter-spacing: -0.025em\` cho các tiêu đề lớn (\`H1\`, \`H2\`), dùng \`line-height: 1.15\` cho Heading và \`1.6\` cho đoạn văn mô tả.`,
+      `   - Phân tách độ tương phản rõ ràng giữa chữ chính (\`#fafafa\` / \`#09090b\`) và chữ phụ (\`#a1a1aa\` / \`#52525b\`).`,
+      `2. **Bố cục Bento Grid, Khoảng thở (Whitespace) & Viền Specular 1px**:`,
+      `   - Chuẩn hóa khoảng cách \`padding\` và \`gap\` theo hệ lưới 8px (\`16px\`, \`24px\`, \`32px\`, \`48px\`).`,
+      `   - Áp dụng viền mảnh \`1px solid rgba(255,255,255,0.08)\` kèm hiệu ứng ánh sáng đỉnh \`box-shadow: inset 0 1px 0 rgba(255,255,255,0.08)\` và \`backdrop-filter: blur(12px)\` cho các thẻ Card và Navbar.`,
+      `3. **Nút bấm (CTA) & Micro-interactions 60fps**:`,
+      `   - Nâng cấp các nút CTA chính với hiệu ứng chuyển động mượt \`transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1)\`, hiệu ứng nhấc nhẹ khi hover (\`translateY(-1px)\`) và vòng sáng focus tinh tế.`,
+      `4. **Độ tương phản Dark Mode / Light Mode & Responsive**:`,
+      `   - Đảm bảo không có bất kỳ chữ nào bị chìm màu trên nền sáng hoặc nền tối, và bố cục tự động co giãn hoàn hảo trên Mobile (\`390px\`), Tablet (\`768px\`) và Desktop (\`1440px+\`).`,
+      ...(state.editsMap.size > 0
+        ? [
+            `5. **Kết hợp với ${state.editsMap.size} Thay đổi Trực quan Đã Chỉnh trên Studio**:`,
+            `   - Đồng thời áp dụng đầy đủ các thông số CSS đã tinh chỉnh thủ công dưới đây:`,
+            '```css',
+            generateCssPatchString(),
+            '```'
+          ]
+        : [
+            `5. **Bảo toàn Tuyệt đối Chức năng & Dữ liệu**:`,
+            `   - Giữ nguyên toàn bộ nội dung, đường dẫn ảnh, liên kết và logic JavaScript/TypeScript hiện có.`
+          ])
+    ].join('\n');
+  }
+
+  function populateAllPromptTabs() {
+    const ctx = getActiveRepoContextSummary();
+    const badge = document.getElementById('prompt-context-badge');
+    if (badge) {
+      badge.textContent = `${ctx.repoName} • ${ctx.fileLabel}`;
+    }
+    if (dom.aiPromptOutput) dom.aiPromptOutput.value = generateAiPromptText();
+    const twOut = document.getElementById('ai-tailwind-output');
+    if (twOut) twOut.value = generateTailwindReactPromptText();
+    const flOut = document.getElementById('ai-flutter-output');
+    if (flOut) flOut.value = generateFlutterDartPromptText();
+    const auOut = document.getElementById('ai-audit-output');
+    if (auOut) auOut.value = generateAutoUiUxAuditPromptText();
+    if (dom.cssPatchOutput) {
+      dom.cssPatchOutput.value = generateCssPatchString() || '/* Chưa có thay đổi CSS thủ công nào */';
+    }
   }
 
   // ==================== CLEAN HTML SERIALIZER (SAVING & EXPORTING) ====================
@@ -5183,8 +5543,7 @@
     dom.btnSaveDirect.addEventListener('click', saveDirectlyToSource);
 
     dom.btnAiPrompt.addEventListener('click', () => {
-      dom.aiPromptOutput.value = generateAiPromptText();
-      dom.cssPatchOutput.value = generateCssPatchString() || '/* Chưa có thay đổi CSS nào */';
+      populateAllPromptTabs();
       dom.modalAiPrompt.classList.remove('hidden');
     });
 
@@ -5857,25 +6216,71 @@
       }
     });
 
-    // AI Prompt Modal Tabs & Copy
+    // AI Prompt Modal Tabs & Copy / Save to Project
     document.querySelectorAll('.prompt-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('.prompt-tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.ptab-content').forEach(c => c.classList.add('hidden'));
         tab.classList.add('active');
-        document.getElementById(tab.dataset.ptab).classList.remove('hidden');
+        const pane = document.getElementById(tab.dataset.ptab);
+        if (pane) pane.classList.remove('hidden');
       });
     });
 
+    function getActivePromptTabText() {
+      const activePane = document.querySelector('#modal-ai-prompt .ptab-content:not(.hidden) textarea');
+      return activePane ? activePane.value : (dom.aiPromptOutput?.value || '');
+    }
+
     dom.btnCopyAiPrompt.addEventListener('click', () => {
-      navigator.clipboard.writeText(dom.aiPromptOutput.value);
-      showToast('Đã copy Prompt chuẩn cho AI vào bộ nhớ tạm!', '📋');
+      navigator.clipboard.writeText(getActivePromptTabText());
+      showToast('Đã copy nội dung Prompt vào bộ nhớ tạm!', '📋');
     });
 
     dom.btnCopyCssPatch.addEventListener('click', () => {
       navigator.clipboard.writeText(dom.cssPatchOutput.value);
       showToast('Đã copy mã CSS vào bộ nhớ tạm!', '🎨');
     });
+
+    const btnSavePromptFile = document.getElementById('btn-save-prompt-file');
+    if (btnSavePromptFile) {
+      btnSavePromptFile.addEventListener('click', async () => {
+        const content = [
+          generateAiPromptText(),
+          '\n---\n',
+          generateTailwindReactPromptText(),
+          '\n---\n',
+          generateAutoUiUxAuditPromptText()
+        ].join('\n');
+        try {
+          const data = await safeFetchStudioJson('/api/save-prompt', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fileName: 'VISUAL-UI-PROMPT.md', promptContent: content })
+          });
+          showToast(`Đã lưu VISUAL-UI-PROMPT.md vào ${data.workspaceDir}!`, '💾');
+        } catch (err) {
+          // Fallback browser download if offline
+          const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'VISUAL-UI-PROMPT.md';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+          showToast('Đã tải file VISUAL-UI-PROMPT.md về máy!', '⬇️');
+        }
+      });
+    }
+
+    const btnSaveAndPushFromPrompt = document.getElementById('btn-save-and-push-from-prompt');
+    if (btnSaveAndPushFromPrompt) {
+      btnSaveAndPushFromPrompt.addEventListener('click', async () => {
+        await saveDirectlyToSource();
+      });
+    }
 
     // ==================== REACTBITS.DEV CUSTOMIZE STUDIO BRIDGE ====================
     let rbUndoTimer = null;
@@ -6194,10 +6599,192 @@
     const selectGhUserRepos = document.getElementById('select-gh-user-repos');
     const inputGhRemoteUrl = document.getElementById('input-gh-remote-url');
     const btnGhLinkRepo = document.getElementById('btn-gh-link-repo');
+    const btnGhOpenSelectedRepoUi = document.getElementById('btn-gh-open-selected-repo-ui');
+    const btnSwitchToGhRepos = document.getElementById('btn-switch-to-gh-repos');
+    const ghReposExplorerList = document.getElementById('gh-repos-explorer-list');
+    const chkGhHideForks = document.getElementById('chk-gh-hide-forks');
+    const inputGhRepoSearch = document.getElementById('input-gh-repo-search');
     const chkGhAutoPush = document.getElementById('chk-gh-auto-push');
     const inputGhCommitMsg = document.getElementById('input-gh-commit-msg');
     const btnGhPushNow = document.getElementById('btn-gh-push-now');
     const ghPushStatusMsg = document.getElementById('gh-push-status-msg');
+
+    let ghRepoFilterMode = 'all'; // 'all' | 'has-ui' | 'no-ui'
+    let cachedGithubRepos = [];
+
+    if (btnSwitchToGhRepos) {
+      btnSwitchToGhRepos.addEventListener('click', () => {
+        if (dom.modalOpenWeb) dom.modalOpenWeb.classList.add('hidden');
+        if (modalGithubHub) {
+          modalGithubHub.classList.remove('hidden');
+          refreshGithubStatus();
+        }
+      });
+    }
+
+    async function openGithubRepoUiInStudio(repoObj, triggerBtn = null) {
+      if (!repoObj) return;
+      const origHtml = triggerBtn ? triggerBtn.innerHTML : '';
+      if (triggerBtn) {
+        triggerBtn.disabled = true;
+        triggerBtn.textContent = '⏳ Đang mở UI...';
+      }
+      setBannerState(
+        ghPushStatusMsg,
+        'info',
+        `⏳ Đang đồng bộ kho lưu trữ <strong>${repoObj.fullName}</strong> về Local và nạp giao diện lên Studio Canvas...`
+      );
+      try {
+        const res = await safeFetchStudioJson('/api/github/open-repo-ui', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(repoObj)
+        });
+
+        state.workspaceDir = res.workspaceDir;
+        state.files = res.files || [];
+        state.activeGithubRepoMeta = res.repoMeta || repoObj;
+        dom.folderLabel.textContent = state.workspaceDir;
+        dom.inputWorkspacePath.value = state.workspaceDir;
+
+        dom.pageSelector.innerHTML = `<option value="">-- Chọn file HTML (${state.files.length} trang) --</option>`;
+        state.files.forEach(f => {
+          const opt = document.createElement('option');
+          opt.value = f.relativePath;
+          opt.textContent = f.name;
+          dom.pageSelector.appendChild(opt);
+        });
+
+        if (res.primaryFile) {
+          dom.pageSelector.value = res.primaryFile;
+          await loadWorkspacePage(res.primaryFile);
+        }
+
+        await refreshGithubStatus();
+
+        const modeDesc =
+          res.modeUsed === 'native-html'
+            ? `file gốc ${res.primaryFile}`
+            : res.modeUsed === 'live-homepage'
+            ? `giao diện Live (${res.primaryFile})`
+            : res.modeUsed === 'starter-ui-for-noui'
+            ? `giao diện khởi tạo mới (${res.primaryFile})`
+            : `Canvas tổng hợp từ Source (${res.primaryFile})`;
+
+        setBannerState(
+          ghPushStatusMsg,
+          'success',
+          `✅ Đã mở <strong>${repoObj.fullName}</strong> (${modeDesc})! Khi bấm Lưu (Ctrl+S) sẽ lưu trực tiếp vào Repo này.`
+        );
+        showToast(`🎨 Đang sửa UI của Repo: ${repoObj.fullName} (${res.primaryFile})!`, '🚀');
+
+        setTimeout(() => {
+          if (modalGithubHub) modalGithubHub.classList.add('hidden');
+        }, 500);
+      } catch (err) {
+        setBannerState(ghPushStatusMsg, 'error', `Lỗi mở UI Repo: ${err.message}`);
+        showToast(`Lỗi mở Repo: ${err.message}`, '❌');
+      } finally {
+        if (triggerBtn) {
+          triggerBtn.disabled = false;
+          triggerBtn.innerHTML = origHtml;
+        }
+      }
+    }
+
+    function renderGithubReposExplorer() {
+      if (!ghReposExplorerList) return;
+      const hideForks = chkGhHideForks ? chkGhHideForks.checked : false;
+      const query = (inputGhRepoSearch ? inputGhRepoSearch.value : '').trim().toLowerCase();
+
+      const baseRepos = cachedGithubRepos.filter(r => (hideForks ? !r.fork : true));
+      const hasUiCount = baseRepos.filter(r => r.hasUi).length;
+      const noUiCount = baseRepos.filter(r => !r.hasUi).length;
+
+      // Update filter pill counts
+      document.querySelectorAll('.gh-filter-pill[data-gh-filter]').forEach(pill => {
+        const mode = pill.getAttribute('data-gh-filter');
+        if (mode === 'all') pill.textContent = `Tất cả (${baseRepos.length})`;
+        else if (mode === 'has-ui') pill.textContent = `✦ Có UI (${hasUiCount})`;
+        else if (mode === 'no-ui') pill.textContent = `🚫 No UI (${noUiCount})`;
+      });
+
+      const filtered = baseRepos.filter(r => {
+        if (ghRepoFilterMode === 'has-ui' && !r.hasUi) return false;
+        if (ghRepoFilterMode === 'no-ui' && r.hasUi) return false;
+        if (query) {
+          const hay = `${r.name} ${r.fullName} ${r.language || ''} ${r.description || ''} ${r.uiDetail || ''}`.toLowerCase();
+          if (!hay.includes(query)) return false;
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        ghReposExplorerList.innerHTML = `<div class="gh-repos-empty">Không tìm thấy Repository nào khớp bộ lọc hiện tại.</div>`;
+        return;
+      }
+
+      ghReposExplorerList.innerHTML = filtered
+        .map(r => {
+          const pillClass = !r.hasUi
+            ? 'gh-ui-pill--noui'
+            : r.uiCategory === 'html'
+            ? 'gh-ui-pill--html'
+            : r.uiCategory === 'mobile'
+            ? 'gh-ui-pill--mobile'
+            : 'gh-ui-pill--webapp';
+          const badgeText = r.hasUi ? (r.uiBadge || '✦ Có UI') : (r.uiDetail || '🚫 No UI');
+          const langTag = r.language ? `<span class="gh-ui-pill gh-ui-pill--noui">${r.language}</span>` : '';
+          const descText = r.description || (r.hasUi ? 'Sẵn sàng mở và chỉnh sửa giao diện trực quan' : 'Dự án Backend / CLI / Tài liệu (Chưa có giao diện UI)');
+
+          return `
+            <div class="gh-repo-item ${r.hasUi ? '' : 'is-no-ui'}" data-repo-fullname="${r.fullName}">
+              <div class="gh-repo-item__left">
+                <div class="gh-repo-item__title-row">
+                  <span class="gh-repo-item__name">${r.name}</span>
+                  <span class="gh-ui-pill ${pillClass}" title="${r.uiDetail || ''}">${badgeText}</span>
+                  ${langTag}
+                </div>
+                <div class="gh-repo-item__desc" title="${descText.replace(/"/g, '&quot;')}">${descText}</div>
+              </div>
+              <div class="gh-repo-item__actions">
+                ${
+                  r.hasUi
+                    ? `<button type="button" class="btn-primary btn-xs btn-gh-edit-repo-ui" data-repo-name="${r.name}" title="Tải Repo này về Local, nạp giao diện lên Canvas để kéo thả & tự động Push khi Lưu">🎨 Sửa UI</button>`
+                    : `<button type="button" class="btn-secondary btn-xs btn-gh-edit-repo-ui" data-repo-name="${r.name}" title="Repo này chưa có UI (No UI) — Bấm để khởi tạo nhanh 1 trang giao diện mẫu cho Repo này">✨ Tạo UI</button>`
+                }
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+
+      ghReposExplorerList.querySelectorAll('.btn-gh-edit-repo-ui').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const rName = btn.getAttribute('data-repo-name');
+          const targetRepo = cachedGithubRepos.find(item => item.name === rName);
+          if (targetRepo) {
+            openGithubRepoUiInStudio(targetRepo, btn);
+          }
+        });
+      });
+    }
+
+    document.querySelectorAll('.gh-filter-pill[data-gh-filter]').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.gh-filter-pill[data-gh-filter]').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        ghRepoFilterMode = pill.getAttribute('data-gh-filter') || 'all';
+        renderGithubReposExplorer();
+      });
+    });
+
+    if (chkGhHideForks) {
+      chkGhHideForks.addEventListener('change', renderGithubReposExplorer);
+    }
+    if (inputGhRepoSearch) {
+      inputGhRepoSearch.addEventListener('input', renderGithubReposExplorer);
+    }
 
     if (chkGhAutoPush) {
       chkGhAutoPush.checked = state.githubAutoPush;
@@ -6280,14 +6867,17 @@
           if (btnGhLogout) btnGhLogout.classList.add('hidden');
         }
 
-        // Populate User Repos Dropdown
+        // Populate User Repos Dropdown & Visual Repo Explorer (with Has UI / No UI status!)
+        cachedGithubRepos = Array.isArray(data.repos) ? data.repos : [];
+        renderGithubReposExplorer();
+
         if (selectGhUserRepos) {
-          const repos = Array.isArray(data.repos) ? data.repos : [];
-          selectGhUserRepos.innerHTML = `<option value="">-- Chọn Repo (${repos.length}) --</option>`;
-          repos.forEach(r => {
+          selectGhUserRepos.innerHTML = `<option value="">-- Chọn Repo (${cachedGithubRepos.length}) --</option>`;
+          cachedGithubRepos.forEach(r => {
             const opt = document.createElement('option');
             opt.value = r.cloneUrl;
-            opt.textContent = `${r.private ? '🔒' : '🌐'} ${r.fullName}`;
+            const uiPrefix = r.hasUi ? (r.uiBadge || '✦ Có UI') : '🚫 No UI';
+            opt.textContent = `[${uiPrefix}] ${r.name}${r.fork ? ' (Fork)' : ''}`;
             if (git.remoteUrl && (git.remoteUrl === r.cloneUrl || git.remoteUrl.includes(r.fullName))) {
               opt.selected = true;
             }
@@ -6303,13 +6893,13 @@
         if (ghRepoStatusBadge && ghGitSummary) {
           if (git.hasRemote) {
             ghRepoStatusBadge.textContent = `✓ ${cleanRepoShort || 'Đã liên kết'}`;
-            ghGitSummary.innerHTML = `Thư mục: <code>${state.workspaceDir}</code> • Nhánh: <strong>${git.branch || 'main'}</strong> • Chờ Push: <strong>${git.changedCount || 0} file</strong>`;
+            ghGitSummary.innerHTML = `Thư mục đang mở: <code>${state.workspaceDir}</code> • Nhánh: <strong>${git.branch || 'main'}</strong> • Chờ Push: <strong>${git.changedCount || 0} file</strong>`;
           } else if (git.isGitRepo) {
             ghRepoStatusBadge.textContent = 'Chưa gắn Remote';
             ghGitSummary.innerHTML = `Thư mục <code>${state.workspaceDir}</code> đã có Git nhưng chưa gắn Repo. Chọn Repo bên dưới và bấm <strong>Liên kết</strong>.`;
           } else {
             ghRepoStatusBadge.textContent = 'Chưa có Git';
-            ghGitSummary.innerHTML = `Chọn Repo bên dưới và bấm <strong>Liên kết</strong> để tự động khởi tạo Git cho <code>${state.workspaceDir}</code>.`;
+            ghGitSummary.innerHTML = `Chọn Repo bên dưới để <strong>🎨 Sửa UI</strong> hoặc bấm <strong>Liên kết</strong> cho <code>${state.workspaceDir}</code>.`;
           }
         }
       } catch (_) {
@@ -6389,6 +6979,29 @@
       selectGhUserRepos.addEventListener('change', () => {
         if (selectGhUserRepos.value) {
           inputGhRemoteUrl.value = selectGhUserRepos.value;
+        }
+      });
+    }
+
+    if (btnGhOpenSelectedRepoUi) {
+      btnGhOpenSelectedRepoUi.addEventListener('click', () => {
+        const selectedUrl = (selectGhUserRepos && selectGhUserRepos.value) || (inputGhRemoteUrl && inputGhRemoteUrl.value.trim()) || '';
+        if (!selectedUrl) {
+          showToast('Vui lòng chọn một Repo từ danh sách để mở & sửa UI!', '⚠️');
+          return;
+        }
+        const matched = (githubReposCache || []).find((r) => r.url === selectedUrl || r.htmlUrl === selectedUrl);
+        if (matched) {
+          openGithubRepoUiInStudio(matched, btnGhOpenSelectedRepoUi);
+        } else {
+          const clean = selectedUrl.replace(/\.git$/i, '').replace(/\/+$/, '');
+          const parts = clean.split('/').slice(-2);
+          openGithubRepoUiInStudio({
+            name: parts[1] || 'repo',
+            fullName: parts.join('/'),
+            url: selectedUrl,
+            htmlUrl: clean
+          }, btnGhOpenSelectedRepoUi);
         }
       });
     }

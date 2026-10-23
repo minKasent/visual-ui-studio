@@ -724,21 +724,33 @@
     {
       sel: '#modal-ai-prompt .modal-header h3',
       text: {
-        en: 'Structured AI Prompt & Generated CSS Patch',
-        vi: 'Prompt Chuẩn Cho AI & Mã CSS Đã Tinh Chỉnh'
+        en: 'AI Prompt Architect (Maxping v7.4) & Multi-Framework Code Sync',
+        vi: 'AI Prompt Architect (Maxping v7.4) & Đồng Bộ Code Đa Nền Tảng'
       }
     },
     {
       sel: '.prompt-tab[data-ptab="ptab-prompt"]',
-      text: { en: 'AI Prompt Instructions', vi: 'Prompt Gửi Cho AI' }
+      text: { en: '🔥 Master Prompt (AI Agent)', vi: '🔥 Master Prompt (AI Agent)' }
+    },
+    {
+      sel: '.prompt-tab[data-ptab="ptab-tailwind"]',
+      text: { en: '⚛️ React / Next + Tailwind', vi: '⚛️ React / Next + Tailwind' }
+    },
+    {
+      sel: '.prompt-tab[data-ptab="ptab-flutter"]',
+      text: { en: '📱 Flutter / Dart UI', vi: '📱 Flutter / Dart UI' }
+    },
+    {
+      sel: '.prompt-tab[data-ptab="ptab-audit"]',
+      text: { en: '✨ Auto Upgrade UI/UX', vi: '✨ Auto Nâng Cấp UI/UX' }
     },
     {
       sel: '.prompt-tab[data-ptab="ptab-css"]',
-      text: { en: 'Generated CSS Patch', vi: 'Mã CSS Đã Sinh Tự Động' }
+      text: { en: '🎨 CSS Patch', vi: '🎨 CSS Patch' }
     },
     {
       sel: '#btn-copy-ai-prompt',
-      html: { en: SVG.copy + ' <span>Copy AI Prompt</span>', vi: SVG.copy + ' <span>Copy Prompt Cho AI</span>' }
+      html: { en: SVG.copy + ' <span>Copy Active Prompt</span>', vi: SVG.copy + ' <span>Copy Prompt Đang Chọn</span>' }
     },
     {
       sel: '#btn-copy-css-patch',
