@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Dancing+Script:wght@600;700&family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto:wght@300;400;500;700;900&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/studio.css?v=7.1" />
+  <link rel="stylesheet" href="./css/studio.css?v=7.2" />
 </head>
 <body>
   <!-- TOP NAVIGATION BAR (Minimalist Icon-First Figma / Framer / Origin UI Precision Bar) -->
@@ -22,7 +22,7 @@
 
       <div class="divider-v"></div>
 
-      <!-- Source Selector (Clean Page Dropdown + Icon-Only Open/Demo Buttons) -->
+      <!-- Source Selector (Clean Page Dropdown + Icon-Only URL Cloner / Open / Demo Buttons) -->
       <div class="project-bar">
         <button id="btn-change-folder" class="btn-ghost btn-sm hidden" title="Đổi thư mục dự án trên máy tính">
           <span id="current-folder-label">d:\Khoa\Porfolio</span>
@@ -30,6 +30,7 @@
         <select id="page-selector" class="select-control" title="Chọn file HTML trong dự án">
           <option value="">-- Chọn trang web --</option>
         </select>
+        <button id="btn-open-url-cloner" class="btn-icon" title="Nhập link Website bất kỳ để tự phân tích, lưu về Local & chỉnh sửa trực tiếp">🌐</button>
         <button id="btn-open-local-file" class="btn-icon" title="Mở file HTML hoặc đổi thư mục dự án từ máy tính">📂</button>
         <button id="btn-load-demo" class="btn-icon" title="Mở giao diện mẫu (Demo UI) để thử nghiệm">🎨</button>
       </div>
@@ -114,7 +115,14 @@
 
       <button id="btn-download-html" class="btn-icon" title="Tải file HTML đã chỉnh sửa về máy">⬇️</button>
 
-      <button id="btn-save-direct" class="btn-primary btn-sm" title="Lưu trực tiếp vào file gốc trên máy (Ctrl+S)">
+      <!-- GitHub Login & Auto-Push Status Trigger -->
+      <button type="button" id="btn-github-hub" class="btn-secondary btn-sm btn-github-trigger" title="Đăng nhập GitHub & Cấu hình Tự động Push khi Lưu (Auto-Push on Save)">
+        <svg class="ui-svg-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+        <span id="github-top-label">GitHub</span>
+        <span id="github-top-dot" class="gh-status-dot"></span>
+      </button>
+
+      <button id="btn-save-direct" class="btn-primary btn-sm" title="Lưu trực tiếp vào file gốc trên máy & Tự động Push lên GitHub (Ctrl+S)">
         💾 Lưu
       </button>
     </div>
@@ -813,6 +821,28 @@
         <button class="btn-icon modal-close" data-close="modal-open-web">✕</button>
       </div>
       <div class="modal-body">
+        <!-- FEATURED: LIVE WEBSITE URL CLONER & LOCAL ANALYZER -->
+        <div class="import-box url-cloner-box" style="margin-bottom:14px;border:1px solid rgba(139,92,246,0.45);background:linear-gradient(180deg, rgba(139,92,246,0.08) 0%, rgba(24,24,27,0.4) 100%);">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">
+            <label style="font-size:12.5px;display:flex;align-items:center;gap:6px;">
+              <svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+              <strong>Nhập Link Website Bất Kỳ — Tự Động Phân Tích, Lưu Về Local &amp; Chỉnh Sửa Trực Tiếp</strong>
+            </label>
+            <span class="badge-count" style="background:rgba(139,92,246,0.2);color:#c4b5fd;border-color:rgba(139,92,246,0.45);">URL Cloner &amp; CSS Inliner</span>
+          </div>
+          <p class="section-hint" style="margin-bottom:8px;">
+            Dán bất kỳ đường dẫn trang web nào (VD: <code>https://minkasent.github.io</code>, <code>https://example.com</code>, trang Portfolio, Landing Page...). Studio sẽ tự động tải mã nguồn HTML + CSS, chuyển đổi đường dẫn ảnh/font, <strong>lưu thành file <code>.html</code> ngay trong thư mục dự án Local của bạn</strong> và mở lên Canvas để bạn kéo thả, sửa chữ, đổi màu và bấm <strong>💾 Lưu (Ctrl+S)</strong> y hệt file Local!
+          </p>
+          <div class="folder-path-row" style="gap:6px;">
+            <input type="url" id="input-clone-url" placeholder="https://minkasent.github.io hoặc bất kỳ URL trang web nào..." style="flex:2;" />
+            <input type="text" id="input-clone-filename" placeholder="Tên file lưu local (tự động nếu để trống)" style="flex:1;max-width:210px;" />
+            <button type="button" id="btn-clone-url" class="btn-primary btn-sm" style="padding:0 14px;font-weight:700;">
+              🌐 Phân Tích &amp; Sửa Ngay
+            </button>
+          </div>
+          <div id="clone-url-status" class="clone-url-status hidden" style="margin-top:8px;font-size:11.5px;padding:7px 10px;border-radius:7px;background:var(--bg-input);border:1px solid var(--border-color);"></div>
+        </div>
+
         <div class="import-grid">
           <div class="import-option" id="card-pick-html">
             <div class="import-option__icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m10 13-2 2 2 2"/><path d="m14 17 2-2-2-2"/></svg></div>
@@ -1022,13 +1052,106 @@
     </div>
   </div>
 
+  <!-- MODAL 4: GITHUB LOGIN, REPOSITORY LINK & AUTO-PUSH CENTER -->
+  <div id="modal-github-hub" class="modal-backdrop hidden">
+    <div class="modal-card modal-card--lg">
+      <div class="modal-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+          <h3>GitHub Login &amp; Đồng Bộ Tự Động (Auto-Push on Save)</h3>
+        </div>
+        <button class="btn-icon modal-close" data-close="modal-github-hub">✕</button>
+      </div>
+      <div class="modal-body">
+        <!-- 1. GITHUB ACCOUNT PROFILE / LOGIN SECTION -->
+        <div class="import-box" id="gh-account-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <img id="gh-user-avatar" src="https://github.com/identicons/app.png" alt="GitHub Avatar" style="width:42px;height:42px;border-radius:50%;border:1px solid var(--border-strong);object-fit:cover;" />
+              <div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <strong id="gh-user-name" style="font-size:13.5px;">Chưa đăng nhập GitHub</strong>
+                  <span id="gh-auth-badge" class="badge-count">Offline</span>
+                </div>
+                <div id="gh-user-sub" style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">
+                  Đăng nhập bằng GitHub để kết nối kho lưu trữ và tự động Push mỗi khi bấm Lưu
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <button type="button" id="btn-gh-login-cli" class="btn-primary btn-sm">
+                🐙 Đăng nhập GitHub (1-Click)
+              </button>
+              <button type="button" id="btn-gh-logout" class="btn-secondary btn-xs hidden" style="color:var(--danger);">
+                Đăng xuất
+              </button>
+            </div>
+          </div>
+
+          <!-- Personal Access Token Login Fallback -->
+          <div id="gh-token-login-row" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-color);">
+            <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:5px;">
+              Hoặc đăng nhập bằng <strong>GitHub Personal Access Token</strong> (<code>ghp_...</code> / <code>github_pat_...</code> — quyền <code>repo</code>):
+            </label>
+            <div class="folder-path-row" style="gap:6px;">
+              <input type="password" id="input-gh-token" placeholder="Dán mã ghp_xxxxxxxxxxxxxxxxxxxx vào đây..." style="flex:1;" />
+              <button type="button" id="btn-gh-login-token" class="btn-secondary btn-sm">Xác thực Token</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. PROJECT GIT REPOSITORY LINK & STATUS -->
+        <div class="import-box mt-12">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;">
+            <label><strong>🔗 Liên kết Thư mục Dự án Local với GitHub Repository:</strong></label>
+            <span id="gh-repo-status-pill" class="badge-count">Đang kiểm tra...</span>
+          </div>
+
+          <div id="gh-project-summary" style="font-size:11.5px;color:var(--text-muted);background:var(--bg-input);padding:8px 10px;border-radius:7px;border:1px solid var(--border-color);margin-bottom:8px;line-height:1.6;">
+            📂 Thư mục: <code id="gh-summary-dir">d:\Khoa\Porfolio</code><br />
+            🌿 Nhánh (Branch): <strong id="gh-summary-branch">main</strong> • Remote: <strong id="gh-summary-remote">Chưa kết nối</strong>
+          </div>
+
+          <div class="folder-path-row" style="gap:6px;">
+            <select id="select-gh-user-repos" class="select-control" style="max-width:220px;" title="Chọn nhanh từ danh sách GitHub Repository của bạn">
+              <option value="">-- Chọn Repo của bạn --</option>
+            </select>
+            <input type="text" id="input-gh-remote-url" placeholder="https://github.com/username/repository.git" style="flex:1;" />
+            <button type="button" id="btn-gh-link-repo" class="btn-secondary btn-sm">🔗 Gắn Repo Này</button>
+          </div>
+        </div>
+
+        <!-- 3. AUTO-PUSH ON SAVE TOGGLE & MANUAL COMMIT/PUSH -->
+        <div class="import-box mt-12" style="border-color:rgba(16,185,129,0.4);background:rgba(16,185,129,0.04);">
+          <label style="display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;">
+            <div>
+              <strong style="font-size:12.5px;color:var(--text-main);">🚀 Tự động Commit &amp; Push lên GitHub mỗi khi bấm Lưu (Ctrl+S / 💾 Lưu)</strong>
+              <p style="font-size:11px;color:var(--text-muted);margin-top:2px;">
+                Khi bật tính năng này, mỗi lần bạn bấm <strong>💾 Lưu</strong> trên thanh công cụ, Studio sẽ lưu vào file gốc ở Local đồng thời tự động <code>git add</code>, <code>git commit</code> và <code>git push</code> thẳng lên nhánh GitHub của dự án!
+              </p>
+            </div>
+            <input type="checkbox" id="chk-gh-auto-push" checked style="width:18px;height:18px;accent-color:#10b981;cursor:pointer;flex-shrink:0;" />
+          </label>
+
+          <div class="folder-path-row mt-10" style="gap:6px;">
+            <input type="text" id="input-gh-commit-msg" placeholder="Nội dung Commit (Để trống sẽ tự tạo: style(ui): update via Visual UI Studio)" style="flex:1;" />
+            <button type="button" id="btn-gh-push-now" class="btn-primary btn-sm" style="padding:0 14px;font-weight:700;">
+              🚀 Commit &amp; Push Ngay
+            </button>
+          </div>
+          <div id="gh-push-status-box" class="hidden" style="margin-top:8px;font-size:11.5px;padding:7px 10px;border-radius:7px;background:var(--bg-input);border:1px solid var(--border-color);"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST NOTIFICATION -->
   <div id="toast-container" class="toast-container"></div>
 
-  <script src="./js/ui-libs-registry.js?v=7.1"></script>
-  <script src="./js/reactbits-customize.js?v=7.1"></script>
-  <script src="./js/templates.js?v=7.1"></script>
-  <script src="./js/studio.js?v=7.1"></script>
-  <script src="./js/i18n-theme.js?v=7.1"></script>
+  <script src="./js/ui-libs-registry.js?v=7.2"></script>
+  <script src="./js/reactbits-customize.js?v=7.2"></script>
+  <script src="./js/templates.js?v=7.2"></script>
+  <script src="./js/studio.js?v=7.2"></script>
+  <script src="./js/i18n-theme.js?v=7.2"></script>
 </body>
 </html>

@@ -3786,6 +3786,67 @@ body.is-resizing-sidebar iframe {
   max-width: 74%;
 }
 
+/* =========================================================================
+   v7.2 — LIVE WEBSITE URL CLONER & GITHUB AUTO-PUSH PILL
+   ========================================================================= */
+#btn-open-url-cloner {
+  color: #8b5cf6;
+  border-color: rgba(139, 92, 246, 0.35);
+  background: rgba(139, 92, 246, 0.08);
+}
+
+#btn-open-url-cloner:hover {
+  background: rgba(139, 92, 246, 0.18);
+  border-color: #8b5cf6;
+  color: #c4b5fd;
+}
+
+.btn-github-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 9px;
+  height: 28px;
+  border-radius: 7px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-main);
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-github-trigger:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-hover);
+}
+
+.gh-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  background: #71717a;
+}
+
+.gh-status-dot.is-online {
+  background: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.7);
+}
+
+.gh-status-dot.is-warn {
+  background: #f59e0b;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.6);
+}
+
+.gh-status-dot.is-offline {
+  background: #71717a;
+}
+
+
 
 
 
