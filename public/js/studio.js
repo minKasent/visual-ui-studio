@@ -4890,10 +4890,116 @@
     renderModalUiLibrariesExplorer();
   }
 
+  // ==================== DRAG-TO-RESIZE LEFT & RIGHT SIDEBAR SPLITTERS ====================
+  function initSidebarResizers() {
+    const root = document.documentElement;
+    const leftResizer = document.getElementById('resizer-left');
+    const rightResizer = document.getElementById('resizer-right');
+    const leftSidebar = document.querySelector('.sidebar--left');
+    const rightSidebar = document.querySelector('.sidebar--right');
+
+    let leftW = parseInt(localStorage.getItem('studio_left_w'), 10);
+    if (isNaN(leftW) || leftW < 180 || leftW > 650) leftW = 310;
+    let rightW = parseInt(localStorage.getItem('studio_right_w'), 10);
+    if (isNaN(rightW) || rightW < 220 || rightW > 680) rightW = 370;
+
+    function applySidebarWidths(save = false) {
+      const vw = window.innerWidth || 1440;
+      const minCanvasW = 240;
+      // Ensure leftW + rightW never push the Right Sidebar off the screen on narrower windows
+      if (leftW + rightW + minCanvasW > vw) {
+        const available = Math.max(360, vw - minCanvasW);
+        const ratio = rightW / Math.max(1, leftW + rightW);
+        rightW = Math.max(220, Math.round(available * ratio));
+        leftW = Math.max(180, available - rightW);
+      }
+      root.style.setProperty('--left-w', `${leftW}px`);
+      root.style.setProperty('--right-w', `${rightW}px`);
+      if (leftSidebar) leftSidebar.style.width = `${leftW}px`;
+      if (rightSidebar) rightSidebar.style.width = `${rightW}px`;
+      if (save) {
+        localStorage.setItem('studio_left_w', String(leftW));
+        localStorage.setItem('studio_right_w', String(rightW));
+      }
+      requestAnimationFrame(updateOverlayPosition);
+    }
+
+    applySidebarWidths(false);
+    window.addEventListener('resize', () => applySidebarWidths(false));
+
+    if (leftResizer) {
+      leftResizer.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        leftResizer.setPointerCapture(e.pointerId);
+        leftResizer.classList.add('is-dragging');
+        document.body.classList.add('is-resizing-sidebar');
+
+        const onMove = ev => {
+          const maxLeft = Math.min(640, (window.innerWidth || 1440) - rightW - 240);
+          leftW = Math.max(180, Math.min(maxLeft, Math.round(ev.clientX)));
+          applySidebarWidths(false);
+        };
+        const onUp = ev => {
+          leftResizer.releasePointerCapture(ev.pointerId);
+          leftResizer.classList.remove('is-dragging');
+          document.body.classList.remove('is-resizing-sidebar');
+          leftResizer.removeEventListener('pointermove', onMove);
+          leftResizer.removeEventListener('pointerup', onUp);
+          leftResizer.removeEventListener('pointercancel', onUp);
+          applySidebarWidths(true);
+        };
+        leftResizer.addEventListener('pointermove', onMove);
+        leftResizer.addEventListener('pointerup', onUp);
+        leftResizer.addEventListener('pointercancel', onUp);
+      });
+
+      leftResizer.addEventListener('dblclick', () => {
+        leftW = 310;
+        applySidebarWidths(true);
+        showToast('Đã đặt lại kích thước cột Trái mặc định (310px)', '↔️');
+      });
+    }
+
+    if (rightResizer) {
+      rightResizer.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        rightResizer.setPointerCapture(e.pointerId);
+        rightResizer.classList.add('is-dragging');
+        document.body.classList.add('is-resizing-sidebar');
+
+        const onMove = ev => {
+          const vw = window.innerWidth || 1440;
+          const maxRight = Math.min(680, vw - leftW - 240);
+          rightW = Math.max(230, Math.min(maxRight, Math.round(vw - ev.clientX)));
+          applySidebarWidths(false);
+        };
+        const onUp = ev => {
+          rightResizer.releasePointerCapture(ev.pointerId);
+          rightResizer.classList.remove('is-dragging');
+          document.body.classList.remove('is-resizing-sidebar');
+          rightResizer.removeEventListener('pointermove', onMove);
+          rightResizer.removeEventListener('pointerup', onUp);
+          rightResizer.removeEventListener('pointercancel', onUp);
+          applySidebarWidths(true);
+        };
+        rightResizer.addEventListener('pointermove', onMove);
+        rightResizer.addEventListener('pointerup', onUp);
+        rightResizer.addEventListener('pointercancel', onUp);
+      });
+
+      rightResizer.addEventListener('dblclick', () => {
+        rightW = 370;
+        applySidebarWidths(true);
+        showToast('Đã đặt lại kích thước cột Phải mặc định (370px)', '↔️');
+      });
+    }
+  }
+
   // ==================== EVENT BINDINGS FOR STUDIO UI ====================
   function initStudioUIEvents() {
     window.addEventListener('keydown', handleGlobalKeydown);
 
+    initSidebarResizers();
     initUiLibrariesHub();
     renderMagicPresetsCatalog();
 

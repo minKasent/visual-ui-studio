@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Dancing+Script:wght@600;700&family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto:wght@300;400;500;700;900&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/studio.css?v=7.0" />
+  <link rel="stylesheet" href="./css/studio.css?v=7.1" />
 </head>
 <body>
   <!-- TOP NAVIGATION BAR (Minimalist Icon-First Figma / Framer / Origin UI Precision Bar) -->
@@ -139,7 +139,7 @@
         <div class="uilib-hub-header">
           <!-- Instant Search Bar + Icon-Only Quick Actions -->
           <div class="uilib-search-row">
-            <div class="uilib-search-box" style="flex:1;">
+            <div class="uilib-search-box" style="flex:1;min-width:0;">
               <span class="uilib-search-icon">🔍</span>
               <input type="text" id="uilib-search-input" placeholder="Tìm: button, card, input..." autocomplete="off" />
               <button type="button" id="btn-clear-uilib-search" class="uilib-clear-btn hidden" title="Xóa tìm kiếm">✕</button>
@@ -149,7 +149,6 @@
             </button>
             <button type="button" id="btn-open-custom-import" class="uilib-action-pill uilib-action-pill--accent uilib-icon-pill" title="Dán code .TSX / JSX / HTML hoặc URL Registry JSON">📥</button>
             <button type="button" id="btn-expand-uilib-modal" class="uilib-action-pill uilib-icon-pill" title="Mở kho thư viện toàn màn hình (Ctrl+K)">⤢</button>
-            <button type="button" id="btn-clear-custom-imports" class="uilib-action-pill uilib-action-pill--danger uilib-icon-pill hidden" title="Xóa toàn bộ mẫu tự Import">🗑️</button>
           </div>
 
           <!-- Expandable NameThat UI Checklist Drawer (Multi-select taxonomy from namethat.com / component.gallery) -->
@@ -213,6 +212,7 @@
                 <input type="checkbox" id="chk-morph-with-fx" checked />
                 <span>Kèm FX/SVG</span>
               </label>
+              <button type="button" id="btn-clear-custom-imports" class="uilib-action-pill uilib-action-pill--danger hidden" title="Xóa toàn bộ mẫu tự Import">🗑️ Xóa Import</button>
             </div>
             <div class="uilib-cdn-bar" style="margin-top:6px;">
               <button type="button" class="cdn-chip" data-inject-cdn="tailwind">Tailwind</button>
@@ -325,6 +325,11 @@
       </div>
     </aside>
 
+    <!-- LEFT DRAGGABLE RESIZER SPLITTER -->
+    <div id="resizer-left" class="sidebar-resizer sidebar-resizer--left" title="Kéo trái/phải để thay đổi kích thước cột Trái (Nhấp đúp để đặt lại mặc định)">
+      <div class="sidebar-resizer__grip"></div>
+    </div>
+
     <!-- CENTER CANVAS AREA -->
     <main class="canvas-stage" id="canvas-stage">
       <!-- Slim Minimalist Canvas Statusbar -->
@@ -357,6 +362,11 @@
         </div>
       </div>
     </main>
+
+    <!-- RIGHT DRAGGABLE RESIZER SPLITTER -->
+    <div id="resizer-right" class="sidebar-resizer sidebar-resizer--right" title="Kéo trái/phải để thay đổi kích thước cột Phải (Nhấp đúp để đặt lại mặc định)">
+      <div class="sidebar-resizer__grip"></div>
+    </div>
 
     <!-- RIGHT SIDEBAR: Visual Property Inspector -->
     <aside class="sidebar sidebar--right">
@@ -1015,10 +1025,10 @@
   <!-- TOAST NOTIFICATION -->
   <div id="toast-container" class="toast-container"></div>
 
-  <script src="./js/ui-libs-registry.js?v=7.0"></script>
-  <script src="./js/reactbits-customize.js?v=7.0"></script>
-  <script src="./js/templates.js?v=7.0"></script>
-  <script src="./js/studio.js?v=7.0"></script>
-  <script src="./js/i18n-theme.js?v=7.0"></script>
+  <script src="./js/ui-libs-registry.js?v=7.1"></script>
+  <script src="./js/reactbits-customize.js?v=7.1"></script>
+  <script src="./js/templates.js?v=7.1"></script>
+  <script src="./js/studio.js?v=7.1"></script>
+  <script src="./js/i18n-theme.js?v=7.1"></script>
 </body>
 </html>

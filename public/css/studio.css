@@ -3674,6 +3674,119 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
   justify-content: center !important;
 }
 
+/* =========================================================================
+   v7.1 DRAGGABLE SIDEBAR RESIZER SPLITTERS & STRICT VIEWPORT CONTAINMENT
+   Prevents right sidebar from ever clipping off-screen & enables 60fps resize
+   ========================================================================= */
+
+.topbar {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+.topbar::-webkit-scrollbar {
+  display: none;
+}
+
+.studio-body {
+  width: 100%;
+  max-width: 100vw;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.canvas-stage,
+.canvas-statusbar,
+.statusbar-left,
+.statusbar-right,
+.canvas-viewport-scroll {
+  min-width: 0;
+}
+
+#status-breadcrumb,
+#live-coords-readout {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.uilib-search-row {
+  min-width: 0;
+  width: 100%;
+}
+
+.uilib-search-box {
+  min-width: 0;
+  flex: 1 1 0%;
+  overflow: hidden;
+}
+
+.uilib-search-box input {
+  min-width: 0;
+  width: 100%;
+}
+
+/* Interactive Drag-to-Resize Splitter Bars (Left & Right) */
+.sidebar-resizer {
+  width: 6px;
+  margin: 0 -3px;
+  cursor: col-resize;
+  position: relative;
+  z-index: 45;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  transition: background 0.15s ease;
+  touch-action: none;
+}
+
+.sidebar-resizer__grip {
+  width: 2px;
+  height: 36px;
+  border-radius: 99px;
+  background: var(--border-strong);
+  opacity: 0.45;
+  transition: all 0.15s ease;
+}
+
+.sidebar-resizer:hover,
+.sidebar-resizer.is-dragging {
+  background: rgba(139, 92, 246, 0.18);
+}
+
+.sidebar-resizer:hover .sidebar-resizer__grip,
+.sidebar-resizer.is-dragging .sidebar-resizer__grip {
+  width: 3px;
+  height: 56px;
+  background: #8b5cf6;
+  opacity: 1;
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.7);
+}
+
+body.is-resizing-sidebar,
+body.is-resizing-sidebar * {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+
+body.is-resizing-sidebar iframe {
+  pointer-events: none !important;
+}
+
+/* Give Scrubber Labels More Room So Vietnamese Labels Never Cut Off */
+.rb-customize-scope .scrubber-label {
+  max-width: 56%;
+}
+
+.rb-customize-scope .scrubber-track--switch .scrubber-label {
+  max-width: 74%;
+}
+
+
 
 
 
