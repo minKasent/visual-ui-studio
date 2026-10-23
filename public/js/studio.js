@@ -1764,8 +1764,8 @@
       return 'input';
     }
 
-    // 3. Buttons, Action Links & Badges
-    if (tag === 'button' || (tag === 'input' && ['button', 'submit', 'reset'].includes(type)) || role === 'button' || /\b(btn|button|cta|badge|pill|chip|tag)\b/.test(cls)) {
+    // 3. Buttons & Action Links
+    if (tag === 'button' || (tag === 'input' && ['button', 'submit', 'reset'].includes(type)) || role === 'button' || /\b(btn|button|cta)\b/.test(cls)) {
       return 'button';
     }
     if (tag === 'a') {
@@ -4420,12 +4420,18 @@
     // Restore saved Studio Theme (tweakcn style)
     const savedTheme = localStorage.getItem('studio_ui_theme') || 'obsidian';
     document.documentElement.setAttribute('data-studio-theme', savedTheme);
+    if (window.setReactBitsTheme) {
+      window.setReactBitsTheme(savedTheme === 'daylight' ? 'light' : 'dark');
+    }
     if (dom.studioThemeSelect) {
       dom.studioThemeSelect.value = savedTheme;
       dom.studioThemeSelect.addEventListener('change', e => {
         const theme = e.target.value;
         document.documentElement.setAttribute('data-studio-theme', theme);
         localStorage.setItem('studio_ui_theme', theme);
+        if (window.setReactBitsTheme) {
+          window.setReactBitsTheme(theme === 'daylight' ? 'light' : 'dark');
+        }
         showToast(`Đã đổi giao diện Studio sang: ${e.target.options[e.target.selectedIndex].text}`, '🎨');
       });
     }
