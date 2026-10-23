@@ -124,21 +124,28 @@ function readJsonBody(req) {
 function sendJson(res, statusCode, payload) {
   res.writeHead(statusCode, {
     'Content-Type': 'application/json; charset=utf-8',
-    'Cache-Control': 'no-store'
+    'Cache-Control': 'no-store',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
   });
   res.end(JSON.stringify(payload));
 }
 
 function serveStaticFile(res, filePath) {
   if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
-    res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.writeHead(404, {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Access-Control-Allow-Origin': '*'
+    });
     res.end('Not found');
     return;
   }
   const mime = getMimeType(filePath);
   res.writeHead(200, {
     'Content-Type': mime,
-    'Cache-Control': 'no-store, no-cache, must-revalidate'
+    'Cache-Control': 'no-store, no-cache, must-revalidate',
+    'Access-Control-Allow-Origin': '*'
   });
   fs.createReadStream(filePath).pipe(res);
 }
@@ -225,11 +232,52 @@ function resolveCssUrls(cssText, baseUrl) {
   });
 }
 
+async function resolveGithubUrlToWebTarget(inputUrl) {
+  try {
+    const u = new URL(inputUrl);
+    if (u.hostname.toLowerCase() !== 'github.com') return inputUrl;
+    const parts = u.pathname.replace(/^\/+|\/+$/g, '').split('/');
+    if (parts.length < 2) return inputUrl;
+    const owner = parts[0];
+    const repo = parts[1].replace(/\.git$/i, '');
+
+    // Case A: Direct link to a file inside a repo: github.com/owner/repo/blob/branch/path/to/file.html
+    if ((parts[2] === 'blob' || parts[2] === 'raw') && parts.length >= 5) {
+      const branch = parts[3];
+      const filePath = parts.slice(4).join('/');
+      return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${filePath}`;
+    }
+
+    // Case B: Repo root link: github.com/owner/repo -> try GitHub Pages first if it's owner.github.io, else raw index.html
+    if (repo.toLowerCase() === `${owner.toLowerCase()}.github.io`) {
+      return `https://${owner.toLowerCase()}.github.io/`;
+    }
+
+    for (const branch of ['main', 'master', 'gh-pages']) {
+      for (const candidate of ['index.html', 'public/index.html']) {
+        const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${candidate}`;
+        try {
+          const check = await fetchUrlBuffer(rawUrl);
+          if (check && check.body && check.body.includes('<')) {
+            return rawUrl;
+          }
+        } catch (_) {}
+      }
+    }
+    return inputUrl;
+  } catch (_) {
+    return inputUrl;
+  }
+}
+
 async function cloneAndRewriteWebpage(rawInputUrl, customFileName = '') {
   let normalizedUrl = (rawInputUrl || '').trim();
   if (!/^https?:\/\//i.test(normalizedUrl)) {
     normalizedUrl = 'https://' + normalizedUrl;
   }
+
+  // Smartly resolve GitHub repository links (e.g. https://github.com/minKasent/minKasent.github.io) to their actual live HTML page
+  normalizedUrl = await resolveGithubUrlToWebTarget(normalizedUrl);
 
   const fetched = await fetchUrlBuffer(normalizedUrl);
   const finalUrl = fetched.finalUrl;
@@ -603,6 +651,15 @@ function commitAndPushWorkspace(options = {}) {
 
 const server = http.createServer(async (req, res) => {
   try {
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204, {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+      });
+      return res.end();
+    }
+
     const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
     const pathname = decodeURIComponent(parsedUrl.pathname);
 

@@ -3846,6 +3846,355 @@ body.is-resizing-sidebar iframe {
   background: #71717a;
 }
 
+/* =========================================================================
+   v7.3 — CLEAN MINIMALIST MODALS (URL CLONER & GITHUB HUB, LIGHT/DARK SAFE)
+   ========================================================================= */
+#modal-open-web .modal-card,
+#modal-github-hub .modal-card {
+  max-width: 560px;
+  border-radius: 14px;
+}
+
+#modal-open-web .modal-body,
+#modal-github-hub .modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px 16px;
+}
+
+.url-cloner-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: 11px;
+  padding: 12px 14px;
+  margin: 0;
+}
+
+.url-cloner-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+
+.url-cloner-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.url-cloner-title svg {
+  color: #7c3aed;
+  width: 15px;
+  height: 15px;
+}
+
+.url-cloner-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 10.5px;
+  font-weight: 700;
+  background: rgba(124, 58, 237, 0.12);
+  color: #7c3aed;
+  border: 1px solid rgba(124, 58, 237, 0.28);
+  white-space: nowrap;
+}
+
+html:not([data-studio-theme="daylight"]) .url-cloner-badge {
+  background: rgba(139, 92, 246, 0.18);
+  color: #ddd6fe;
+  border-color: rgba(139, 92, 246, 0.4);
+}
+
+.url-cloner-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.url-cloner-input-row input[type="url"] {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0 12px;
+  font-size: 12.5px;
+  border-radius: 8px;
+  background: var(--bg-input);
+  color: var(--text-main);
+  border: 1px solid var(--border-strong);
+}
+
+.url-cloner-input-row input[type="url"]:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.18);
+  outline: none;
+}
+
+.url-cloner-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.url-quick-chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.url-quick-chips__label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-right: 2px;
+}
+
+.url-chip {
+  background: var(--bg-input);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+
+.url-chip:hover {
+  color: var(--text-main);
+  border-color: var(--border-strong);
+  background: var(--bg-hover);
+}
+
+/* High-Contrast Status Banner (Light & Dark Mode Safe) */
+.studio-status-banner {
+  margin-top: 9px;
+  padding: 8px 11px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.45;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-main);
+}
+
+.studio-status-banner.is-info {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.35);
+  color: var(--text-main);
+}
+
+.studio-status-banner.is-success {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #047857;
+}
+html:not([data-studio-theme="daylight"]) .studio-status-banner.is-success {
+  color: #6ee7b7;
+}
+
+.studio-status-banner.is-error {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.38);
+  color: #b91c1c;
+}
+html:not([data-studio-theme="daylight"]) .studio-status-banner.is-error {
+  color: #fca5a5;
+}
+
+/* Compact 2-Column Picker Cards */
+.import-grid--compact {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.import-option--row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  text-align: left;
+  border-radius: 10px;
+}
+
+.import-option--row .import-option__icon {
+  margin: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-input);
+  color: var(--text-main);
+  flex-shrink: 0;
+}
+
+.import-option--row .import-option__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.import-option--row h4 {
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-main);
+}
+
+.import-option--row p {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  margin: 1px 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.import-box--compact {
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin: 0;
+}
+
+.compact-box-label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 6px;
+}
+
+.clean-details summary.compact-box-summary {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+
+.clean-details summary.compact-box-summary:hover {
+  color: var(--text-main);
+}
+
+/* GitHub Modal Clean Layout */
+.gh-profile-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.gh-profile-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.gh-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.gh-name-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.gh-name-line strong {
+  font-size: 13px;
+  color: var(--text-main);
+}
+
+.gh-login-handle {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.gh-subtext {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.gh-profile-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.gh-git-summary-box {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 7px;
+  padding: 7px 10px;
+  line-height: 1.5;
+}
+
+.gh-autopush-card {
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.gh-autopush-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.gh-autopush-toggle strong {
+  display: block;
+  font-size: 12px;
+  color: var(--text-main);
+}
+
+.gh-autopush-toggle p {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 2px 0 0;
+}
+
+.gh-autopush-toggle input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  accent-color: #10b981;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+
 
 
 

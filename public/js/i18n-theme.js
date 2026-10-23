@@ -683,43 +683,43 @@
     {
       sel: '#modal-open-web .modal-header h3',
       text: {
-        en: 'Import Web Page or Connect Project Workspace',
-        vi: 'Đưa Giao Diện Web Của Bạn Vào Studio'
+        en: 'Open Web Page',
+        vi: 'Mở Giao Diện Web'
       }
     },
     {
       sel: '#card-pick-html h4',
-      html: { en: '1. Choose Local <code>.html</code> File', vi: '1. Chọn File <code>.html</code> từ máy' }
+      text: { en: 'Open .HTML File', vi: 'Mở File .HTML' }
     },
     {
       sel: '#card-pick-html p',
       text: {
-        en: 'Open any standalone HTML file and export or overwrite it after editing.',
-        vi: 'Mở trực tiếp bất kỳ file HTML nào và lưu đè lại ngay khi sửa xong.'
+        en: 'Pick a standalone file',
+        vi: 'Chọn 1 file lẻ từ máy'
       }
     },
     {
       sel: '#btn-trigger-file-picker',
-      text: { en: 'Select .HTML File', vi: 'Chọn File .HTML' }
+      text: { en: 'Choose File', vi: 'Chọn File' }
     },
     {
       sel: '#card-pick-folder h4',
-      text: { en: '2. Import Project Folder', vi: '2. Thả Nguyên Thư Mục Web' }
+      text: { en: 'Project Folder', vi: 'Thư Mục Web' }
     },
     {
       sel: '#card-pick-folder p',
       text: {
-        en: 'Automatically bundles HTML, CSS stylesheets, and local image assets.',
-        vi: 'Tự động nạp cả file HTML, CSS và Hình ảnh đi kèm trong thư mục.'
+        en: 'HTML, CSS & Assets',
+        vi: 'Nạp cả HTML, CSS & Ảnh'
       }
     },
     {
       sel: '#btn-apply-workspace-path',
-      text: { en: 'Connect Workspace', vi: 'Kết nối Thư mục' }
+      text: { en: 'Connect', vi: 'Kết nối' }
     },
     {
       sel: '#btn-load-pasted-html',
-      text: { en: 'Load HTML Snippet', vi: 'Nạp Mã HTML Này' }
+      text: { en: 'Load HTML', vi: 'Nạp Mã HTML' }
     },
     {
       sel: '#modal-ai-prompt .modal-header h3',

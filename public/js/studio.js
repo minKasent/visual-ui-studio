@@ -2453,6 +2453,26 @@
     return '<!DOCTYPE html>\n' + cleanDoc.documentElement.outerHTML;
   }
 
+  const STUDIO_API_BASE =
+    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? ''
+      : 'http://localhost:4567';
+
+  async function safeFetchStudioJson(endpoint, options = {}) {
+    const res = await fetch(`${STUDIO_API_BASE}${endpoint}`, options);
+    const rawText = await res.text();
+    let data;
+    try {
+      data = rawText ? JSON.parse(rawText) : {};
+    } catch (_) {
+      throw new Error('STUDIO_SERVER_UNAVAILABLE');
+    }
+    if (!res.ok || data.error) {
+      throw new Error(data.error || `HTTP ${res.status}`);
+    }
+    return data;
+  }
+
   async function saveDirectlyToSource() {
     const finalHtml = buildCleanExportHtml();
 
@@ -2481,7 +2501,7 @@
       const autoPushEnabled = state.githubAutoPush !== false;
       const customCommitMsg = document.getElementById('input-gh-commit-msg')?.value?.trim() || '';
 
-      const res = await fetch('/api/save', {
+      const data = await safeFetchStudioJson('/api/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -2491,8 +2511,6 @@
           commitMessage: customCommitMsg || undefined
         })
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Lỗi khi lưu file');
       state.originalRawHtml = finalHtml;
       state.currentFile = targetRelativePath;
 
@@ -2526,7 +2544,11 @@
         window.studioRefreshGithubStatus();
       }
     } catch (err) {
-      showToast(`Lỗi lưu file: ${err.message}`, '❌');
+      if (err.message === 'STUDIO_SERVER_UNAVAILABLE' || err.message.includes('Failed to fetch')) {
+        downloadEditedHtml();
+      } else {
+        showToast(`Lỗi lưu file: ${err.message}`, '❌');
+      }
     } finally {
       if (dom.btnSaveDirect) {
         dom.btnSaveDirect.disabled = false;
@@ -2553,15 +2575,13 @@
   // ==================== WORKSPACE & PAGE LOADING ====================
   async function loadWorkspaceFiles(workspaceDir = null) {
     try {
-      const res = workspaceDir
-        ? await fetch('/api/workspace', {
+      const data = workspaceDir
+        ? await safeFetchStudioJson('/api/workspace', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ workspaceDir })
           })
-        : await fetch('/api/workspace');
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Không đọc được thư mục');
+        : await safeFetchStudioJson('/api/workspace');
 
       state.workspaceDir = data.workspaceDir;
       state.files = data.files || [];
@@ -2603,7 +2623,7 @@
     state.localFileHandle = null;
     resetSessionState();
 
-    const pageUrl = `/workspace/${encodeURI(relativePath)}?t=${Date.now()}`;
+    const pageUrl = `${STUDIO_API_BASE}/workspace/${encodeURI(relativePath)}?t=${Date.now()}`;
     try {
       const rawRes = await fetch(pageUrl);
       state.originalRawHtml = await rawRes.text();
@@ -2611,8 +2631,13 @@
       state.originalRawHtml = '';
     }
 
-    dom.iframe.removeAttribute('srcdoc');
-    dom.iframe.src = pageUrl;
+    if (STUDIO_API_BASE && state.originalRawHtml) {
+      dom.iframe.removeAttribute('src');
+      dom.iframe.srcdoc = state.originalRawHtml;
+    } else {
+      dom.iframe.removeAttribute('srcdoc');
+      dom.iframe.src = pageUrl;
+    }
     showToast(`Đang nạp giao diện: ${relativePath}`, '🚀');
   }
 
@@ -5945,6 +5970,98 @@
     const btnCloneUrl = document.getElementById('btn-clone-url');
     const cloneUrlStatus = document.getElementById('clone-url-status');
 
+    function setBannerState(el, type, htmlContent) {
+      if (!el) return;
+      el.classList.remove('hidden', 'is-info', 'is-success', 'is-error');
+      if (type) el.classList.add(`is-${type}`);
+      el.innerHTML = htmlContent;
+    }
+
+    // Client-side fallback when running on static GitHub Pages without Local Node Server
+    async function cloneWebpageInBrowser(rawInputUrl) {
+      let targetUrl = (rawInputUrl || '').trim();
+      if (!/^https?:\/\//i.test(targetUrl)) {
+        targetUrl = 'https://' + targetUrl;
+      }
+
+      const u = new URL(targetUrl);
+      let fetchCandidates = [];
+      let baseHref = u.origin + '/';
+      let suggestedName = `cloned-${u.hostname.replace(/[^a-z0-9-]/gi, '-')}.html`;
+
+      // Smart GitHub Repository URL resolution in browser
+      if (u.hostname.toLowerCase() === 'github.com') {
+        const parts = u.pathname.replace(/^\/+|\/+$/g, '').split('/');
+        if (parts.length >= 2) {
+          const owner = parts[0];
+          const repo = parts[1].replace(/\.git$/i, '');
+          suggestedName = `${repo}.html`;
+
+          if ((parts[2] === 'blob' || parts[2] === 'raw') && parts.length >= 5) {
+            const branch = parts[3];
+            const filePath = parts.slice(4).join('/');
+            const rawFileUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${filePath}`;
+            baseHref = rawFileUrl.substring(0, rawFileUrl.lastIndexOf('/') + 1);
+            fetchCandidates.push(rawFileUrl);
+          } else {
+            if (repo.toLowerCase() === `${owner.toLowerCase()}.github.io`) {
+              baseHref = `https://${owner.toLowerCase()}.github.io/`;
+            } else {
+              baseHref = `https://raw.githubusercontent.com/${owner}/${repo}/main/`;
+            }
+            fetchCandidates.push(
+              `https://raw.githubusercontent.com/${owner}/${repo}/main/index.html`,
+              `https://raw.githubusercontent.com/${owner}/${repo}/master/index.html`,
+              `https://raw.githubusercontent.com/${owner}/${repo}/gh-pages/index.html`,
+              `https://raw.githubusercontent.com/${owner}/${repo}/main/public/index.html`
+            );
+          }
+        }
+      }
+
+      // Add CORS proxy candidates for arbitrary websites
+      fetchCandidates.push(
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
+        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`
+      );
+
+      let html = '';
+      for (const candidate of fetchCandidates) {
+        try {
+          const r = await fetch(candidate);
+          if (r.ok) {
+            const txt = await r.text();
+            if (txt && txt.includes('<')) {
+              html = txt;
+              if (candidate.startsWith('https://raw.githubusercontent.com/')) {
+                baseHref = candidate.substring(0, candidate.lastIndexOf('/') + 1);
+              }
+              break;
+            }
+          }
+        } catch (_) {}
+      }
+
+      if (!html) {
+        throw new Error('Không thể tải nội dung từ URL này. Hãy kiểm tra lại đường dẫn.');
+      }
+
+      // Strip CSP / frame-blocking meta tags and inject <base href="..."> so all relative CSS/images load cleanly
+      html = html.replace(/<meta[^>]+http-equiv\s*=\s*["']?(Content-Security-Policy|X-Frame-Options)["']?[^>]*>/gi, '');
+      if (!/<base\b/i.test(html)) {
+        if (/<head[^>]*>/i.test(html)) {
+          html = html.replace(/<head[^>]*>/i, match => `${match}\n  <base href="${baseHref}">`);
+        } else {
+          html = `<head><base href="${baseHref}"></head>\n` + html;
+        }
+      }
+
+      return {
+        html,
+        fileName: suggestedName
+      };
+    }
+
     // 1. Open URL Cloner inside Open Web Modal
     if (btnOpenUrlCloner) {
       btnOpenUrlCloner.addEventListener('click', () => {
@@ -5966,69 +6083,70 @@
       const customFileName = inputCloneFilename ? inputCloneFilename.value.trim() : '';
 
       if (!rawUrl) {
-        if (cloneUrlStatus) {
-          cloneUrlStatus.classList.remove('hidden');
-          cloneUrlStatus.style.background = 'rgba(239, 68, 68, 0.12)';
-          cloneUrlStatus.style.border = '1px solid rgba(239, 68, 68, 0.35)';
-          cloneUrlStatus.style.color = '#f87171';
-          cloneUrlStatus.innerHTML = '⚠️ Vui lòng nhập đường dẫn URL trang web bất kỳ (ví dụ: <code>https://minkasent.github.io</code> hoặc <code>https://example.com</code>).';
-        }
+        setBannerState(
+          cloneUrlStatus,
+          'error',
+          'Vui lòng nhập đường dẫn trang web hoặc link GitHub (ví dụ: <code>https://minkasent.github.io</code>).'
+        );
         inputCloneUrl.focus();
         return;
       }
 
       const origText = btnCloneUrl.innerHTML;
       btnCloneUrl.disabled = true;
-      btnCloneUrl.innerHTML = '⏳ Đang phân tích & tải...';
+      btnCloneUrl.textContent = 'Đang tải...';
 
-      if (cloneUrlStatus) {
-        cloneUrlStatus.classList.remove('hidden');
-        cloneUrlStatus.style.background = 'rgba(139, 92, 246, 0.12)';
-        cloneUrlStatus.style.border = '1px solid rgba(139, 92, 246, 0.35)';
-        cloneUrlStatus.style.color = 'var(--text-main)';
-        cloneUrlStatus.innerHTML = `⏳ Đang tải trang <strong>${rawUrl}</strong>, tự động nhúng CSS ngoại vi, chuẩn hóa đường dẫn ảnh/font và lưu vào thư mục Local (<code>${state.workspaceDir}</code>)...`;
-      }
+      setBannerState(
+        cloneUrlStatus,
+        'info',
+        `Đang phân tích <strong>${rawUrl}</strong> và chuẩn bị giao diện...`
+      );
 
       try {
-        const res = await fetch('/api/clone-url', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: rawUrl, fileName: customFileName, customFileName })
-        });
-        const data = await res.json();
-        if (!res.ok || data.error) {
-          throw new Error(data.error || 'Không thể tải trang web này');
-        }
+        // Prefer Local Studio Server (/api/clone-url) so it saves directly to Local disk + inlines CSS
+        try {
+          const data = await safeFetchStudioJson('/api/clone-url', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: rawUrl, fileName: customFileName, customFileName })
+          });
 
-        if (cloneUrlStatus) {
-          cloneUrlStatus.style.background = 'rgba(16, 185, 129, 0.14)';
-          cloneUrlStatus.style.border = '1px solid rgba(16, 185, 129, 0.4)';
-          cloneUrlStatus.style.color = '#34d399';
-          cloneUrlStatus.innerHTML = `✅ Đã phân tích & lưu thành công vào Local: <strong>${data.relativePath}</strong> (${data.stats?.sizeKb || 0} KB • ${data.stats?.elementsCount || 0} phần tử • ${data.stats?.inlinedCssCount || 0} bộ CSS đã nhúng)!`;
-        }
+          setBannerState(
+            cloneUrlStatus,
+            'success',
+            `Đã lưu vào Local: <strong>${data.relativePath}</strong> (${data.stats?.sizeKb || 1} KB • ${data.stats?.elementsCount || 0} thẻ)`
+          );
 
-        // Refresh workspace files & open the newly cloned page in Studio Canvas
-        await loadWorkspaceFiles(state.workspaceDir);
-        if (dom.pageSelector) {
-          dom.pageSelector.value = data.relativePath;
-        }
-        await loadWorkspacePage(data.relativePath);
+          await loadWorkspaceFiles(state.workspaceDir);
+          if (dom.pageSelector) {
+            dom.pageSelector.value = data.relativePath;
+          }
+          await loadWorkspacePage(data.relativePath);
 
-        showToast(
-          `🌐 Đã tải "${data.title || data.relativePath}" về Local (${data.relativePath}) — Sẵn sàng chỉnh sửa như dự án gốc!`,
-          '✨'
-        );
+          showToast(
+            `Đã tải "${data.title || data.relativePath}" về Local (${data.relativePath})!`,
+            '✨'
+          );
+        } catch (serverErr) {
+          if (serverErr.message !== 'STUDIO_SERVER_UNAVAILABLE' && !serverErr.message.includes('Failed to fetch')) {
+            throw serverErr;
+          }
+          // Fallback: Browser-Native Cloner (works even on static GitHub Pages!)
+          const fallback = await cloneWebpageInBrowser(rawUrl);
+          loadRawHtmlString(fallback.html, customFileName || fallback.fileName);
+
+          setBannerState(
+            cloneUrlStatus,
+            'success',
+            `Đã nạp trực tiếp <strong>${fallback.fileName}</strong> lên Canvas! (Bấm Lưu để tải file HTML về máy)`
+          );
+        }
 
         setTimeout(() => {
           if (dom.modalOpenWeb) dom.modalOpenWeb.classList.add('hidden');
-        }, 650);
+        }, 550);
       } catch (err) {
-        if (cloneUrlStatus) {
-          cloneUrlStatus.style.background = 'rgba(239, 68, 68, 0.12)';
-          cloneUrlStatus.style.border = '1px solid rgba(239, 68, 68, 0.35)';
-          cloneUrlStatus.style.color = '#f87171';
-          cloneUrlStatus.innerHTML = `❌ Lỗi tải URL: ${err.message}`;
-        }
+        setBannerState(cloneUrlStatus, 'error', `Không thể tải URL: ${err.message}`);
         showToast(`Lỗi tải trang web: ${err.message}`, '❌');
       } finally {
         btnCloneUrl.disabled = false;
@@ -6048,17 +6166,25 @@
       });
     }
 
+    // Bind Quick Sample URL Chips
+    document.querySelectorAll('.url-chip[data-sample-url]').forEach(chip => {
+      chip.addEventListener('click', () => {
+        if (!inputCloneUrl) return;
+        inputCloneUrl.value = chip.getAttribute('data-sample-url') || '';
+        handleCloneUrl();
+      });
+    });
+
     // 2. GitHub Hub Modal & Status Sync
     const btnGithubHub = document.getElementById('btn-github-hub');
     const githubTopLabel = document.getElementById('github-top-label');
     const githubTopDot = document.getElementById('github-top-dot');
     const modalGithubHub = document.getElementById('modal-github-hub');
-    const ghAuthLoggedIn = document.getElementById('gh-auth-logged-in');
-    const ghAuthLoggedOut = document.getElementById('gh-auth-logged-out');
     const ghUserAvatar = document.getElementById('gh-user-avatar');
     const ghUserName = document.getElementById('gh-user-name');
     const ghUserLogin = document.getElementById('gh-user-login');
     const ghAuthMethodBadge = document.getElementById('gh-auth-method-badge');
+    const ghUserSub = document.getElementById('gh-user-sub');
     const btnGhLogout = document.getElementById('btn-gh-logout');
     const btnGhLoginCli = document.getElementById('btn-gh-login-cli');
     const inputGhToken = document.getElementById('input-gh-token');
@@ -6080,7 +6206,7 @@
         localStorage.setItem('studio_gh_auto_push', state.githubAutoPush ? '1' : '0');
         showToast(
           state.githubAutoPush
-            ? 'Đã BẬT tự động Commit & Push lên GitHub mỗi khi bấm Lưu (Ctrl+S)!'
+            ? 'Đã BẬT tự động Push lên GitHub khi bấm Lưu (Ctrl+S)!'
             : 'Đã TẮT tự động Push lên GitHub khi lưu.',
           state.githubAutoPush ? '🚀' : '⚙️'
         );
@@ -6089,9 +6215,7 @@
 
     async function refreshGithubStatus() {
       try {
-        const res = await fetch('/api/github/status');
-        if (!res.ok) return;
-        const data = await res.json();
+        const data = await safeFetchStudioJson('/api/github/status');
         state.githubStatus = data;
 
         const isAuthenticated = Boolean(data.loggedIn || (data.auth && data.auth.authenticated));
@@ -6134,30 +6258,36 @@
 
         // Update Modal Auth Section
         if (isAuthenticated) {
-          if (ghAuthLoggedIn) ghAuthLoggedIn.classList.remove('hidden');
-          if (ghAuthLoggedOut) ghAuthLoggedOut.classList.add('hidden');
           if (ghUserAvatar) {
             ghUserAvatar.src = userObj.avatarUrl || `https://github.com/${userObj.login}.png`;
           }
           if (ghUserName) ghUserName.textContent = userObj.name || userObj.login;
           if (ghUserLogin) ghUserLogin.textContent = `@${userObj.login}`;
           if (ghAuthMethodBadge) {
-            ghAuthMethodBadge.textContent =
-              authMethod === 'gh-cli' ? '✓ GitHub CLI Connected' : '✓ Personal Token Connected';
+            ghAuthMethodBadge.textContent = authMethod === 'gh-cli' ? '✓ GitHub CLI' : '✓ Token';
           }
+          if (ghUserSub) {
+            ghUserSub.textContent = `Đã kết nối tài khoản GitHub (@${userObj.login})`;
+          }
+          if (btnGhLoginCli) btnGhLoginCli.classList.add('hidden');
+          if (btnGhLogout) btnGhLogout.classList.remove('hidden');
         } else {
-          if (ghAuthLoggedIn) ghAuthLoggedIn.classList.add('hidden');
-          if (ghAuthLoggedOut) ghAuthLoggedOut.classList.remove('hidden');
+          if (ghUserName) ghUserName.textContent = 'Chưa đăng nhập';
+          if (ghUserLogin) ghUserLogin.textContent = '';
+          if (ghAuthMethodBadge) ghAuthMethodBadge.textContent = 'Offline';
+          if (ghUserSub) ghUserSub.textContent = 'Kết nối GitHub để tự động đẩy code khi bấm Lưu';
+          if (btnGhLoginCli) btnGhLoginCli.classList.remove('hidden');
+          if (btnGhLogout) btnGhLogout.classList.add('hidden');
         }
 
         // Populate User Repos Dropdown
         if (selectGhUserRepos) {
           const repos = Array.isArray(data.repos) ? data.repos : [];
-          selectGhUserRepos.innerHTML = `<option value="">-- Chọn nhanh từ danh sách Repo GitHub của bạn (${repos.length} repo) --</option>`;
+          selectGhUserRepos.innerHTML = `<option value="">-- Chọn Repo (${repos.length}) --</option>`;
           repos.forEach(r => {
             const opt = document.createElement('option');
             opt.value = r.cloneUrl;
-            opt.textContent = `${r.private ? '🔒' : '🌐'} ${r.fullName} (${r.defaultBranch || 'main'})`;
+            opt.textContent = `${r.private ? '🔒' : '🌐'} ${r.fullName}`;
             if (git.remoteUrl && (git.remoteUrl === r.cloneUrl || git.remoteUrl.includes(r.fullName))) {
               opt.selected = true;
             }
@@ -6172,28 +6302,18 @@
         // Update Repo Link Summary
         if (ghRepoStatusBadge && ghGitSummary) {
           if (git.hasRemote) {
-            ghRepoStatusBadge.textContent = `✓ Đã liên kết: ${cleanRepoShort || 'origin'}`;
-            ghRepoStatusBadge.style.background = 'rgba(16, 185, 129, 0.14)';
-            ghRepoStatusBadge.style.color = '#10b981';
-            ghGitSummary.innerHTML = `
-              <div>🌿 Nhánh (Branch): <strong>${git.branch || 'main'}</strong> &nbsp;•&nbsp; 📝 File thay đổi chờ Push: <strong>${git.changedCount || 0} file</strong></div>
-              <div style="margin-top:3px;opacity:0.85;">🔗 Remote: <code>${git.remoteUrl}</code></div>
-              ${git.lastCommit ? `<div style="margin-top:3px;opacity:0.75;">🕒 Commit gần nhất: <code>${git.lastCommit}</code></div>` : ''}
-            `;
+            ghRepoStatusBadge.textContent = `✓ ${cleanRepoShort || 'Đã liên kết'}`;
+            ghGitSummary.innerHTML = `Thư mục: <code>${state.workspaceDir}</code> • Nhánh: <strong>${git.branch || 'main'}</strong> • Chờ Push: <strong>${git.changedCount || 0} file</strong>`;
           } else if (git.isGitRepo) {
-            ghRepoStatusBadge.textContent = '⚠️ Chưa gắn Remote GitHub';
-            ghRepoStatusBadge.style.background = 'rgba(245, 158, 11, 0.16)';
-            ghRepoStatusBadge.style.color = '#fbbf24';
-            ghGitSummary.innerHTML = `Thư mục <code>${state.workspaceDir}</code> đã có Git (nhánh <strong>${git.branch || 'main'}</strong>) nhưng chưa liên kết với GitHub Repository nào. Hãy chọn Repo ở dưới và bấm <strong>Liên Kết Repo</strong>.`;
+            ghRepoStatusBadge.textContent = 'Chưa gắn Remote';
+            ghGitSummary.innerHTML = `Thư mục <code>${state.workspaceDir}</code> đã có Git nhưng chưa gắn Repo. Chọn Repo bên dưới và bấm <strong>Liên kết</strong>.`;
           } else {
-            ghRepoStatusBadge.textContent = 'Chưa khởi tạo Git';
-            ghRepoStatusBadge.style.background = 'var(--bg-hover)';
-            ghRepoStatusBadge.style.color = 'var(--text-muted)';
-            ghGitSummary.innerHTML = `Thư mục <code>${state.workspaceDir}</code> chưa khởi tạo Git. Hãy chọn 1 Repo bên dưới và bấm <strong>Liên Kết Repo</strong> để Studio tự động <code>git init</code> &amp; kết nối!`;
+            ghRepoStatusBadge.textContent = 'Chưa có Git';
+            ghGitSummary.innerHTML = `Chọn Repo bên dưới và bấm <strong>Liên kết</strong> để tự động khởi tạo Git cho <code>${state.workspaceDir}</code>.`;
           }
         }
-      } catch (err) {
-        console.warn('GitHub status check failed:', err);
+      } catch (_) {
+        // Silent when running purely static without local server
       }
     }
 
@@ -6210,14 +6330,12 @@
       btnGhLoginCli.addEventListener('click', async () => {
         const orig = btnGhLoginCli.innerHTML;
         btnGhLoginCli.disabled = true;
-        btnGhLoginCli.textContent = '⏳ Đang kết nối GitHub CLI...';
+        btnGhLoginCli.textContent = 'Đang kết nối...';
         try {
-          const res = await fetch('/api/github/login-cli', { method: 'POST' });
-          const data = await res.json();
-          if (!res.ok || data.error) throw new Error(data.error || 'Chưa đăng nhập gh CLI');
+          const data = await safeFetchStudioJson('/api/github/login-cli', { method: 'POST' });
           await refreshGithubStatus();
           const loginName = data.user?.login || data.auth?.login || 'GitHub';
-          showToast(`Đã đăng nhập GitHub thành công: @${loginName}!`, '🐙');
+          showToast(`Đã đăng nhập GitHub: @${loginName}!`, '🐙');
         } catch (err) {
           showToast(err.message, '⚠️');
         } finally {
@@ -6237,19 +6355,17 @@
         }
         const orig = btnGhLoginToken.textContent;
         btnGhLoginToken.disabled = true;
-        btnGhLoginToken.textContent = '⏳ Đang xác thực...';
+        btnGhLoginToken.textContent = 'Đang xác thực...';
         try {
-          const res = await fetch('/api/github/login-token', {
+          const data = await safeFetchStudioJson('/api/github/login-token', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ token })
           });
-          const data = await res.json();
-          if (!res.ok || data.error) throw new Error(data.error || 'Token không hợp lệ');
           if (inputGhToken) inputGhToken.value = '';
           await refreshGithubStatus();
           const loginName = data.user?.login || data.auth?.login || 'GitHub';
-          showToast(`Đã đăng nhập GitHub bằng Token: @${loginName}!`, '🐙');
+          showToast(`Đã đăng nhập GitHub: @${loginName}!`, '🐙');
         } catch (err) {
           showToast(`Lỗi đăng nhập: ${err.message}`, '❌');
         } finally {
@@ -6261,9 +6377,11 @@
 
     if (btnGhLogout) {
       btnGhLogout.addEventListener('click', async () => {
-        await fetch('/api/github/logout', { method: 'POST' });
+        try {
+          await safeFetchStudioJson('/api/github/logout', { method: 'POST' });
+        } catch (_) {}
         await refreshGithubStatus();
-        showToast('Đã đăng xuất phiên GitHub trên Studio (Bấm "Kết Nối GitHub CLI" để bật lại).', '👋');
+        showToast('Đã đăng xuất phiên GitHub trên Studio.', '👋');
       });
     }
 
@@ -6285,17 +6403,15 @@
         }
         const orig = btnGhLinkRepo.textContent;
         btnGhLinkRepo.disabled = true;
-        btnGhLinkRepo.textContent = '⏳ Đang liên kết...';
+        btnGhLinkRepo.textContent = 'Đang gắn...';
         try {
-          const res = await fetch('/api/github/link-repo', {
+          await safeFetchStudioJson('/api/github/link-repo', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ remoteUrl })
           });
-          const data = await res.json();
-          if (!res.ok || data.error) throw new Error(data.error || 'Không thể liên kết Repo');
           await refreshGithubStatus();
-          showToast(`🔗 Đã liên kết thư mục Local với Repo: ${remoteUrl}!`, '✅');
+          showToast(`Đã liên kết với Repo: ${remoteUrl}!`, '✅');
         } catch (err) {
           showToast(`Lỗi liên kết Repo: ${err.message}`, '❌');
         } finally {
@@ -6310,43 +6426,29 @@
         const commitMessage = inputGhCommitMsg ? inputGhCommitMsg.value.trim() : '';
         const orig = btnGhPushNow.innerHTML;
         btnGhPushNow.disabled = true;
-        btnGhPushNow.innerHTML = '⏳ Đang Commit & Push...';
-        if (ghPushStatusMsg) {
-          ghPushStatusMsg.classList.remove('hidden');
-          ghPushStatusMsg.style.background = 'rgba(139, 92, 246, 0.12)';
-          ghPushStatusMsg.style.border = '1px solid rgba(139, 92, 246, 0.35)';
-          ghPushStatusMsg.style.color = 'var(--text-main)';
-          ghPushStatusMsg.innerHTML = '⏳ Đang chạy <code>git add -A</code>, <code>git commit</code> và <code>git push</code> lên GitHub...';
-        }
+        btnGhPushNow.textContent = 'Đang Push...';
+        setBannerState(ghPushStatusMsg, 'info', 'Đang chạy <code>git add</code>, <code>commit</code> và <code>push</code> lên GitHub...');
         try {
-          const res = await fetch('/api/github/push', {
+          const data = await safeFetchStudioJson('/api/github/push', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ commitMessage: commitMessage || undefined })
           });
-          const data = await res.json();
-          if (!res.ok || data.error) throw new Error(data.error || 'Lỗi khi Push lên GitHub');
 
           const pushInfo = data.gitPush || {};
           const msgText = pushInfo.lastCommit
-            ? `Đã Push thành công commit: ${pushInfo.lastCommit}`
+            ? `Đã Push thành công: ${pushInfo.lastCommit}`
             : pushInfo.message || 'Đã Commit & Push lên GitHub thành công!';
 
-          if (ghPushStatusMsg) {
-            ghPushStatusMsg.style.background = 'rgba(16, 185, 129, 0.14)';
-            ghPushStatusMsg.style.border = '1px solid rgba(16, 185, 129, 0.4)';
-            ghPushStatusMsg.style.color = '#34d399';
-            ghPushStatusMsg.innerHTML = `✅ ${msgText} (Nhánh: <strong>${pushInfo.branch || data.git?.branch || 'main'}</strong>)`;
-          }
+          setBannerState(
+            ghPushStatusMsg,
+            'success',
+            `${msgText} (Nhánh: <strong>${pushInfo.branch || data.git?.branch || 'main'}</strong>)`
+          );
           showToast(`🚀 ${msgText}`, '✅');
           await refreshGithubStatus();
         } catch (err) {
-          if (ghPushStatusMsg) {
-            ghPushStatusMsg.style.background = 'rgba(239, 68, 68, 0.12)';
-            ghPushStatusMsg.style.border = '1px solid rgba(239, 68, 68, 0.35)';
-            ghPushStatusMsg.style.color = '#f87171';
-            ghPushStatusMsg.innerHTML = `❌ Lỗi Git Push: ${err.message}`;
-          }
+          setBannerState(ghPushStatusMsg, 'error', `Lỗi Git Push: ${err.message}`);
           showToast(`Lỗi Git Push: ${err.message}`, '❌');
         } finally {
           btnGhPushNow.disabled = false;
