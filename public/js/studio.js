@@ -2992,12 +2992,33 @@
     }
 
     if (STUDIO_API_BASE && state.originalRawHtml) {
+      let inlinedHtml = state.originalRawHtml;
+      try {
+        const inlineRes = await fetch(`${pageUrl}&inline=1`);
+        if (inlineRes.ok) {
+          inlinedHtml = await inlineRes.text();
+        }
+      } catch (_) {}
       dom.iframe.removeAttribute('src');
-      dom.iframe.srcdoc = state.originalRawHtml;
+      dom.iframe.srcdoc = inlinedHtml;
     } else {
       dom.iframe.removeAttribute('srcdoc');
       dom.iframe.src = pageUrl;
     }
+
+    // Ensure overlay & loader-bypass activate promptly even if external scripts/videos on a cloned page are still loading
+    [700, 1800].forEach(delayMs => {
+      setTimeout(() => {
+        try {
+          const doc = dom.iframe && dom.iframe.contentDocument;
+          if (doc && doc.body && !doc.getElementById('__ui_studio_overlay_root__')) {
+            injectStudioOverlay(doc);
+            buildDomTree();
+          }
+        } catch (_) {}
+      }, delayMs);
+    });
+
     showToast(`Đang nạp giao diện: ${relativePath}`, '🚀');
   }
 
@@ -6516,21 +6537,49 @@
             body: JSON.stringify({ url: rawUrl, fileName: customFileName, customFileName })
           });
 
+          if (data.workspaceDir) {
+            state.workspaceDir = data.workspaceDir;
+            if (dom.folderLabel) dom.folderLabel.textContent = state.workspaceDir;
+            if (dom.inputWorkspacePath) dom.inputWorkspacePath.value = state.workspaceDir;
+          }
+          if (Array.isArray(data.files)) {
+            state.files = data.files;
+            if (dom.pageSelector) {
+              dom.pageSelector.innerHTML = `<option value="">-- Chọn file HTML (${state.files.length} trang) --</option>`;
+              state.files.forEach(f => {
+                const opt = document.createElement('option');
+                opt.value = f.relativePath;
+                opt.textContent = f.name;
+                dom.pageSelector.appendChild(opt);
+              });
+            }
+          }
+          if (data.repoMeta) {
+            state.activeGithubRepoMeta = data.repoMeta;
+          }
+
           setBannerState(
             cloneUrlStatus,
             'success',
-            `Đã lưu vào Local: <strong>${data.relativePath}</strong> (${data.stats?.sizeKb || 1} KB • ${data.stats?.elementsCount || 0} thẻ)`
+            data.isGithubRepoUi
+              ? `✅ Đã mở Repo GitHub <strong>${data.title}</strong> (${data.relativePath}) lên Canvas!`
+              : `✅ Đã lưu vào Local: <strong>${data.relativePath}</strong> (${data.stats?.sizeKb || 1} KB • ${data.stats?.elementsCount || 0} thẻ)`
           );
 
-          await loadWorkspaceFiles(state.workspaceDir);
-          if (dom.pageSelector) {
+          if (dom.pageSelector && data.relativePath) {
             dom.pageSelector.value = data.relativePath;
           }
           await loadWorkspacePage(data.relativePath);
 
+          if (typeof window.studioRefreshGithubStatus === 'function') {
+            window.studioRefreshGithubStatus();
+          }
+
           showToast(
-            `Đã tải "${data.title || data.relativePath}" về Local (${data.relativePath})!`,
-            '✨'
+            data.isGithubRepoUi
+              ? `🎨 Đã mở giao diện Repo "${data.title}" (${data.relativePath})!`
+              : `✨ Đã tải "${data.title || data.relativePath}" về Local (${data.relativePath})!`,
+            '🚀'
           );
         } catch (serverErr) {
           if (serverErr.message !== 'STUDIO_SERVER_UNAVAILABLE' && !serverErr.message.includes('Failed to fetch')) {

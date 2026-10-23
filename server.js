@@ -248,17 +248,25 @@ async function resolveGithubUrlToWebTarget(inputUrl) {
       return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${filePath}`;
     }
 
-    // Case B: Repo root link: github.com/owner/repo -> try GitHub Pages first if it's owner.github.io, else raw index.html
+    // Case B: Repo root link: github.com/owner/repo -> try GitHub Pages first if it's owner.github.io
     if (repo.toLowerCase() === `${owner.toLowerCase()}.github.io`) {
       return `https://${owner.toLowerCase()}.github.io/`;
     }
+    if (repo.toLowerCase() === 'visual-ui-studio') {
+      return `https://${owner.toLowerCase()}.github.io/visual-ui-studio/public/index.html`;
+    }
 
     for (const branch of ['main', 'master', 'gh-pages']) {
-      for (const candidate of ['index.html', 'public/index.html']) {
+      for (const candidate of ['public/index.html', 'index.html']) {
         const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${candidate}`;
         try {
           const check = await fetchUrlBuffer(rawUrl);
-          if (check && check.body && check.body.includes('<')) {
+          if (
+            check &&
+            check.body &&
+            check.body.includes('<') &&
+            !/http-equiv\s*=\s*["']?refresh["']?/i.test(check.body)
+          ) {
             return rawUrl;
           }
         } catch (_) {}
@@ -279,39 +287,34 @@ async function cloneAndRewriteWebpage(rawInputUrl, customFileName = '') {
   // Smartly resolve GitHub repository links (e.g. https://github.com/minKasent/minKasent.github.io) to their actual live HTML page
   normalizedUrl = await resolveGithubUrlToWebTarget(normalizedUrl);
 
-  const fetched = await fetchUrlBuffer(normalizedUrl);
-  const finalUrl = fetched.finalUrl;
+  let fetched = await fetchUrlBuffer(normalizedUrl);
+  let finalUrl = fetched.finalUrl;
   let html = fetched.body || '';
 
-  // 1. Strip restrictive CSP meta tags & frame-busting headers that block visual editing
-  html = html.replace(/<meta[^>]+http-equiv\s*=\s*["']?Content-Security-Policy["']?[^>]*>/gi, '');
-  html = html.replace(/<meta[^>]+http-equiv\s*=\s*["']?X-Frame-Options["']?[^>]*>/gi, '');
-
-  // 2. Fetch & inline up to 8 external <link rel="stylesheet"> so styles/fonts/icons work 100% locally without CORS issues
-  const linkRegex = /<link\b[^>]*rel\s*=\s*["']?stylesheet["']?[^>]*>/gi;
-  const stylesheetTags = html.match(linkRegex) || [];
-  let inlinedCssCount = 0;
-
-  for (const linkTag of stylesheetTags.slice(0, 8)) {
-    const hrefMatch = linkTag.match(/\bhref\s*=\s*["']([^"']+)["']/i);
-    if (!hrefMatch || !hrefMatch[1]) continue;
+  // Follow <meta http-equiv="refresh" content="0; url=..."> redirect stubs automatically (up to 2 hops)
+  for (let hop = 0; hop < 2; hop++) {
+    const refreshMatch = html.match(/<meta[^>]+http-equiv\s*=\s*["']?refresh["']?[^>]+content\s*=\s*["'][^"']*url=([^"'\s>]+)["']/i);
+    if (!refreshMatch || !refreshMatch[1]) break;
     try {
-      const cssUrl = new URL(hrefMatch[1], finalUrl).href;
-      const cssRes = await fetchUrlBuffer(cssUrl);
-      if (cssRes && cssRes.body && cssRes.body.length < 1500000) {
-        const rewrittenCss = resolveCssUrls(cssRes.body, cssRes.finalUrl);
-        html = html.replace(
-          linkTag,
-          `<style data-cloned-stylesheet="${cssUrl}">\n${rewrittenCss}\n</style>`
-        );
-        inlinedCssCount++;
+      const nextTargetUrl = new URL(refreshMatch[1].trim(), finalUrl).href;
+      const nextFetched = await fetchUrlBuffer(nextTargetUrl);
+      if (nextFetched && nextFetched.body && nextFetched.body.includes('<')) {
+        fetched = nextFetched;
+        finalUrl = nextFetched.finalUrl;
+        html = nextFetched.body;
+      } else {
+        break;
       }
     } catch (_) {
-      // Keep original <link> with absolute href if stylesheet fetch fails
+      break;
     }
   }
 
-  // 3. Rewrite relative attributes (src, href, poster, action) to absolute URLs so images, scripts, and links work locally
+  // 1. Strip restrictive CSP meta tags, frame-busting headers & auto-redirect scripts that break visual editing
+  html = html.replace(/<meta[^>]+http-equiv\s*=\s*["']?(Content-Security-Policy|X-Frame-Options|refresh)["']?[^>]*>/gi, '');
+  html = html.replace(/window\.location\.(replace|assign)\s*\([^)]*\)\s*;?/gi, '/* redirect disabled by Visual UI Studio */');
+
+  // 2. Rewrite relative attributes (src, href, poster, action) on HTML tags BEFORE inlining CSS
   html = html.replace(/\b(src|href|poster|action)\s*=\s*(["'])([^"']+)\2/gi, (match, attr, quote, val) => {
     const v = val.trim();
     if (!v || v.startsWith('#') || v.startsWith('data:') || v.startsWith('mailto:') || v.startsWith('tel:') || v.startsWith('javascript:')) {
@@ -325,7 +328,7 @@ async function cloneAndRewriteWebpage(rawInputUrl, customFileName = '') {
     }
   });
 
-  // 4. Rewrite srcset="..."
+  // 3. Rewrite srcset="..."
   html = html.replace(/\bsrcset\s*=\s*(["'])([^"']+)\1/gi, (match, quote, srcsetVal) => {
     try {
       const parts = srcsetVal.split(',').map(part => {
@@ -340,15 +343,55 @@ async function cloneAndRewriteWebpage(rawInputUrl, customFileName = '') {
     }
   });
 
-  // 5. Rewrite url(...) inside existing <style> tags
+  // 4. Rewrite url(...) inside existing <style> tags
   html = html.replace(/(<style\b[^>]*>)([\s\S]*?)(<\/style>)/gi, (m, openTag, cssContent, closeTag) => {
     return openTag + resolveCssUrls(cssContent, finalUrl) + closeTag;
   });
 
-  // 6. Inject a metadata comment & <base> fallback if needed
+  // 5. Fetch & inline up to 8 external <link rel="stylesheet"> using a function replacer so $ patterns in CSS are never corrupted
+  const linkRegex = /<link\b[^>]*rel\s*=\s*["']?stylesheet["']?[^>]*>/gi;
+  const stylesheetTags = html.match(linkRegex) || [];
+  let inlinedCssCount = 0;
+
+  for (const linkTag of stylesheetTags.slice(0, 8)) {
+    const hrefMatch = linkTag.match(/\bhref\s*=\s*["']([^"']+)["']/i);
+    if (!hrefMatch || !hrefMatch[1]) continue;
+    try {
+      const cssUrl = new URL(hrefMatch[1], finalUrl).href;
+      const cssRes = await fetchUrlBuffer(cssUrl);
+      if (cssRes && cssRes.body && cssRes.body.length < 1800000) {
+        const rewrittenCss = resolveCssUrls(cssRes.body, cssRes.finalUrl);
+        html = html.replace(
+          linkTag,
+          () => `<style data-cloned-stylesheet="${cssUrl}">\n${rewrittenCss}\n</style>`
+        );
+        inlinedCssCount++;
+      }
+    } catch (_) {
+      // Keep original <link> with absolute href if stylesheet fetch fails
+    }
+  }
+
+  // 6. Inject <base> fallback + instant preloader/scroll-reveal bypass so cloned pages render immediately in the Canvas
+  const instantVisibleStyle = `<style id="__studio_cloned_visibility__" data-studio-ignore="true">
+    #loader, .loader, .preloader, [id*="preloader"], [class*="preloader"] {
+      display: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+    .loading__fade, .anim-uni-in-up, .reveal-type, .animate-card-2, .animate-card-3, .animate-card-4, .animate-card-5 {
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+  </style>`;
+
   const clonedBanner = `<!-- Cloned by Visual UI Studio from ${finalUrl} at ${new Date().toISOString()} -->\n`;
   if (!/<html\b/i.test(html)) {
-    html = `<!DOCTYPE html>\n<html lang="vi">\n<head><meta charset="UTF-8"><title>Cloned: ${fetched.hostname}</title></head>\n<body>\n${html}\n</body>\n</html>`;
+    html = `<!DOCTYPE html>\n<html lang="vi">\n<head><meta charset="UTF-8"><base href="${finalUrl}"><title>Cloned: ${fetched.hostname}</title>${instantVisibleStyle}</head>\n<body>\n${html}\n</body>\n</html>`;
+  } else if (/<head[^>]*>/i.test(html)) {
+    const baseTag = /<base\b/i.test(html) ? '' : `\n  <base href="${finalUrl}">`;
+    html = html.replace(/<head[^>]*>/i, m => `${m}${baseTag}\n  ${instantVisibleStyle}`);
   }
   html = clonedBanner + html;
 
@@ -1343,7 +1386,7 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
-    // API: Clone any live website URL, analyze DOM & save to local workspace for editing
+    // API: Clone any live website URL (or GitHub Repository URL!), analyze DOM & save to local workspace for editing
     if (req.method === 'POST' && pathname === '/api/clone-url') {
       const body = await readJsonBody(req);
       const targetUrl = (body.url || '').trim();
@@ -1352,6 +1395,29 @@ const server = http.createServer(async (req, res) => {
         return sendJson(res, 400, { error: 'Vui lòng nhập đường dẫn URL trang web (ví dụ: https://example.com).' });
       }
       try {
+        // Smart Detection: If the user pasted a GitHub Repository URL (e.g. https://github.com/minKasent/pharmawms),
+        // automatically open & prepare that repository's real UI instead of scraping GitHub.com's repo page!
+        const ghRepoMatch = targetUrl.match(/^https?:\/\/github\.com\/([^/]+)\/([^/#?]+)\/?$/i);
+        if (ghRepoMatch) {
+          const owner = ghRepoMatch[1];
+          const repo = ghRepoMatch[2].replace(/\.git$/i, '');
+          if (repo.toLowerCase() !== `${owner.toLowerCase()}.github.io`) {
+            const repoUiResult = await openAndPrepareGithubRepoUi({
+              name: repo,
+              fullName: `${owner}/${repo}`,
+              cloneUrl: `https://github.com/${owner}/${repo}.git`
+            });
+            return sendJson(res, 200, {
+              ...repoUiResult,
+              success: true,
+              isGithubRepoUi: true,
+              title: `${owner}/${repo}`,
+              fileName: repoUiResult.primaryFile,
+              relativePath: repoUiResult.primaryFile
+            });
+          }
+        }
+
         const result = await cloneAndRewriteWebpage(targetUrl, customFileName);
         return sendJson(res, 200, {
           ...result,
@@ -1603,6 +1669,54 @@ const server = http.createServer(async (req, res) => {
         res.end('Forbidden');
         return;
       }
+
+      // If requested with ?inline=1 (used by srcdoc when Studio is opened from https://minkasent.github.io),
+      // inline local <link rel="stylesheet"> files and inject <base> so CSS/Fonts/Images never 404 or get blocked by Mixed Content!
+      if (
+        parsedUrl.searchParams.get('inline') === '1' &&
+        /\.html?$/i.test(targetFile) &&
+        fs.existsSync(targetFile)
+      ) {
+        try {
+          let html = fs.readFileSync(targetFile, 'utf8');
+          const wsOrigin = `http://localhost:${PORT}/workspace/`;
+          const htmlDir = path.dirname(targetFile);
+
+          const linkRegex = /<link\b[^>]*rel\s*=\s*["']?stylesheet["']?[^>]*>/gi;
+          const linkTags = html.match(linkRegex) || [];
+          for (const linkTag of linkTags) {
+            const hrefMatch = linkTag.match(/\bhref\s*=\s*["']([^"']+)["']/i);
+            if (!hrefMatch || !hrefMatch[1]) continue;
+            const rawHref = hrefMatch[1].trim();
+            if (/^(https?:|\/\/|data:)/i.test(rawHref)) continue;
+            const localCssPath = path.resolve(htmlDir, rawHref.split('?')[0]);
+            if (localCssPath.startsWith(normalizedWorkspace) && fs.existsSync(localCssPath)) {
+              const rawCss = fs.readFileSync(localCssPath, 'utf8');
+              const cssRelDir = path.relative(normalizedWorkspace, path.dirname(localCssPath)).replace(/\\/g, '/');
+              const cssBaseUrl = wsOrigin + (cssRelDir ? cssRelDir + '/' : '');
+              const rewrittenCss = resolveCssUrls(rawCss, cssBaseUrl);
+              html = html.replace(
+                linkTag,
+                () => `<style data-studio-local-css="${rawHref}">\n${rewrittenCss}\n</style>`
+              );
+            }
+          }
+
+          const relFileDir = path.relative(normalizedWorkspace, htmlDir).replace(/\\/g, '/');
+          const pageBaseHref = wsOrigin + (relFileDir ? relFileDir + '/' : '');
+          if (!/<base\b/i.test(html) && /<head[^>]*>/i.test(html)) {
+            html = html.replace(/<head[^>]*>/i, m => `${m}\n  <base href="${pageBaseHref}" data-studio-ignore="true">`);
+          }
+
+          res.writeHead(200, {
+            'Content-Type': 'text/html; charset=utf-8',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Access-Control-Allow-Origin': '*'
+          });
+          return res.end(html);
+        } catch (_) {}
+      }
+
       return serveStaticFile(res, targetFile);
     }
 
