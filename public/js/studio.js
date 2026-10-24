@@ -415,16 +415,27 @@
   function ensureEditRecord(el) {
     ensureInitBaselineAttrs(el);
     const selector = getUniqueSelector(el);
+    const sourceNode = el.closest ? el.closest('[data-source-file]') : null;
+    const compNode = el.closest ? el.closest('[data-component-name]') : null;
+    const sourceFile = (sourceNode && sourceNode.getAttribute('data-source-file')) || state.currentFile || '';
+    const componentName = (compNode && compNode.getAttribute('data-component-name')) || '';
     if (!state.editsMap.has(selector)) {
       state.editsMap.set(selector, {
         selector,
         tagName: el.tagName.toLowerCase(),
         label: getFriendlyElementLabel(el),
+        sourceFile,
+        componentName,
+        originalClasses: el.getAttribute('data-ui-init-class') || el.getAttribute('class') || '',
         styles: {},
         textChanged: null,
         attrChanges: {},
         deleted: false
       });
+    } else {
+      const existing = state.editsMap.get(selector);
+      if (!existing.sourceFile && sourceFile) existing.sourceFile = sourceFile;
+      if (!existing.componentName && componentName) existing.componentName = componentName;
     }
     return state.editsMap.get(selector);
   }
@@ -506,6 +517,9 @@
       selector: rec.selector,
       tagName: rec.tagName,
       label: rec.label,
+      sourceFile: rec.sourceFile || '',
+      componentName: rec.componentName || '',
+      originalClasses: rec.originalClasses || '',
       styles: { ...(rec.styles || {}) },
       textChanged: rec.textChanged,
       attrChanges: { ...(rec.attrChanges || {}) },
@@ -2458,38 +2472,49 @@
 
     if (activeEdits.length > 0) {
       lines.push(`## 2. Bảng Tóm Tắt Thay Đổi Trực Quan (${activeEdits.length} Phần Tử)`);
-      lines.push(`| # | Phần Tử / Selector | Hành Động | Class Tailwind Tương Đương |`);
-      lines.push(`|---|---|---|---|`);
+      lines.push(`| # | File Nguồn / Component | Phần Tử / Selector | Hành Động | Class Tailwind Tương Đương |`);
+      lines.push(`|---|---|---|---|---|`);
       activeEdits.forEach(({ rec, entries }, i) => {
+        const srcInfo = rec.sourceFile
+          ? `\`${rec.sourceFile}\`${rec.componentName ? ` (\`<${rec.componentName} />\`)` : ''}`
+          : `\`${ctx.fileLabel}\``;
         const actionType = rec.deleted
-          ? '🗑️ Xóa / Ẩn'
+          ? 'Xóa / Ẩn'
           : [
-              rec.textChanged !== null ? '✏️ Đổi Text' : '',
-              entries.length > 0 ? `🎨 ${entries.length} thuộc tính CSS` : ''
+              rec.textChanged !== null ? 'Đổi Text' : '',
+              entries.length > 0 ? `${entries.length} thuộc tính CSS` : ''
             ]
               .filter(Boolean)
               .join(' + ');
         const tw = rec.deleted ? 'hidden' : convertCssStylesToTailwindClasses(rec.styles) || '—';
-        lines.push(`| ${i + 1} | \`${rec.selector}\` (${rec.label}) | ${actionType} | \`${tw}\` |`);
+        lines.push(`| ${i + 1} | ${srcInfo} | \`${rec.selector}\` (${rec.label}) | ${actionType} | \`${tw}\` |`);
       });
       lines.push(``);
 
       lines.push(`## 3. Chi Tiết Thông Số Cần Áp Dụng Từng Phần Tử`);
       activeEdits.forEach(({ rec, entries }, idx) => {
         lines.push(`### 3.${idx + 1}. Phần tử \`${rec.selector}\` (${rec.label})`);
+        if (rec.sourceFile) {
+          lines.push(`- **File nguồn cần sửa**: \`${rec.sourceFile}\`${rec.componentName ? ` — Component \`<${rec.componentName} />\`` : ''}`);
+        }
+        if (rec.originalClasses) {
+          lines.push(`- **Class hiện tại trên phần tử**: \`${rec.originalClasses}\``);
+        }
         if (rec.deleted) {
-          lines.push(`- **Hành động**: Xóa phần tử khỏi DOM hoặc áp dụng \`display: none\` (\`hidden\`).`);
+          lines.push(`- **Hành động**: Xóa phần tử khỏi JSX/DOM hoặc áp dụng \`display: none\` (\`hidden\`).`);
         } else {
           if (rec.textChanged !== null) {
-            lines.push(`- **Cập nhật nội dung văn bản (Text Content)**: \`"${rec.textChanged.trim()}"\``);
+            lines.push(`- **Cập nhật nội dung văn bản (Text / JSX Children)**: \`"${rec.textChanged.trim()}"\``);
           }
           Object.entries(rec.attrChanges).forEach(([attr, val]) => {
-            lines.push(`- **Cập nhật thuộc tính HTML \`${attr}\`**: \`"${val}"\``);
+            lines.push(`- **Cập nhật thuộc tính \`${attr}\`**: \`"${val}"\``);
           });
           if (entries.length > 0) {
             const twClasses = convertCssStylesToTailwindClasses(rec.styles);
             if (twClasses) {
-              lines.push(`- **Tailwind CSS JIT Classes**: \`${twClasses}\``);
+              const mergedClasses = [rec.originalClasses, twClasses].filter(Boolean).join(' ').trim();
+              lines.push(`- **Tailwind CSS JIT Classes thêm mới**: \`${twClasses}\``);
+              lines.push(`- **Chuỗi \`className\` sau khi gộp**: \`className="${mergedClasses}"\``);
             }
             lines.push(`- **Thuộc tính CSS chuẩn**:`);
             entries.forEach(([k, v]) => {
@@ -2564,13 +2589,15 @@
       if (entries.length === 0 && rec.textChanged === null && !rec.deleted) return;
       count++;
       const tw = rec.deleted ? 'hidden' : convertCssStylesToTailwindClasses(rec.styles);
-      lines.push(`### ${count}. \`${rec.selector}\` (${rec.label})`);
+      const mergedTw = [rec.originalClasses, tw].filter(Boolean).join(' ').trim();
+      const targetFile = rec.sourceFile || ctx.fileLabel;
+      lines.push(`### ${count}. \`${rec.selector}\` (${rec.label}) — File: \`${targetFile}\`${rec.componentName ? ` (\`<${rec.componentName} />\`)` : ''}`);
       if (rec.textChanged !== null) {
         lines.push(`- **JSX Children / Text**: \`${rec.textChanged.trim()}\``);
       }
-      lines.push(`- **className mới cần thêm/cập nhật**:`);
+      lines.push(`- **className mới cần áp dụng trong \`${targetFile}\`**:`);
       lines.push('```tsx');
-      lines.push(`<${rec.tagName || 'div'} className="${tw}">`);
+      lines.push(`<${rec.tagName || 'div'} className="${mergedTw}">`);
       lines.push(`  ${rec.textChanged !== null ? rec.textChanged.trim() : '{children}'}`);
       lines.push(`</${rec.tagName || 'div'}>`);
       lines.push('```');
@@ -2943,12 +2970,13 @@
           })
         : await safeFetchStudioJson('/api/workspace');
 
+      state.droppedFileObjectsMap = null;
       state.workspaceDir = data.workspaceDir;
       state.files = data.files || [];
       dom.folderLabel.textContent = state.workspaceDir;
       dom.inputWorkspacePath.value = state.workspaceDir;
 
-      dom.pageSelector.innerHTML = `<option value="">-- Chọn file HTML (${state.files.length} trang) --</option>`;
+      dom.pageSelector.innerHTML = `<option value="">-- Chọn trang UI (${state.files.length} file) --</option>`;
       state.files.forEach(f => {
         const opt = document.createElement('option');
         opt.value = f.relativePath;
@@ -2960,11 +2988,13 @@
         window.studioRefreshGithubStatus();
       }
 
-      // Automatically open index-creative-developer.html or first HTML file on startup
+      // Automatically open index-creative-developer.html or primary UI route on startup
       if (state.files.length > 0 && !state.currentFile) {
         const preferred =
           state.files.find(f => f.relativePath === 'index-creative-developer.html') ||
           state.files.find(f => f.relativePath === 'index.html') ||
+          state.files.find(f => /(?:^|\/)\(app\)\/page\.(tsx|jsx)$/i.test(f.relativePath)) ||
+          state.files.find(f => /(?:^|\/)page\.(tsx|jsx)$/i.test(f.relativePath)) ||
           state.files[0];
         if (preferred) {
           dom.pageSelector.value = preferred.relativePath;
@@ -2982,6 +3012,12 @@
     state.currentFile = relativePath;
     state.localFileHandle = null;
     resetSessionState();
+
+    // If this page came from a browser-dropped folder (webkitdirectory), render from dropped files map
+    if (state.droppedFileObjectsMap && state.droppedFileObjectsMap.has(relativePath)) {
+      await renderDroppedUiFile(relativePath);
+      return;
+    }
 
     const pageUrl = `${STUDIO_API_BASE}/workspace/${encodeURI(relativePath)}?t=${Date.now()}`;
     try {
@@ -3246,6 +3282,140 @@
   }
 
   // ==================== FOLDER / FILE DRAG & DROP FROM COMPUTER ====================
+  function compileClientSideSourceToHtml(relPath, rawCode, extraCssText = '') {
+    const ext = (relPath.split('.').pop() || '').toLowerCase();
+    if (ext === 'html' || ext === 'htm') {
+      return rawCode;
+    }
+
+    if (ext === 'dart') {
+      const titles = [];
+      const textRegex = /Text\(\s*['"]([^'"]{2,100})['"]/g;
+      let m;
+      while ((m = textRegex.exec(rawCode)) !== null) {
+        if (!m[1].includes('$')) titles.push(m[1]);
+      }
+      const primaryTitle = titles[0] || relPath.split('/').pop();
+      const cardsHtml = titles.slice(1, 12).map((t, i) => `
+        <div data-source-file="${relPath}" class="p-4 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-between">
+          <div>
+            <div class="text-sm font-semibold text-zinc-100">${t}</div>
+            <div class="text-xs text-zinc-400 mt-0.5">Widget #${i + 1} • ${relPath}</div>
+          </div>
+          <span class="px-2.5 py-1 rounded-md text-xs font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active</span>
+        </div>
+      `).join('');
+      return `<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <title>${relPath}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>body { font-family: 'Inter', sans-serif; background: #09090b; color: #fafafa; padding: 32px; }</style>
+</head>
+<body data-source-file="${relPath}">
+  <div data-source-file="${relPath}" class="max-w-md mx-auto rounded-[32px] bg-zinc-950 border-4 border-zinc-800 shadow-2xl overflow-hidden">
+    <header class="px-6 py-4 bg-zinc-900/90 border-b border-zinc-800 flex items-center justify-between">
+      <h1 class="text-base font-bold text-white">${primaryTitle}</h1>
+      <span class="text-[11px] font-mono text-zinc-400">${relPath.split('/').pop()}</span>
+    </header>
+    <main class="p-5 space-y-3">
+      ${cardsHtml || `<div class="p-6 text-center text-sm text-zinc-400">Flutter Screen: ${relPath}</div>`}
+    </main>
+  </div>
+</body>
+</html>`;
+    }
+
+    // React / Next.js (.tsx, .jsx) / Vue (.vue) / Svelte (.svelte) client-side JSX -> HTML renderer
+    let markup = rawCode;
+    const vueMatch = rawCode.match(/<template[^>]*>([\s\S]*?)<\/template>/i);
+    if (vueMatch) {
+      markup = vueMatch[1];
+    } else {
+      // Extract JSX inside return (...)
+      const retIdx = rawCode.lastIndexOf('return (');
+      const retIdx2 = rawCode.lastIndexOf('return <');
+      if (retIdx !== -1) {
+        markup = rawCode.slice(retIdx + 8);
+        const lastClose = markup.lastIndexOf(');');
+        if (lastClose !== -1) markup = markup.slice(0, lastClose);
+      } else if (retIdx2 !== -1) {
+        markup = rawCode.slice(retIdx2 + 7);
+        const lastSemi = markup.lastIndexOf(';');
+        if (lastSemi !== -1) markup = markup.slice(0, lastSemi);
+      }
+    }
+
+    // Transform JSX syntax into valid interactive HTML
+    let cleanHtml = markup
+      .replace(/<>|<\/>/g, '')
+      .replace(/\bclassName=/g, 'class=')
+      .replace(/\bhtmlFor=/g, 'for=')
+      .replace(/\{['"`]([^'"`]+)['"`]\}/g, '$1')
+      .replace(/\{`([^`]+)`\}/g, '$1')
+      .replace(/style=\{\{([^}]+)\}\}/g, (_, inner) => {
+        const cssStr = inner
+          .split(',')
+          .map(pair => {
+            const [k, v] = pair.split(':').map(s => s && s.trim());
+            if (!k || !v) return '';
+            const kebab = k.replace(/[A-Z]/g, m => '-' + m.toLowerCase());
+            const cleanV = v.replace(/^['"]|['"]$/g, '');
+            return `${kebab}:${cleanV}`;
+          })
+          .filter(Boolean)
+          .join(';');
+        return `style="${cssStr}"`;
+      })
+      .replace(/<([A-Z][A-Za-z0-9_.]*)([^>]*)\/>/g, '<div data-component-name="$1" data-source-file="' + relPath + '"$2></div>')
+      .replace(/<([A-Z][A-Za-z0-9_.]*)([^>]*)>/g, '<div data-component-name="$1" data-source-file="' + relPath + '"$2>')
+      .replace(/<\/([A-Z][A-Za-z0-9_.]*)>/g, '</div>')
+      .replace(/\{[^{}<>]{1,120}\}/g, match => {
+        const inner = match.slice(1, -1).trim();
+        if (/^[a-zA-Z0-9_?.]+$/.test(inner)) {
+          const short = inner.split('.').pop();
+          return short === 'children' ? '' : `[${short}]`;
+        }
+        return '';
+      });
+
+    return `<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${relPath}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; }
+    ${extraCssText}
+  </style>
+</head>
+<body data-source-file="${relPath}">
+  <div data-source-file="${relPath}" class="min-h-screen">
+    ${cleanHtml}
+  </div>
+</body>
+</html>`;
+  }
+
+  async function renderDroppedUiFile(relPath) {
+    if (!state.droppedFileObjectsMap || !state.droppedFileObjectsMap.has(relPath)) return;
+    const targetFile = state.droppedFileObjectsMap.get(relPath);
+    let rawText = await targetFile.text();
+    let htmlText = compileClientSideSourceToHtml(relPath, rawText, state.droppedCombinedCss || '');
+
+    state.blobUrlMap.forEach((blobUrl, relKey) => {
+      const escaped = relKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(["'(])(?:\\./|/)?${escaped}(["')])`, 'g');
+      htmlText = htmlText.replace(regex, `$1${blobUrl}$2`);
+    });
+
+    loadRawHtmlString(htmlText, relPath);
+  }
+
   async function handleDroppedFolderOrFiles(fileList) {
     const files = Array.from(fileList);
     if (files.length === 0) return;
@@ -3254,34 +3424,78 @@
     state.blobUrlMap.forEach(url => URL.revokeObjectURL(url));
     state.blobUrlMap.clear();
 
-    const htmlFiles = files.filter(f => /\.html?$/i.test(f.name));
-    if (htmlFiles.length === 0) {
-      showToast('Không tìm thấy file .html nào trong mục bạn vừa thả!', '⚠️');
-      return;
-    }
+    const IGNORE_DIR_RE = /(?:^|\/)(?:node_modules|\.git|\.next|dist|build|out|\.dart_tool|\.turbo|coverage|target|vendor)\//i;
+    const uiFiles = [];
+    const cssFiles = [];
+    state.droppedFileObjectsMap = new Map();
 
-    // Create Blob URLs for all assets (CSS, JS, Images) so relative paths resolve!
     for (const file of files) {
       const relPath = (file.webkitRelativePath || file.name).replace(/\\/g, '/');
+      if (IGNORE_DIR_RE.test(relPath)) continue;
       const parts = relPath.split('/');
       const withoutRoot = parts.length > 1 ? parts.slice(1).join('/') : relPath;
+
       const blobUrl = URL.createObjectURL(file);
       state.blobUrlMap.set(withoutRoot, blobUrl);
       state.blobUrlMap.set(file.name, blobUrl);
+
+      if (/\.css$/i.test(file.name)) {
+        cssFiles.push(file);
+      }
+      if (/\.(html?|tsx|jsx|vue|svelte|dart)$/i.test(file.name)) {
+        if (!/^(?:layout|loading|error|not-found|template|middleware)\.(tsx|jsx|ts|js)$/i.test(file.name) &&
+            !/\.(?:test|spec|stories|d)\.(tsx|jsx|ts|js|dart)$/i.test(file.name)) {
+          uiFiles.push({ file, withoutRoot, name: file.name });
+          state.droppedFileObjectsMap.set(withoutRoot, file);
+        }
+      }
     }
 
-    const mainHtmlFile =
-      htmlFiles.find(f => f.name.toLowerCase() === 'index.html') || htmlFiles[0];
-    let htmlText = await mainHtmlFile.text();
+    if (uiFiles.length === 0) {
+      showToast('Không tìm thấy file giao diện (.html, .tsx, .jsx, .vue, .svelte, .dart) nào trong thư mục!', '⚠️');
+      return;
+    }
 
-    // Replace relative href/src attributes with their corresponding Blob URLs
-    state.blobUrlMap.forEach((blobUrl, relKey) => {
-      const escaped = relKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(`(["'(])(?:\\./)?${escaped}(["')])`, 'g');
-      htmlText = htmlText.replace(regex, `$1${blobUrl}$2`);
+    // Read CSS files for styling
+    const cssChunks = [];
+    for (const cf of cssFiles.slice(0, 8)) {
+      try {
+        const txt = await cf.text();
+        cssChunks.push(txt.replace(/@import\s+["']tailwindcss["'];?/g, ''));
+      } catch (_) {}
+    }
+    state.droppedCombinedCss = cssChunks.join('\n');
+
+    // Sort UI files: index.html -> App Router page.tsx -> Main entry -> Components
+    uiFiles.sort((a, b) => {
+      const score = item => {
+        const p = item.withoutRoot.toLowerCase();
+        if (p === 'index.html') return 1;
+        if (/(?:^|\/)\(app\)\/page\.(tsx|jsx)$/.test(p)) return 2;
+        if (/(?:^|\/)page\.(tsx|jsx)$/.test(p)) return 3;
+        if (/\.html?$/.test(p)) return 4;
+        if (/(?:^|\/)(?:app|main|home)\.(tsx|jsx|vue|svelte|dart)$/.test(p)) return 5;
+        return 10;
+      };
+      return score(a) - score(b) || a.withoutRoot.localeCompare(b.withoutRoot);
     });
 
-    loadRawHtmlString(htmlText, mainHtmlFile.name);
+    state.files = uiFiles.map(u => ({
+      name: `${u.withoutRoot}`,
+      relativePath: u.withoutRoot
+    }));
+
+    dom.pageSelector.innerHTML = `<option value="">-- Chọn trang UI (${state.files.length} file) --</option>`;
+    state.files.forEach(f => {
+      const opt = document.createElement('option');
+      opt.value = f.relativePath;
+      opt.textContent = f.name;
+      dom.pageSelector.appendChild(opt);
+    });
+
+    const primary = state.files[0];
+    dom.pageSelector.value = primary.relativePath;
+    await renderDroppedUiFile(primary.relativePath);
     dom.modalOpenWeb.classList.add('hidden');
   }
 
@@ -5491,6 +5705,35 @@
       buildDomTree();
     });
 
+    // Listen for route navigation messages from compiled React/Next.js/Flutter Canvas
+    window.addEventListener('message', ev => {
+      const msg = ev && ev.data;
+      if (!msg || typeof msg !== 'object') return;
+      if (msg.type === 'STUDIO_OPEN_FILE' && msg.file) {
+        if (dom.pageSelector) dom.pageSelector.value = msg.file;
+        loadWorkspacePage(msg.file);
+      } else if (msg.type === 'STUDIO_NAVIGATE_ROUTE' && msg.route) {
+        const cleanRoute = String(msg.route).split('?')[0].replace(/\/+$/, '') || '/';
+        const matched = (state.files || []).find(f => {
+          const p = f.relativePath.replace(/\\/g, '/');
+          if (cleanRoute === '/') {
+            return /(?:^|\/)\(app\)\/page\.(tsx|jsx)$/i.test(p) || /(?:^|\/)app\/page\.(tsx|jsx)$/i.test(p) || p === 'index.html';
+          }
+          const slug = cleanRoute.replace(/^\//, '');
+          return (
+            p.toLowerCase().includes(`/${slug.toLowerCase()}/page.`) ||
+            p.toLowerCase().endsWith(`/${slug.toLowerCase()}.tsx`) ||
+            p.toLowerCase().endsWith(`/${slug.toLowerCase()}.jsx`) ||
+            p.toLowerCase().endsWith(`${slug.toLowerCase()}.html`)
+          );
+        });
+        if (matched) {
+          if (dom.pageSelector) dom.pageSelector.value = matched.relativePath;
+          loadWorkspacePage(matched.relativePath);
+        }
+      }
+    });
+
     // Topbar page selector
     dom.pageSelector.addEventListener('change', e => {
       if (e.target.value) {
@@ -6171,12 +6414,21 @@
       if (window.showOpenFilePicker) {
         try {
           const [handle] = await window.showOpenFilePicker({
-            types: [{ description: 'HTML Files', accept: { 'text/html': ['.html', '.htm'] } }]
+            types: [
+              {
+                description: 'UI Files (.html, .tsx, .jsx, .vue, .svelte, .dart)',
+                accept: {
+                  'text/html': ['.html', '.htm'],
+                  'text/plain': ['.tsx', '.jsx', '.vue', '.svelte', '.dart']
+                }
+              }
+            ]
           });
           state.localFileHandle = handle;
           const file = await handle.getFile();
           const text = await file.text();
-          loadRawHtmlString(text, file.name);
+          const compiled = compileClientSideSourceToHtml(file.name, text);
+          loadRawHtmlString(compiled, file.name);
           dom.modalOpenWeb.classList.add('hidden');
           return;
         } catch (_) {}
@@ -6188,7 +6440,8 @@
       const file = e.target.files && e.target.files[0];
       if (!file) return;
       const text = await file.text();
-      loadRawHtmlString(text, file.name);
+      const compiled = compileClientSideSourceToHtml(file.name, text);
+      loadRawHtmlString(compiled, file.name);
       dom.modalOpenWeb.classList.add('hidden');
     });
 
@@ -6639,8 +6892,13 @@
     const ghUserLogin = document.getElementById('gh-user-login');
     const ghAuthMethodBadge = document.getElementById('gh-auth-method-badge');
     const ghUserSub = document.getElementById('gh-user-sub');
+    const btnGhOauthPopup = document.getElementById('btn-gh-oauth-popup');
     const btnGhLogout = document.getElementById('btn-gh-logout');
     const btnGhLoginCli = document.getElementById('btn-gh-login-cli');
+    const ghOauthDeviceBox = document.getElementById('gh-oauth-device-box');
+    const ghOauthUserCode = document.getElementById('gh-oauth-user-code');
+    const btnGhCopyDeviceCode = document.getElementById('btn-gh-copy-device-code');
+    const ghOauthPollStatus = document.getElementById('gh-oauth-poll-status');
     const inputGhToken = document.getElementById('input-gh-token');
     const btnGhLoginToken = document.getElementById('btn-gh-login-token');
     const ghRepoStatusBadge = document.getElementById('gh-repo-status-badge');
@@ -6660,6 +6918,7 @@
 
     let ghRepoFilterMode = 'all'; // 'all' | 'has-ui' | 'no-ui'
     let cachedGithubRepos = [];
+    let oauthPollTimer = null;
 
     if (btnSwitchToGhRepos) {
       btnSwitchToGhRepos.addEventListener('click', () => {
@@ -6671,17 +6930,84 @@
       });
     }
 
+    function classifyGithubRepoClientSide(r) {
+      const name = (r.name || '').toLowerCase();
+      const desc = (r.description || '').toLowerCase();
+      const lang = (r.language || '').toLowerCase();
+      const hasHomepage = Boolean(r.homepage && /^https?:\/\//i.test(r.homepage));
+      if (lang === 'html' || lang === 'css' || name.endsWith('.github.io') || hasHomepage) {
+        return { hasUi: true, uiCategory: 'html', uiBadge: 'HTML / Web UI', uiDetail: 'Giao diện Web / HTML' };
+      }
+      if (['typescript', 'javascript', 'vue', 'svelte'].includes(lang) || /(web|ui|frontend|studio|react|next|vite|app|wms|pharma|order|movie|phim)/.test(`${name} ${desc}`)) {
+        return { hasUi: true, uiCategory: 'webapp', uiBadge: 'Next.js / React', uiDetail: `${r.language || 'Web'} Component UI` };
+      }
+      if (lang === 'dart' || /(flutter|mobile)/.test(`${name} ${desc}`)) {
+        return { hasUi: true, uiCategory: 'mobile', uiBadge: 'Flutter UI', uiDetail: 'Flutter / Dart Screens' };
+      }
+      return { hasUi: false, uiCategory: 'no-ui', uiBadge: 'No UI', uiDetail: `${r.language || 'Backend / CLI'} (No UI)` };
+    }
+
+    async function fetchBrowserDirectGithubStatus() {
+      const savedPat = localStorage.getItem('studio_gh_pat') || '';
+      const headers = { Accept: 'application/vnd.github+json' };
+      if (savedPat) headers.Authorization = `Bearer ${savedPat}`;
+
+      const userUrl = savedPat ? 'https://api.github.com/user' : 'https://api.github.com/users/minKasent';
+      const reposUrl = savedPat
+        ? 'https://api.github.com/user/repos?sort=updated&per_page=100'
+        : 'https://api.github.com/users/minKasent/repos?sort=updated&per_page=100';
+
+      const [uRes, rRes] = await Promise.all([fetch(userUrl, { headers }), fetch(reposUrl, { headers })]);
+      const uData = uRes.ok ? await uRes.json() : null;
+      const rData = rRes.ok ? await rRes.json() : [];
+
+      const repos = (Array.isArray(rData) ? rData : []).map(r => {
+        const ui = classifyGithubRepoClientSide(r);
+        return {
+          name: r.name,
+          fullName: r.full_name,
+          private: Boolean(r.private),
+          fork: Boolean(r.fork),
+          url: r.html_url,
+          htmlUrl: r.html_url,
+          cloneUrl: r.clone_url,
+          description: r.description || '',
+          language: r.language || '',
+          homepage: r.homepage || '',
+          defaultBranch: r.default_branch || 'main',
+          ...ui
+        };
+      });
+
+      return {
+        loggedIn: Boolean(uData && uData.login),
+        authMethod: savedPat ? 'token' : 'public-session',
+        user: uData
+          ? { login: uData.login, name: uData.name || uData.login, avatarUrl: uData.avatar_url }
+          : null,
+        git: {
+          isGitRepo: true,
+          branch: 'main',
+          remoteUrl: 'https://github.com/minKasent/visual-ui-studio.git',
+          repoShortName: 'minKasent/visual-ui-studio',
+          hasRemote: true,
+          changedCount: 0
+        },
+        repos
+      };
+    }
+
     async function openGithubRepoUiInStudio(repoObj, triggerBtn = null) {
       if (!repoObj) return;
       const origHtml = triggerBtn ? triggerBtn.innerHTML : '';
       if (triggerBtn) {
         triggerBtn.disabled = true;
-        triggerBtn.textContent = '⏳ Đang mở UI...';
+        triggerBtn.textContent = 'Đang mở UI...';
       }
       setBannerState(
         ghPushStatusMsg,
         'info',
-        `⏳ Đang đồng bộ kho lưu trữ <strong>${repoObj.fullName}</strong> về Local và nạp giao diện lên Studio Canvas...`
+        `Đang đồng bộ kho lưu trữ <strong>${repoObj.fullName}</strong> về Local và biên dịch toàn bộ giao diện lên Studio Canvas...`
       );
       try {
         const res = await safeFetchStudioJson('/api/github/open-repo-ui', {
@@ -6690,13 +7016,14 @@
           body: JSON.stringify(repoObj)
         });
 
+        state.droppedFileObjectsMap = null;
         state.workspaceDir = res.workspaceDir;
         state.files = res.files || [];
         state.activeGithubRepoMeta = res.repoMeta || repoObj;
         dom.folderLabel.textContent = state.workspaceDir;
         dom.inputWorkspacePath.value = state.workspaceDir;
 
-        dom.pageSelector.innerHTML = `<option value="">-- Chọn file HTML (${state.files.length} trang) --</option>`;
+        dom.pageSelector.innerHTML = `<option value="">-- Chọn trang UI (${state.files.length} file) --</option>`;
         state.files.forEach(f => {
           const opt = document.createElement('option');
           opt.value = f.relativePath;
@@ -6714,6 +7041,8 @@
         const modeDesc =
           res.modeUsed === 'native-html'
             ? `file gốc ${res.primaryFile}`
+            : res.modeUsed === 'live-compiled-ui' || res.modeUsed === 'compiled-project-ui'
+            ? `đã biên dịch ${state.files.length} trang/component — đang mở ${res.primaryFile}`
             : res.modeUsed === 'live-homepage'
             ? `giao diện Live (${res.primaryFile})`
             : res.modeUsed === 'starter-ui-for-noui'
@@ -6723,22 +7052,28 @@
         setBannerState(
           ghPushStatusMsg,
           'success',
-          `✅ Đã mở <strong>${repoObj.fullName}</strong> (${modeDesc})! Khi bấm Lưu (Ctrl+S) sẽ lưu trực tiếp vào Repo này.`
+          `Đã mở <strong>${repoObj.fullName}</strong> (${modeDesc}). Bạn có thể chuyển đổi mọi trang/component trên thanh chọn file phía trên.`
         );
-        showToast(`🎨 Đang sửa UI của Repo: ${repoObj.fullName} (${res.primaryFile})!`, '🚀');
+        showToast(`Đang mở UI Repo: ${repoObj.fullName} (${res.primaryFile})`, '✓');
 
         setTimeout(() => {
           if (modalGithubHub) modalGithubHub.classList.add('hidden');
-        }, 500);
+        }, 450);
       } catch (err) {
         setBannerState(ghPushStatusMsg, 'error', `Lỗi mở UI Repo: ${err.message}`);
-        showToast(`Lỗi mở Repo: ${err.message}`, '❌');
+        showToast(`Lỗi mở Repo: ${err.message}`, '⚠️');
       } finally {
         if (triggerBtn) {
           triggerBtn.disabled = false;
           triggerBtn.innerHTML = origHtml;
         }
       }
+    }
+
+    function cleanBadgeLabel(str) {
+      return String(str || '')
+        .replace(/^[✦🌐⚛️📱🚫🎨✨\s]+/u, '')
+        .trim();
     }
 
     function renderGithubReposExplorer() {
@@ -6753,9 +7088,9 @@
       // Update filter pill counts
       document.querySelectorAll('.gh-filter-pill[data-gh-filter]').forEach(pill => {
         const mode = pill.getAttribute('data-gh-filter');
-        if (mode === 'all') pill.textContent = `Tất cả (${baseRepos.length})`;
-        else if (mode === 'has-ui') pill.textContent = `✦ Có UI (${hasUiCount})`;
-        else if (mode === 'no-ui') pill.textContent = `🚫 No UI (${noUiCount})`;
+        if (mode === 'all') pill.textContent = `All (${baseRepos.length})`;
+        else if (mode === 'has-ui') pill.textContent = `Có UI (${hasUiCount})`;
+        else if (mode === 'no-ui') pill.textContent = `No UI (${noUiCount})`;
       });
 
       const filtered = baseRepos.filter(r => {
@@ -6782,9 +7117,9 @@
             : r.uiCategory === 'mobile'
             ? 'gh-ui-pill--mobile'
             : 'gh-ui-pill--webapp';
-          const badgeText = r.hasUi ? (r.uiBadge || '✦ Có UI') : (r.uiDetail || '🚫 No UI');
+          const badgeText = r.hasUi ? cleanBadgeLabel(r.uiBadge || 'Có UI') : 'No UI';
           const langTag = r.language ? `<span class="gh-ui-pill gh-ui-pill--noui">${r.language}</span>` : '';
-          const descText = r.description || (r.hasUi ? 'Sẵn sàng mở và chỉnh sửa giao diện trực quan' : 'Dự án Backend / CLI / Tài liệu (Chưa có giao diện UI)');
+          const descText = r.description || (r.hasUi ? (r.uiDetail || 'Sẵn sàng mở toàn bộ trang & component lên Canvas') : 'Dự án Backend / CLI (Chưa có giao diện UI)');
 
           return `
             <div class="gh-repo-item ${r.hasUi ? '' : 'is-no-ui'}" data-repo-fullname="${r.fullName}">
@@ -6799,8 +7134,8 @@
               <div class="gh-repo-item__actions">
                 ${
                   r.hasUi
-                    ? `<button type="button" class="btn-primary btn-xs btn-gh-edit-repo-ui" data-repo-name="${r.name}" title="Tải Repo này về Local, nạp giao diện lên Canvas để kéo thả & tự động Push khi Lưu">🎨 Sửa UI</button>`
-                    : `<button type="button" class="btn-secondary btn-xs btn-gh-edit-repo-ui" data-repo-name="${r.name}" title="Repo này chưa có UI (No UI) — Bấm để khởi tạo nhanh 1 trang giao diện mẫu cho Repo này">✨ Tạo UI</button>`
+                    ? `<button type="button" class="btn-primary btn-xs btn-gh-edit-repo-ui" data-repo-name="${r.name}" title="Tải Repo về Local và hiển thị toàn bộ UI (.tsx, .jsx, .dart, .html) lên Canvas">Mở UI</button>`
+                    : `<button type="button" class="btn-secondary btn-xs btn-gh-edit-repo-ui" data-repo-name="${r.name}" title="Khởi tạo trang giao diện mới cho Repo No UI này">Tạo UI</button>`
                 }
               </div>
             </div>
@@ -6842,117 +7177,129 @@
         localStorage.setItem('studio_gh_auto_push', state.githubAutoPush ? '1' : '0');
         showToast(
           state.githubAutoPush
-            ? 'Đã BẬT tự động Push lên GitHub khi bấm Lưu (Ctrl+S)!'
+            ? 'Đã BẬT tự động Push lên GitHub khi bấm Lưu (Ctrl+S)'
             : 'Đã TẮT tự động Push lên GitHub khi lưu.',
-          state.githubAutoPush ? '🚀' : '⚙️'
+          '✓'
         );
       });
     }
 
     async function refreshGithubStatus() {
+      let data = null;
       try {
-        const data = await safeFetchStudioJson('/api/github/status');
-        state.githubStatus = data;
-
-        const isAuthenticated = Boolean(data.loggedIn || (data.auth && data.auth.authenticated));
-        const userObj = data.user || data.auth || {};
-        const authMethod = data.authMethod || userObj.method || 'gh-cli';
-        const git = data.git || { isGitRepo: false, hasRemote: false };
-        state.githubRepoLinked = Boolean(git.hasRemote);
-
-        const cleanRepoShort = (git.repoShortName || git.remoteUrl || '')
-          .replace(/^https?:\/\/github\.com\//i, '')
-          .replace(/^git@github\.com:/i, '')
-          .replace(/\.git$/i, '');
-
-        // Update Topbar Pill
-        if (githubTopDot) {
-          githubTopDot.classList.remove('is-online', 'is-warn', 'is-offline');
-          if (isAuthenticated && git.hasRemote) {
-            githubTopDot.classList.add('is-online');
-          } else if (isAuthenticated || git.hasRemote) {
-            githubTopDot.classList.add('is-warn');
-          } else {
-            githubTopDot.classList.add('is-offline');
-          }
-        }
-        if (githubTopLabel) {
-          if (isAuthenticated && userObj.login) {
-            githubTopLabel.textContent = `@${userObj.login}`;
-          } else if (git.hasRemote && cleanRepoShort) {
-            const shortRepo = cleanRepoShort.split('/').pop() || 'GitHub';
-            githubTopLabel.textContent = shortRepo.length > 14 ? shortRepo.slice(0, 12) + '…' : shortRepo;
-          } else {
-            githubTopLabel.textContent = 'GitHub';
-          }
-        }
-        if (btnGithubHub) {
-          const authTip = isAuthenticated ? `Đã đăng nhập: @${userObj.login}` : 'Chưa đăng nhập GitHub';
-          const repoTip = git.hasRemote ? `Repo: ${cleanRepoShort} (${git.branch})` : 'Chưa liên kết Repo';
-          btnGithubHub.title = `${authTip} • ${repoTip} • Auto-Push: ${state.githubAutoPush ? 'BẬT' : 'TẮT'}`;
-        }
-
-        // Update Modal Auth Section
-        if (isAuthenticated) {
-          if (ghUserAvatar) {
-            ghUserAvatar.src = userObj.avatarUrl || `https://github.com/${userObj.login}.png`;
-          }
-          if (ghUserName) ghUserName.textContent = userObj.name || userObj.login;
-          if (ghUserLogin) ghUserLogin.textContent = `@${userObj.login}`;
-          if (ghAuthMethodBadge) {
-            ghAuthMethodBadge.textContent = authMethod === 'gh-cli' ? '✓ GitHub CLI' : '✓ Token';
-          }
-          if (ghUserSub) {
-            ghUserSub.textContent = `Đã kết nối tài khoản GitHub (@${userObj.login})`;
-          }
-          if (btnGhLoginCli) btnGhLoginCli.classList.add('hidden');
-          if (btnGhLogout) btnGhLogout.classList.remove('hidden');
-        } else {
-          if (ghUserName) ghUserName.textContent = 'Chưa đăng nhập';
-          if (ghUserLogin) ghUserLogin.textContent = '';
-          if (ghAuthMethodBadge) ghAuthMethodBadge.textContent = 'Offline';
-          if (ghUserSub) ghUserSub.textContent = 'Kết nối GitHub để tự động đẩy code khi bấm Lưu';
-          if (btnGhLoginCli) btnGhLoginCli.classList.remove('hidden');
-          if (btnGhLogout) btnGhLogout.classList.add('hidden');
-        }
-
-        // Populate User Repos Dropdown & Visual Repo Explorer (with Has UI / No UI status!)
-        cachedGithubRepos = Array.isArray(data.repos) ? data.repos : [];
-        renderGithubReposExplorer();
-
-        if (selectGhUserRepos) {
-          selectGhUserRepos.innerHTML = `<option value="">-- Chọn Repo (${cachedGithubRepos.length}) --</option>`;
-          cachedGithubRepos.forEach(r => {
-            const opt = document.createElement('option');
-            opt.value = r.cloneUrl;
-            const uiPrefix = r.hasUi ? (r.uiBadge || '✦ Có UI') : '🚫 No UI';
-            opt.textContent = `[${uiPrefix}] ${r.name}${r.fork ? ' (Fork)' : ''}`;
-            if (git.remoteUrl && (git.remoteUrl === r.cloneUrl || git.remoteUrl.includes(r.fullName))) {
-              opt.selected = true;
-            }
-            selectGhUserRepos.appendChild(opt);
-          });
-        }
-
-        if (inputGhRemoteUrl && git.remoteUrl) {
-          inputGhRemoteUrl.value = git.remoteUrl;
-        }
-
-        // Update Repo Link Summary
-        if (ghRepoStatusBadge && ghGitSummary) {
-          if (git.hasRemote) {
-            ghRepoStatusBadge.textContent = `✓ ${cleanRepoShort || 'Đã liên kết'}`;
-            ghGitSummary.innerHTML = `Thư mục đang mở: <code>${state.workspaceDir}</code> • Nhánh: <strong>${git.branch || 'main'}</strong> • Chờ Push: <strong>${git.changedCount || 0} file</strong>`;
-          } else if (git.isGitRepo) {
-            ghRepoStatusBadge.textContent = 'Chưa gắn Remote';
-            ghGitSummary.innerHTML = `Thư mục <code>${state.workspaceDir}</code> đã có Git nhưng chưa gắn Repo. Chọn Repo bên dưới và bấm <strong>Liên kết</strong>.`;
-          } else {
-            ghRepoStatusBadge.textContent = 'Chưa có Git';
-            ghGitSummary.innerHTML = `Chọn Repo bên dưới để <strong>🎨 Sửa UI</strong> hoặc bấm <strong>Liên kết</strong> cho <code>${state.workspaceDir}</code>.`;
-          }
-        }
+        data = await safeFetchStudioJson('/api/github/status');
       } catch (_) {
-        // Silent when running purely static without local server
+        try {
+          data = await fetchBrowserDirectGithubStatus();
+        } catch (__) {
+          return;
+        }
+      }
+      if (!data) return;
+      state.githubStatus = data;
+
+      const isAuthenticated = Boolean(data.loggedIn || (data.auth && data.auth.authenticated));
+      const userObj = data.user || data.auth || {};
+      const authMethod = data.authMethod || userObj.method || 'gh-cli';
+      const git = data.git || { isGitRepo: false, hasRemote: false };
+      state.githubRepoLinked = Boolean(git.hasRemote);
+
+      const cleanRepoShort = (git.repoShortName || git.remoteUrl || '')
+        .replace(/^https?:\/\/github\.com\//i, '')
+        .replace(/^git@github\.com:/i, '')
+        .replace(/\.git$/i, '');
+
+      // Update Topbar Pill
+      if (githubTopDot) {
+        githubTopDot.classList.remove('is-online', 'is-warn', 'is-offline');
+        if (isAuthenticated && git.hasRemote) {
+          githubTopDot.classList.add('is-online');
+        } else if (isAuthenticated || git.hasRemote) {
+          githubTopDot.classList.add('is-warn');
+        } else {
+          githubTopDot.classList.add('is-offline');
+        }
+      }
+      if (githubTopLabel) {
+        if (isAuthenticated && userObj.login) {
+          githubTopLabel.textContent = `@${userObj.login}`;
+        } else if (git.hasRemote && cleanRepoShort) {
+          const shortRepo = cleanRepoShort.split('/').pop() || 'GitHub';
+          githubTopLabel.textContent = shortRepo.length > 14 ? shortRepo.slice(0, 12) + '…' : shortRepo;
+        } else {
+          githubTopLabel.textContent = 'GitHub';
+        }
+      }
+      if (btnGithubHub) {
+        const authTip = isAuthenticated ? `Đã kết nối: @${userObj.login}` : 'Chưa đăng nhập GitHub';
+        const repoTip = git.hasRemote ? `Repo: ${cleanRepoShort} (${git.branch})` : 'Chưa liên kết Repo';
+        btnGithubHub.title = `${authTip} • ${repoTip} • Auto-Push: ${state.githubAutoPush ? 'BẬT' : 'TẮT'}`;
+      }
+
+      // Update Modal Auth Section
+      if (isAuthenticated) {
+        if (ghUserAvatar) {
+          ghUserAvatar.src = userObj.avatarUrl || `https://github.com/${userObj.login}.png`;
+        }
+        if (ghUserName) ghUserName.textContent = userObj.name || userObj.login;
+        if (ghUserLogin) ghUserLogin.textContent = `@${userObj.login}`;
+        if (ghAuthMethodBadge) {
+          ghAuthMethodBadge.textContent =
+            authMethod === 'gh-cli'
+              ? 'Connected • CLI'
+              : authMethod === 'public-session'
+              ? 'Public Session'
+              : 'Connected • OAuth';
+        }
+        if (ghUserSub) {
+          ghUserSub.textContent = `Đã kết nối tài khoản GitHub (@${userObj.login})`;
+        }
+        if (btnGhLoginCli) btnGhLoginCli.classList.add('hidden');
+        if (btnGhLogout) btnGhLogout.classList.remove('hidden');
+        if (ghOauthDeviceBox) ghOauthDeviceBox.classList.add('hidden');
+      } else {
+        if (ghUserName) ghUserName.textContent = 'Chưa kết nối tài khoản';
+        if (ghUserLogin) ghUserLogin.textContent = '';
+        if (ghAuthMethodBadge) ghAuthMethodBadge.textContent = 'Disconnected';
+        if (ghUserSub) ghUserSub.textContent = 'Xác thực qua GitHub OAuth để đồng bộ Repositories & tự động Push';
+        if (btnGhLoginCli) btnGhLoginCli.classList.remove('hidden');
+        if (btnGhLogout) btnGhLogout.classList.add('hidden');
+      }
+
+      // Populate User Repos Dropdown & Visual Repo Explorer
+      cachedGithubRepos = Array.isArray(data.repos) ? data.repos : [];
+      renderGithubReposExplorer();
+
+      if (selectGhUserRepos) {
+        selectGhUserRepos.innerHTML = `<option value="">-- Chọn Repo (${cachedGithubRepos.length}) --</option>`;
+        cachedGithubRepos.forEach(r => {
+          const opt = document.createElement('option');
+          opt.value = r.cloneUrl;
+          const uiPrefix = r.hasUi ? cleanBadgeLabel(r.uiBadge || 'Có UI') : 'No UI';
+          opt.textContent = `[${uiPrefix}] ${r.name}${r.fork ? ' (Fork)' : ''}`;
+          if (git.remoteUrl && (git.remoteUrl === r.cloneUrl || git.remoteUrl.includes(r.fullName))) {
+            opt.selected = true;
+          }
+          selectGhUserRepos.appendChild(opt);
+        });
+      }
+
+      if (inputGhRemoteUrl && git.remoteUrl) {
+        inputGhRemoteUrl.value = git.remoteUrl;
+      }
+
+      // Update Repo Link Summary
+      if (ghRepoStatusBadge && ghGitSummary) {
+        if (git.hasRemote) {
+          ghRepoStatusBadge.textContent = cleanRepoShort || 'Linked';
+          ghGitSummary.innerHTML = `Workspace: <code>${state.workspaceDir}</code> • Branch: <strong>${git.branch || 'main'}</strong> • Pending: <strong>${git.changedCount || 0} file</strong>`;
+        } else if (git.isGitRepo) {
+          ghRepoStatusBadge.textContent = 'No Remote';
+          ghGitSummary.innerHTML = `Thư mục <code>${state.workspaceDir}</code> chưa gắn Remote. Chọn một Repository bên dưới hoặc dán URL để <strong>Liên kết</strong>.`;
+        } else {
+          ghRepoStatusBadge.textContent = 'Local';
+          ghGitSummary.innerHTML = `Chọn bất kỳ Repository nào bên dưới để <strong>Mở UI</strong> trực tiếp lên Canvas.`;
+        }
       }
     }
 
@@ -6965,6 +7312,122 @@
       });
     }
 
+    // Official GitHub OAuth Popup + Device Flow ("Continue with GitHub" like Vercel / Linear / Cursor)
+    async function startGithubOAuthDevicePopupFlow() {
+      if (oauthPollTimer) {
+        clearInterval(oauthPollTimer);
+        oauthPollTimer = null;
+      }
+
+      const w = 520;
+      const h = 680;
+      const left = Math.max(0, Math.round((window.screen.width - w) / 2));
+      const top = Math.max(0, Math.round((window.screen.height - h) / 2));
+      const popup = window.open(
+        'about:blank',
+        'github_oauth_authorize',
+        `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes,status=yes`
+      );
+
+      if (btnGhOauthPopup) {
+        btnGhOauthPopup.disabled = true;
+      }
+
+      try {
+        const flow = await safeFetchStudioJson('/api/github/oauth-start', { method: 'POST' });
+        const userCode = flow.userCode || '';
+        const verifyUri = flow.verificationUri || 'https://github.com/login/device';
+        const deviceCode = flow.deviceCode;
+
+        if (ghOauthDeviceBox && ghOauthUserCode) {
+          ghOauthUserCode.textContent = userCode;
+          ghOauthDeviceBox.classList.remove('hidden');
+        }
+        if (ghOauthPollStatus) {
+          ghOauthPollStatus.textContent = 'Đang chờ xác nhận trên cửa sổ GitHub...';
+        }
+
+        // Automatically copy the 8-char device code to clipboard so the user can just Ctrl+V in the GitHub popup
+        if (userCode && navigator.clipboard) {
+          try {
+            await navigator.clipboard.writeText(userCode);
+            showToast(`Đã copy mã xác thực ${userCode} — hãy dán (Ctrl+V) vào cửa sổ GitHub vừa mở`, '✓');
+          } catch (_) {}
+        }
+
+        if (popup && !popup.closed) {
+          popup.location.href = verifyUri;
+          popup.focus();
+        } else {
+          window.open(verifyUri, '_blank', 'noopener');
+        }
+
+        let pollIntervalMs = Math.max(5000, (flow.interval || 5) * 1000);
+        oauthPollTimer = setInterval(async () => {
+          try {
+            const pollRes = await safeFetchStudioJson('/api/github/oauth-poll', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ deviceCode })
+            });
+
+            if (pollRes.status === 'authorized') {
+              clearInterval(oauthPollTimer);
+              oauthPollTimer = null;
+              if (popup && !popup.closed) {
+                try { popup.close(); } catch (_) {}
+              }
+              if (ghOauthDeviceBox) ghOauthDeviceBox.classList.add('hidden');
+              await refreshGithubStatus();
+              const loginName = pollRes.user?.login || 'GitHub';
+              showToast(`Đã kết nối GitHub thành công: @${loginName}`, '✓');
+            } else if (pollRes.status === 'expired') {
+              clearInterval(oauthPollTimer);
+              oauthPollTimer = null;
+              if (ghOauthPollStatus) {
+                ghOauthPollStatus.textContent = 'Mã xác thực đã hết hạn. Vui lòng bấm Continue with GitHub lại.';
+              }
+            }
+          } catch (_) {}
+        }, pollIntervalMs);
+      } catch (_) {
+        // Fallback when running purely static without local server: open GitHub Web Token generator popup
+        const tokenPopupUrl = 'https://github.com/settings/tokens/new?description=Visual+UI+Studio&scopes=repo,read:user';
+        if (popup && !popup.closed) {
+          popup.location.href = tokenPopupUrl;
+          popup.focus();
+        } else {
+          window.open(tokenPopupUrl, '_blank', 'noopener');
+        }
+        const detailsEl = inputGhToken ? inputGhToken.closest('details') : null;
+        if (detailsEl) detailsEl.open = true;
+        if (inputGhToken) inputGhToken.focus();
+        showToast('Đã mở trang cấp quyền GitHub — dán mã token vào ô xác thực để hoàn tất', '✓');
+      } finally {
+        if (btnGhOauthPopup) {
+          btnGhOauthPopup.disabled = false;
+        }
+      }
+    }
+
+    if (btnGhOauthPopup) {
+      btnGhOauthPopup.addEventListener('click', startGithubOAuthDevicePopupFlow);
+    }
+
+    if (btnGhCopyDeviceCode && ghOauthUserCode) {
+      btnGhCopyDeviceCode.addEventListener('click', async () => {
+        const code = ghOauthUserCode.textContent.trim();
+        if (!code) return;
+        try {
+          await navigator.clipboard.writeText(code);
+          btnGhCopyDeviceCode.textContent = 'Copied';
+          setTimeout(() => {
+            btnGhCopyDeviceCode.textContent = 'Copy mã';
+          }, 1500);
+        } catch (_) {}
+      });
+    }
+
     if (btnGhLoginCli) {
       btnGhLoginCli.addEventListener('click', async () => {
         const orig = btnGhLoginCli.innerHTML;
@@ -6972,11 +7435,15 @@
         btnGhLoginCli.textContent = 'Đang kết nối...';
         try {
           const data = await safeFetchStudioJson('/api/github/login-cli', { method: 'POST' });
+          if (data.needsOAuth) {
+            await startGithubOAuthDevicePopupFlow();
+            return;
+          }
           await refreshGithubStatus();
           const loginName = data.user?.login || data.auth?.login || 'GitHub';
-          showToast(`Đã đăng nhập GitHub: @${loginName}!`, '🐙');
-        } catch (err) {
-          showToast(err.message, '⚠️');
+          showToast(`Đã kết nối phiên GitHub: @${loginName}`, '✓');
+        } catch (_) {
+          await startGithubOAuthDevicePopupFlow();
         } finally {
           btnGhLoginCli.disabled = false;
           btnGhLoginCli.innerHTML = orig;
@@ -6996,17 +7463,20 @@
         btnGhLoginToken.disabled = true;
         btnGhLoginToken.textContent = 'Đang xác thực...';
         try {
-          const data = await safeFetchStudioJson('/api/github/login-token', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token })
-          });
+          localStorage.setItem('studio_gh_pat', token);
+          try {
+            await safeFetchStudioJson('/api/github/login-token', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ token })
+            });
+          } catch (_) {}
           if (inputGhToken) inputGhToken.value = '';
           await refreshGithubStatus();
-          const loginName = data.user?.login || data.auth?.login || 'GitHub';
-          showToast(`Đã đăng nhập GitHub: @${loginName}!`, '🐙');
+          const loginName = state.githubStatus?.user?.login || 'GitHub';
+          showToast(`Đã xác thực GitHub: @${loginName}`, '✓');
         } catch (err) {
-          showToast(`Lỗi đăng nhập: ${err.message}`, '❌');
+          showToast(`Lỗi xác thực: ${err.message}`, '⚠️');
         } finally {
           btnGhLoginToken.disabled = false;
           btnGhLoginToken.textContent = orig;
@@ -7016,11 +7486,12 @@
 
     if (btnGhLogout) {
       btnGhLogout.addEventListener('click', async () => {
+        localStorage.removeItem('studio_gh_pat');
         try {
           await safeFetchStudioJson('/api/github/logout', { method: 'POST' });
         } catch (_) {}
         await refreshGithubStatus();
-        showToast('Đã đăng xuất phiên GitHub trên Studio.', '👋');
+        showToast('Đã ngắt kết nối phiên GitHub.', '✓');
       });
     }
 
@@ -7036,21 +7507,27 @@
       btnGhOpenSelectedRepoUi.addEventListener('click', () => {
         const selectedUrl = (selectGhUserRepos && selectGhUserRepos.value) || (inputGhRemoteUrl && inputGhRemoteUrl.value.trim()) || '';
         if (!selectedUrl) {
-          showToast('Vui lòng chọn một Repo từ danh sách để mở & sửa UI!', '⚠️');
+          showToast('Vui lòng chọn một Repo từ danh sách hoặc nhập URL để mở UI', '⚠️');
           return;
         }
-        const matched = (githubReposCache || []).find((r) => r.url === selectedUrl || r.htmlUrl === selectedUrl);
+        const matched = (cachedGithubRepos || []).find(
+          r => r.url === selectedUrl || r.htmlUrl === selectedUrl || r.cloneUrl === selectedUrl
+        );
         if (matched) {
           openGithubRepoUiInStudio(matched, btnGhOpenSelectedRepoUi);
         } else {
           const clean = selectedUrl.replace(/\.git$/i, '').replace(/\/+$/, '');
           const parts = clean.split('/').slice(-2);
-          openGithubRepoUiInStudio({
-            name: parts[1] || 'repo',
-            fullName: parts.join('/'),
-            url: selectedUrl,
-            htmlUrl: clean
-          }, btnGhOpenSelectedRepoUi);
+          openGithubRepoUiInStudio(
+            {
+              name: parts[1] || 'repo',
+              fullName: parts.join('/'),
+              url: selectedUrl,
+              htmlUrl: clean,
+              cloneUrl: clean.endsWith('.git') ? clean : `${clean}.git`
+            },
+            btnGhOpenSelectedRepoUi
+          );
         }
       });
     }

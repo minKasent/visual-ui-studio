@@ -3,10 +3,14 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const { execFileSync, execSync } = require('child_process');
+const { listProjectUiFiles, compileProjectUiFile } = require('./project-ui-compiler');
 
 const PORT = process.env.PORT || 4567;
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const AUTH_CONFIG_FILE = path.join(__dirname, '.studio-github-auth.json');
+const GITHUB_OAUTH_CLIENT_ID = '178c6fc778ccc68e1d6a';
+
+let pendingOAuthDevice = null;
 
 // Default linked project directory (auto-detects user's Portfolio folder if present)
 let currentWorkspaceDir = fs.existsSync('d:\\Khoa\\Porfolio')
@@ -69,38 +73,22 @@ function listHtmlFiles(dirPath) {
   if (!fs.existsSync(dirPath)) return results;
 
   try {
-    const entries = fs.readdirSync(dirPath, { withFileTypes: true });
-    for (const entry of entries) {
-      if (entry.name.startsWith('.') || entry.name === 'node_modules') continue;
-      const fullPath = path.join(dirPath, entry.name);
-      if (entry.isFile() && /\.html?$/i.test(entry.name) && !entry.name.endsWith('.bak.html')) {
+    const relFiles = listProjectUiFiles(dirPath);
+    for (const rel of relFiles) {
+      const fullPath = path.join(dirPath, rel);
+      try {
         const stats = fs.statSync(fullPath);
         results.push({
-          name: entry.name,
-          relativePath: entry.name,
+          name: rel,
+          relativePath: rel,
+          ext: path.extname(rel).toLowerCase(),
           size: stats.size,
           modifiedAt: stats.mtime
         });
-      } else if (entry.isDirectory()) {
-        try {
-          const subEntries = fs.readdirSync(fullPath, { withFileTypes: true });
-          for (const sub of subEntries) {
-            if (sub.isFile() && /\.html?$/i.test(sub.name) && !sub.name.endsWith('.bak.html')) {
-              const subFull = path.join(fullPath, sub.name);
-              const stats = fs.statSync(subFull);
-              results.push({
-                name: `${entry.name}/${sub.name}`,
-                relativePath: `${entry.name}/${sub.name}`,
-                size: stats.size,
-                modifiedAt: stats.mtime
-              });
-            }
-          }
-        } catch (_) {}
-      }
+      } catch (_) {}
     }
   } catch (err) {
-    console.error('Error listing HTML files:', err.message);
+    console.error('Error listing UI files:', err.message);
   }
   return results;
 }
@@ -1279,52 +1267,32 @@ async function openAndPrepareGithubRepoUi(repoMeta = {}) {
   // 3. Switch active workspace to this repo's local directory
   currentWorkspaceDir = path.resolve(targetDir);
 
-  // 4. Inspect existing HTML files in this repo
-  let htmlFiles = listHtmlFiles(currentWorkspaceDir);
-  let realVisualHtmlFiles = htmlFiles.filter(f => {
-    try {
-      const full = path.join(currentWorkspaceDir, f.relativePath);
-      const raw = fs.readFileSync(full, 'utf8');
-      const isEmptySpaShell =
-        raw.length < 2400 &&
-        /<div\s+id=["'](root|app)["']\s*>\s*<\/div>/i.test(raw) &&
-        (raw.match(/<(section|nav|header|footer|main|article|h1|h2|button)\b/gi) || []).length < 2;
-      return !isEmptySpaShell;
-    } catch (_) {
-      return false;
-    }
-  });
-
-  let primaryFile = '';
-  let modeUsed = 'native-html';
-  let sourceSummary = scanRepoSourceSummary(currentWorkspaceDir);
-
-  if (realVisualHtmlFiles.length > 0 && !repoMeta.forceSynthesize) {
-    const preferred =
-      realVisualHtmlFiles.find(f => f.relativePath === 'index-creative-developer.html') ||
-      realVisualHtmlFiles.find(f => f.relativePath === 'index.html') ||
-      realVisualHtmlFiles.find(f => f.relativePath.endsWith('index.html')) ||
-      realVisualHtmlFiles[0];
-    primaryFile = preferred.relativePath;
-  } else if (repoMeta.homepage && /^https?:\/\//i.test(repoMeta.homepage) && !repoMeta.homepage.includes('localhost')) {
-    // Try cloning live deployed homepage into the repo folder first
-    try {
-      const cloned = await cloneAndRewriteWebpage(repoMeta.homepage, 'studio-live-ui.html');
-      primaryFile = cloned.relativePath;
-      modeUsed = 'live-homepage';
-    } catch (_) {
-      const synth = synthesizeRepoUiCanvasHtml(currentWorkspaceDir, repoMeta);
-      primaryFile = synth.fileName;
-      modeUsed = 'synthesized-canvas';
-    }
-  } else {
-    // Synthesize an interactive Visual UI Canvas from the repo's actual .tsx / .jsx / .dart / .css files
-    const synth = synthesizeRepoUiCanvasHtml(currentWorkspaceDir, repoMeta);
-    primaryFile = synth.fileName;
-    modeUsed = repoMeta.hasUi === false ? 'starter-ui-for-noui' : 'synthesized-canvas';
+  // Clean up any old synthetic placeholder if real UI files exist
+  const legacyPlaceholder = path.join(currentWorkspaceDir, 'studio-ui-canvas.html');
+  const discoveredUiFiles = listProjectUiFiles(currentWorkspaceDir).filter(f => f !== 'studio-ui-canvas.html');
+  if (discoveredUiFiles.length > 0 && fs.existsSync(legacyPlaceholder)) {
+    try { fs.unlinkSync(legacyPlaceholder); } catch (_) {}
   }
 
-  htmlFiles = listHtmlFiles(currentWorkspaceDir);
+  // 4. Inspect all visual UI files (.tsx, .jsx, .vue, .svelte, .dart, .html) in this repo
+  let uiFiles = listHtmlFiles(currentWorkspaceDir);
+  let primaryFile = '';
+  let modeUsed = 'live-compiled-ui';
+  let sourceSummary = scanRepoSourceSummary(currentWorkspaceDir);
+
+  if (uiFiles.length > 0 && !repoMeta.forceSynthesize) {
+    const preferred =
+      uiFiles.find(f => f.relativePath === 'index-creative-developer.html') ||
+      uiFiles[0];
+    primaryFile = preferred.relativePath;
+    modeUsed = /\.html?$/i.test(primaryFile) ? 'native-html' : 'live-compiled-ui';
+  } else {
+    // Only synthesize a starter UI canvas when the repo has 0 UI files (e.g., No-UI backend/CLI repo)
+    const synth = synthesizeRepoUiCanvasHtml(currentWorkspaceDir, repoMeta);
+    primaryFile = synth.fileName;
+    modeUsed = 'starter-ui-for-noui';
+    uiFiles = listHtmlFiles(currentWorkspaceDir);
+  }
 
   return {
     success: true,
@@ -1341,9 +1309,48 @@ async function openAndPrepareGithubRepoUi(repoMeta = {}) {
       sourceFiles: sourceSummary.sourceFiles.slice(0, 30),
       extractedComponents: sourceSummary.extractedComponentNames
     },
-    files: htmlFiles,
+    files: uiFiles,
     git: getWorkspaceGitStatus(currentWorkspaceDir)
   };
+}
+
+function githubOAuthPost(urlPath, paramsObj) {
+  return new Promise((resolve, reject) => {
+    const bodyStr = new URLSearchParams(paramsObj).toString();
+    const req = https.request(
+      {
+        hostname: 'github.com',
+        path: urlPath,
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': Buffer.byteLength(bodyStr),
+          'User-Agent': 'Visual-UI-Studio/8.0'
+        },
+        timeout: 12000
+      },
+      res => {
+        const chunks = [];
+        res.on('data', c => chunks.push(c));
+        res.on('end', () => {
+          try {
+            const parsed = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+            resolve(parsed);
+          } catch (e) {
+            reject(new Error('Phản hồi OAuth từ GitHub không hợp lệ.'));
+          }
+        });
+      }
+    );
+    req.on('error', reject);
+    req.on('timeout', () => {
+      req.destroy();
+      reject(new Error('Hết thời gian kết nối GitHub OAuth.'));
+    });
+    req.write(bodyStr);
+    req.end();
+  });
 }
 
 const server = http.createServer(async (req, res) => {
@@ -1441,24 +1448,83 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
-    // API: Login with GitHub CLI / Browser Keyring
+    // API: Start Official GitHub OAuth Device Flow (opens https://github.com/login/device popup)
+    if (req.method === 'POST' && pathname === '/api/github/oauth-start') {
+      try {
+        const data = await githubOAuthPost('/login/device/code', {
+          client_id: GITHUB_OAUTH_CLIENT_ID,
+          scope: 'repo read:user'
+        });
+        if (!data.device_code || !data.user_code) {
+          return sendJson(res, 400, {
+            error: data.error_description || 'Không thể khởi tạo phiên GitHub OAuth Device Flow.'
+          });
+        }
+        pendingOAuthDevice = {
+          deviceCode: data.device_code,
+          userCode: data.user_code,
+          verificationUri: data.verification_uri || 'https://github.com/login/device',
+          interval: Number(data.interval) || 5,
+          expiresAt: Date.now() + (Number(data.expires_in) || 900) * 1000
+        };
+        return sendJson(res, 200, {
+          userCode: pendingOAuthDevice.userCode,
+          verificationUri: pendingOAuthDevice.verificationUri,
+          interval: pendingOAuthDevice.interval,
+          expiresIn: Number(data.expires_in) || 900
+        });
+      } catch (err) {
+        return sendJson(res, 500, { error: err.message });
+      }
+    }
+
+    // API: Poll GitHub OAuth Device Flow authorization status
+    if (req.method === 'POST' && pathname === '/api/github/oauth-poll') {
+      if (!pendingOAuthDevice || Date.now() > pendingOAuthDevice.expiresAt) {
+        return sendJson(res, 400, { status: 'expired', error: 'Mã xác thực đã hết hạn. Vui lòng bấm Kết nối lại.' });
+      }
+      try {
+        const pollRes = await githubOAuthPost('/login/oauth/access_token', {
+          client_id: GITHUB_OAUTH_CLIENT_ID,
+          device_code: pendingOAuthDevice.deviceCode,
+          grant_type: 'urn:ietf:params:oauth:grant-type:device_code'
+        });
+        if (pollRes.access_token) {
+          githubSession.token = pollRes.access_token;
+          githubSession.loggedOutManually = false;
+          pendingOAuthDevice = null;
+          saveGithubSession();
+          const auth = await detectGithubAuthAndRepos();
+          return sendJson(res, 200, {
+            status: 'authorized',
+            ...auth,
+            git: getWorkspaceGitStatus(currentWorkspaceDir)
+          });
+        }
+        if (pollRes.error === 'authorization_pending' || pollRes.error === 'slow_down') {
+          return sendJson(res, 200, {
+            status: 'pending',
+            interval: pollRes.interval || pendingOAuthDevice.interval
+          });
+        }
+        return sendJson(res, 400, {
+          status: 'error',
+          error: pollRes.error_description || pollRes.error || 'Chưa hoàn tất xác thực GitHub.'
+        });
+      } catch (err) {
+        return sendJson(res, 500, { status: 'error', error: err.message });
+      }
+    }
+
+    // API: Instant 1-Click Link with Local GitHub CLI / Browser Keyring
     if (req.method === 'POST' && pathname === '/api/github/login-cli') {
       githubSession.loggedOutManually = false;
       saveGithubSession();
-      let auth = await detectGithubAuthAndRepos();
+      const auth = await detectGithubAuthAndRepos();
       if (!auth.loggedIn) {
-        // Attempt interactive browser login via gh CLI if installed
-        try {
-          execSync('gh auth login --hostname github.com --git-protocol https --web', {
-            cwd: __dirname,
-            timeout: 60000
-          });
-          auth = await detectGithubAuthAndRepos();
-        } catch (e) {
-          return sendJson(res, 400, {
-            error: 'Chưa phát hiện phiên GitHub CLI tự động. Bạn có thể dán Personal Access Token (ghp_...) ở khung bên dưới để đăng nhập ngay!'
-          });
-        }
+        return sendJson(res, 400, {
+          error: 'Không tìm thấy phiên GitHub CLI trên máy. Hãy sử dụng cửa sổ Xác thực GitHub OAuth (Device Flow) hoặc dán mã Personal Access Token.'
+        });
       }
       return sendJson(res, 200, {
         ...auth,
@@ -1593,13 +1659,21 @@ const server = http.createServer(async (req, res) => {
     // API: Save edited HTML directly back to source file on disk (+ Optional Auto-Push to GitHub!)
     if (req.method === 'POST' && pathname === '/api/save') {
       const body = await readJsonBody(req);
-      const relFile = (body.relativePath || '').replace(/^[/\\]+/, '');
+      let relFile = (body.relativePath || '').replace(/^[/\\]+/, '');
       const htmlContent = body.htmlContent;
       const shouldAutoPush = Boolean(body.autoPush);
       const commitMessage = body.commitMessage || '';
 
       if (!relFile || typeof htmlContent !== 'string') {
         return sendJson(res, 400, { error: 'Thiếu đường dẫn file hoặc nội dung HTML.' });
+      }
+
+      // Protect non-HTML source code files (.tsx, .jsx, .vue, .svelte, .dart) from being overwritten with raw HTML;
+      // save visual snapshot alongside while keeping original source code intact for AI Prompt sync.
+      const ext = path.extname(relFile).toLowerCase();
+      if (['.tsx', '.jsx', '.vue', '.svelte', '.dart'].includes(ext)) {
+        const safeBase = relFile.replace(/[\\/]/g, '-').replace(/\.[^.]+$/, '');
+        relFile = `studio-preview-${safeBase}.html`;
       }
 
       const targetPath = path.resolve(currentWorkspaceDir, relFile);
@@ -1668,6 +1742,29 @@ const server = http.createServer(async (req, res) => {
         res.writeHead(403);
         res.end('Forbidden');
         return;
+      }
+
+      // Live Compilation for React/Next.js (.tsx, .jsx), Vue (.vue), Svelte (.svelte), and Flutter (.dart) files!
+      if (/\.(tsx|jsx|vue|svelte|dart)$/i.test(targetFile) && fs.existsSync(targetFile)) {
+        try {
+          let compiledHtml = await compileProjectUiFile(relPath, currentWorkspaceDir);
+          if (parsedUrl.searchParams.get('inline') === '1') {
+            const wsRootOrigin = `http://localhost:${PORT}/workspace/`;
+            compiledHtml = compiledHtml.replace(/(['"(])\/workspace\//g, `$1${wsRootOrigin}`);
+          }
+          res.writeHead(200, {
+            'Content-Type': 'text/html; charset=utf-8',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Access-Control-Allow-Origin': '*'
+          });
+          return res.end(compiledHtml);
+        } catch (compileErr) {
+          res.writeHead(500, {
+            'Content-Type': 'text/html; charset=utf-8',
+            'Access-Control-Allow-Origin': '*'
+          });
+          return res.end(`<!DOCTYPE html><html><body style="font-family:sans-serif;padding:24px;"><h3>Lỗi biên dịch UI (${relPath})</h3><pre>${compileErr.message}</pre></body></html>`);
+        }
       }
 
       // If requested with ?inline=1 (used by srcdoc when Studio is opened from https://minkasent.github.io),

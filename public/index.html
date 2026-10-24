@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Visual UI Studio Pro v6.0 — 247+ Official .TSX Registry &amp; 38+ UI Libraries</title>
+  <title>Visual UI Studio Pro v8.0 — Universal React/Next.js/Flutter UI Canvas &amp; GitHub Sync</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Dancing+Script:wght@600;700&family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto:wght@300;400;500;700;900&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/studio.css?v=7.5" />
+  <link rel="stylesheet" href="./css/studio.css?v=8.0" />
 </head>
 <body>
   <!-- TOP NAVIGATION BAR (Minimalist Icon-First Figma / Framer / Origin UI Precision Bar) -->
@@ -817,7 +817,7 @@
   <div id="modal-open-web" class="modal-backdrop hidden">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Mở Giao Diện Web</h3>
+        <h3>Mở Dự Án &amp; Giao Diện (HTML / React / Next.js / Flutter)</h3>
         <button class="btn-icon modal-close" data-close="modal-open-web">✕</button>
       </div>
       <div class="modal-body">
@@ -826,26 +826,26 @@
           <div class="url-cloner-header">
             <div class="url-cloner-title">
               <svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-              <span>Nhập Link Website hoặc GitHub Repo</span>
+              <span>Nhập Link Website hoặc GitHub Repository</span>
             </div>
-            <span class="url-cloner-badge">Lưu về Local</span>
+            <span class="url-cloner-badge">Live UI Compiler</span>
           </div>
 
           <div class="url-cloner-input-row">
-            <input type="url" id="input-clone-url" placeholder="Dán link web hoặc GitHub (vd: https://minkasent.github.io)..." />
+            <input type="url" id="input-clone-url" placeholder="https://github.com/minKasent/pharmawms hoặc https://minkasent.github.io" />
             <input type="hidden" id="input-clone-filename" value="" />
             <button type="button" id="btn-clone-url" class="btn-primary url-cloner-submit">
               <svg class="ui-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-              <span>Tải &amp; Sửa Ngay</span>
+              <span>Mở Giao Diện</span>
             </button>
           </div>
 
           <div class="url-quick-chips">
-            <span class="url-quick-chips__label">Thử nhanh:</span>
+            <span class="url-quick-chips__label">Dự án mẫu:</span>
+            <button type="button" class="url-chip" data-sample-url="https://github.com/minKasent/pharmawms">minKasent/pharmawms (Next.js)</button>
+            <button type="button" class="url-chip" data-sample-url="https://github.com/minKasent/crypto_exchange">minKasent/crypto_exchange (Flutter)</button>
             <button type="button" class="url-chip" data-sample-url="https://minkasent.github.io">minkasent.github.io</button>
-            <button type="button" class="url-chip" data-sample-url="https://github.com/minKasent/minKasent.github.io">github.com/minKasent/minKasent.github.io</button>
-            <button type="button" class="url-chip" data-sample-url="https://example.com">example.com</button>
-            <button type="button" id="btn-switch-to-gh-repos" class="url-chip url-chip--accent">🐙 Chọn từ Repo GitHub của bạn →</button>
+            <button type="button" id="btn-switch-to-gh-repos" class="url-chip url-chip--accent">Chọn từ GitHub của bạn →</button>
           </div>
 
           <div id="clone-url-status" class="studio-status-banner hidden"></div>
@@ -856,18 +856,18 @@
           <div class="import-option import-option--row" id="card-pick-html">
             <div class="import-option__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg></div>
             <div class="import-option__info">
-              <h4>Mở File .HTML</h4>
-              <p>Chọn 1 file lẻ từ máy</p>
+              <h4>Mở File UI Lẻ</h4>
+              <p>.HTML, .TSX, .JSX, .Vue, .Dart</p>
             </div>
             <button id="btn-trigger-file-picker" class="btn-secondary btn-sm">Chọn File</button>
-            <input type="file" id="input-html-file" accept=".html,.htm" hidden />
+            <input type="file" id="input-html-file" accept=".html,.htm,.tsx,.jsx,.vue,.svelte,.dart" hidden />
           </div>
 
           <div class="import-option import-option--row" id="card-pick-folder">
             <div class="import-option__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></div>
             <div class="import-option__info">
-              <h4>Thư Mục Web</h4>
-              <p>Nạp cả HTML, CSS &amp; Ảnh</p>
+              <h4>Import Cả Project</h4>
+              <p>React, Next.js, Flutter, HTML</p>
             </div>
             <label class="btn-secondary btn-sm upload-label">
               Chọn Thư Mục
@@ -878,42 +878,42 @@
 
         <!-- 3. LOCAL WORKSPACE PATH -->
         <div class="import-box import-box--compact">
-          <label class="compact-box-label">Thư mục dự án Local (Lưu trực tiếp <code>Ctrl+S</code>):</label>
+          <label class="compact-box-label">Đường dẫn thư mục dự án trên máy (Biên dịch trực tiếp .TSX / .Dart / .HTML &amp; Lưu <code>Ctrl+S</code>):</label>
           <div class="folder-path-row">
             <input type="text" id="input-workspace-path" value="d:\Khoa\Porfolio" placeholder="Ví dụ: d:\Khoa\Porfolio" />
-            <button id="btn-apply-workspace-path" class="btn-secondary btn-sm">Kết nối</button>
+            <button id="btn-apply-workspace-path" class="btn-secondary btn-sm">Mở Project</button>
           </div>
         </div>
 
         <!-- 4. COLLAPSIBLE PASTE RAW HTML -->
         <details class="import-box import-box--compact clean-details">
-          <summary class="compact-box-summary">Dán trực tiếp mã HTML...</summary>
+          <summary class="compact-box-summary">Dán trực tiếp mã nguồn HTML / JSX...</summary>
           <div class="mt-8">
             <textarea id="textarea-paste-html" rows="4" placeholder="Dán code <html>...</html> vào đây..."></textarea>
-            <button id="btn-load-pasted-html" class="btn-secondary btn-sm mt-6">Nạp Mã HTML</button>
+            <button id="btn-load-pasted-html" class="btn-secondary btn-sm mt-6">Nạp Mã Nguồn</button>
           </div>
         </details>
       </div>
     </div>
   </div>
 
-  <!-- MODAL 2: MAXPING AI PROMPT ARCHITECT & MULTI-FRAMEWORK CODE SYNC -->
+  <!-- MODAL 2: AI PROMPT ARCHITECT & MULTI-FRAMEWORK CODE SYNC -->
   <div id="modal-ai-prompt" class="modal-backdrop hidden">
     <div class="modal-card modal-card--lg">
       <div class="modal-header">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-          <h3>✨ Maxping AI Prompt Architect &amp; Code Sync</h3>
-          <span id="prompt-context-badge" class="url-cloner-badge">Sẵn sàng</span>
+          <h3>AI Prompt Architect &amp; Code Sync</h3>
+          <span id="prompt-context-badge" class="url-cloner-badge">Ready</span>
         </div>
         <button class="btn-icon modal-close" data-close="modal-ai-prompt">✕</button>
       </div>
       <div class="modal-body">
         <div class="prompt-tabs">
-          <button class="prompt-tab active" data-ptab="ptab-prompt">🔥 Master Prompt (AI Agent)</button>
-          <button class="prompt-tab" data-ptab="ptab-tailwind">⚛️ React / Next + Tailwind</button>
-          <button class="prompt-tab" data-ptab="ptab-flutter">📱 Flutter / Dart UI</button>
-          <button class="prompt-tab" data-ptab="ptab-audit">✨ Auto Nâng Cấp UI/UX</button>
-          <button class="prompt-tab" data-ptab="ptab-css">🎨 CSS Patch</button>
+          <button class="prompt-tab active" data-ptab="ptab-prompt">Master Prompt (AI Agent)</button>
+          <button class="prompt-tab" data-ptab="ptab-tailwind">React / Next.js + Tailwind</button>
+          <button class="prompt-tab" data-ptab="ptab-flutter">Flutter / Dart UI</button>
+          <button class="prompt-tab" data-ptab="ptab-audit">UI/UX Design Audit</button>
+          <button class="prompt-tab" data-ptab="ptab-css">CSS Patch</button>
         </div>
 
         <div id="ptab-prompt" class="ptab-content active">
@@ -934,14 +934,14 @@
 
         <div class="prompt-actions-bar">
           <div class="prompt-actions-left">
-            <button type="button" id="btn-copy-ai-prompt" class="btn-primary btn-sm">📋 Copy Tab Này</button>
-            <button type="button" id="btn-copy-css-patch" class="btn-secondary btn-sm">🎨 Copy CSS</button>
+            <button type="button" id="btn-copy-ai-prompt" class="btn-primary btn-sm">Copy Tab Này</button>
+            <button type="button" id="btn-copy-css-patch" class="btn-secondary btn-sm">Copy CSS</button>
             <button type="button" id="btn-save-prompt-file" class="btn-secondary btn-sm" title="Lưu thẳng file VISUAL-UI-PROMPT.md vào thư mục dự án để Cursor / Antigravity / Claude đọc trực tiếp">
-              💾 Lưu VISUAL-UI-PROMPT.md vào Project
+              Lưu VISUAL-UI-PROMPT.md
             </button>
           </div>
           <button type="button" id="btn-save-and-push-from-prompt" class="btn-secondary btn-sm">
-            🚀 Lưu Web &amp; Push GitHub
+            Lưu &amp; Push GitHub
           </button>
         </div>
       </div>
@@ -1088,18 +1088,18 @@
     </div>
   </div>
 
-  <!-- MODAL 4: GITHUB LOGIN, REPOSITORY LINK & AUTO-PUSH CENTER -->
+  <!-- MODAL 4: GITHUB CONNECT (OAUTH DEVICE FLOW POPUP), REPOSITORY EXPLORER & AUTO-PUSH -->
   <div id="modal-github-hub" class="modal-backdrop hidden">
-    <div class="modal-card">
+    <div class="modal-card modal-card--github">
       <div class="modal-header">
         <div style="display:flex;align-items:center;gap:8px;">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-          <h3>GitHub &amp; Tự Động Push</h3>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+          <h3>GitHub Integration &amp; Repository UI Explorer</h3>
         </div>
         <button class="btn-icon modal-close" data-close="modal-github-hub">✕</button>
       </div>
       <div class="modal-body">
-        <!-- 1. GITHUB ACCOUNT PROFILE / LOGIN -->
+        <!-- 1. GITHUB ACCOUNT PROFILE & OFFICIAL OAUTH POPUP FLOW -->
         <div class="import-box import-box--compact" id="gh-account-card">
           <div class="gh-profile-row">
             <div class="gh-profile-left">
@@ -1110,28 +1110,47 @@
                   <span id="gh-user-login" class="gh-login-handle"></span>
                   <span id="gh-auth-method-badge" class="url-cloner-badge">Offline</span>
                 </div>
-                <div id="gh-user-sub" class="gh-subtext">Kết nối GitHub để tự động đẩy code khi bấm Lưu</div>
+                <div id="gh-user-sub" class="gh-subtext">Kết nối tài khoản GitHub để mở UI từ các Repository &amp; tự động Push</div>
               </div>
             </div>
             <div class="gh-profile-actions">
-              <button type="button" id="btn-gh-login-cli" class="btn-primary btn-sm">Kết nối GitHub</button>
+              <button type="button" id="btn-gh-oauth-popup" class="btn-primary btn-sm">
+                <svg class="ui-svg-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                <span>Continue with GitHub</span>
+              </button>
+              <button type="button" id="btn-gh-login-cli" class="btn-secondary btn-sm" title="Kết nối tức thì bằng phiên GitHub CLI có sẵn trên máy">Phiên @minKasent</button>
               <button type="button" id="btn-gh-logout" class="btn-secondary btn-xs hidden">Đăng xuất</button>
             </div>
           </div>
 
+          <!-- OFFICIAL GITHUB OAUTH DEVICE VERIFICATION PANEL (Appears when Continue with GitHub is clicked) -->
+          <div id="gh-oauth-device-box" class="gh-oauth-device-box hidden">
+            <div class="gh-oauth-device-box__top">
+              <div>
+                <div class="gh-oauth-device-box__title">Xác thực trên cửa sổ GitHub.com vừa mở</div>
+                <div class="gh-oauth-device-box__desc">Mã xác thực đã được tự động copy. Hãy dán mã này vào trang <strong>github.com/login/device</strong> để cấp quyền:</div>
+              </div>
+              <span id="gh-oauth-poll-badge" class="url-cloner-badge">Đang chờ xác nhận...</span>
+            </div>
+            <div class="gh-oauth-code-row">
+              <code id="gh-oauth-user-code" class="gh-oauth-code-pill">---- ----</code>
+              <button type="button" id="btn-gh-copy-device-code" class="btn-secondary btn-sm">Copy Mã &amp; Mở GitHub</button>
+            </div>
+          </div>
+
           <details class="clean-details mt-8">
-            <summary class="compact-box-summary">Đăng nhập bằng Personal Access Token (ghp_...)...</summary>
+            <summary class="compact-box-summary">Hoặc xác thực bằng Personal Access Token (ghp_...)...</summary>
             <div class="folder-path-row mt-6">
-              <input type="password" id="input-gh-token" placeholder="Dán mã ghp_xxxxxxxxxxxx (quyền repo)..." />
-              <button type="button" id="btn-gh-login-token" class="btn-secondary btn-sm">Xác thực</button>
+              <input type="password" id="input-gh-token" placeholder="ghp_xxxxxxxxxxxx (quyền repo, read:user)..." />
+              <button type="button" id="btn-gh-login-token" class="btn-secondary btn-sm">Xác thực Token</button>
             </div>
           </details>
         </div>
 
-        <!-- 2. REPOSITORY EXPLORER (EDIT UI FROM EXISTING GITHUB REPOS + HAS UI / NO UI BADGES) -->
+        <!-- 2. UNIFIED REPOSITORY EXPLORER (REACT / NEXT.JS / FLUTTER / HTML + NO-UI BADGES) -->
         <div class="import-box import-box--compact" id="gh-repos-explorer-box">
           <div class="url-cloner-header">
-            <span class="compact-box-label" style="margin:0;">Kho lưu trữ của bạn — Chọn Repo để Sửa UI hoặc Liên kết</span>
+            <span class="compact-box-label" style="margin:0;">Repositories — Mở toàn bộ UI dự án (.TSX / .Dart / .HTML)</span>
             <span id="gh-repo-status-badge" class="url-cloner-badge">Đang kiểm tra...</span>
           </div>
 
@@ -1142,30 +1161,30 @@
           <!-- Filter & Search Bar for GitHub Repos -->
           <div class="gh-repo-filter-bar mt-8">
             <div class="gh-repo-filter-pills">
-              <button type="button" class="gh-filter-pill active" data-gh-filter="all">Tất cả</button>
-              <button type="button" class="gh-filter-pill" data-gh-filter="has-ui">✦ Có UI</button>
-              <button type="button" class="gh-filter-pill" data-gh-filter="no-ui">🚫 No UI</button>
+              <button type="button" class="gh-filter-pill active" data-gh-filter="all">All</button>
+              <button type="button" class="gh-filter-pill" data-gh-filter="has-ui">Có UI</button>
+              <button type="button" class="gh-filter-pill" data-gh-filter="no-ui">No UI</button>
             </div>
             <label class="gh-fork-toggle" title="Ẩn các repo Fork từ người khác để chỉ hiện dự án của bạn">
               <input type="checkbox" id="chk-gh-hide-forks" checked />
-              <span>Chỉ dự án của tôi</span>
+              <span>Ẩn Fork</span>
             </label>
-            <input type="text" id="input-gh-repo-search" class="gh-repo-search-input" placeholder="Tìm repo (vd: pharmawms, phim, spring...)" />
+            <input type="text" id="input-gh-repo-search" class="gh-repo-search-input" placeholder="Tìm repo (vd: pharmawms, crypto, portfolio...)" />
           </div>
 
-          <!-- Interactive Scrollable List of Repos with Has-UI / No-UI Badges & 1-Click Edit UI -->
+          <!-- Interactive Scrollable List of Repos with UI Stack Badges & 1-Click Open UI -->
           <div id="gh-repos-explorer-list" class="gh-repos-explorer-list">
             <div class="gh-repos-empty">Đang tải danh sách Repository từ GitHub...</div>
           </div>
 
-          <!-- Quick Dropdown / Custom Remote URL Bar -->
+          <!-- Custom Repository URL Bar (Hidden select kept for DOM reference compatibility) -->
+          <select id="select-gh-user-repos" class="hidden" aria-hidden="true">
+            <option value="">-- Chọn nhanh Repo --</option>
+          </select>
           <div class="folder-path-row mt-8">
-            <select id="select-gh-user-repos" class="select-control" style="max-width:210px;">
-              <option value="">-- Chọn nhanh Repo --</option>
-            </select>
-            <input type="text" id="input-gh-remote-url" placeholder="https://github.com/username/repo.git" />
-            <button type="button" id="btn-gh-open-selected-repo-ui" class="btn-primary btn-sm" title="Tải & Mở giao diện của Repo đang chọn lên Studio để chỉnh sửa">🎨 Sửa UI</button>
-            <button type="button" id="btn-gh-link-repo" class="btn-secondary btn-sm" title="Chỉ gắn Remote URL vào thư mục hiện tại">Liên kết</button>
+            <input type="text" id="input-gh-remote-url" placeholder="Hoặc dán URL GitHub bất kỳ (https://github.com/owner/repo)..." />
+            <button type="button" id="btn-gh-open-selected-repo-ui" class="btn-primary btn-sm" title="Clone & Biên dịch trực tiếp giao diện của Repo này lên Canvas">Mở UI</button>
+            <button type="button" id="btn-gh-link-repo" class="btn-secondary btn-sm" title="Chỉ gắn Remote URL vào thư mục hiện tại">Gắn Remote</button>
           </div>
         </div>
 
@@ -1173,15 +1192,15 @@
         <div class="import-box import-box--compact gh-autopush-card">
           <label class="gh-autopush-toggle">
             <div>
-              <strong>Tự động Push lên GitHub khi bấm Lưu (Ctrl+S)</strong>
-              <p>Tự động <code>git add</code>, <code>commit</code> &amp; <code>push</code> sau mỗi lần lưu</p>
+              <strong>Tự động Push lên GitHub khi Lưu (Ctrl+S)</strong>
+              <p>Tự động chạy <code>git add</code>, <code>commit</code> &amp; <code>push</code> sau mỗi lần lưu thay đổi</p>
             </div>
             <input type="checkbox" id="chk-gh-auto-push" checked />
           </label>
 
           <div class="folder-path-row mt-8">
-            <input type="text" id="input-gh-commit-msg" placeholder="Lời nhắn Commit (để trống sẽ tự tạo)..." />
-            <button type="button" id="btn-gh-push-now" class="btn-primary btn-sm">Push Ngay</button>
+            <input type="text" id="input-gh-commit-msg" placeholder="Commit message (để trống sẽ tự động tạo)..." />
+            <button type="button" id="btn-gh-push-now" class="btn-primary btn-sm">Push Changes</button>
           </div>
           <div id="gh-push-status-msg" class="studio-status-banner hidden"></div>
         </div>
@@ -1192,10 +1211,10 @@
   <!-- TOAST NOTIFICATION -->
   <div id="toast-container" class="toast-container"></div>
 
-  <script src="./js/ui-libs-registry.js?v=7.5"></script>
-  <script src="./js/reactbits-customize.js?v=7.5"></script>
-  <script src="./js/templates.js?v=7.5"></script>
-  <script src="./js/studio.js?v=7.5"></script>
-  <script src="./js/i18n-theme.js?v=7.5"></script>
+  <script src="./js/ui-libs-registry.js?v=8.0"></script>
+  <script src="./js/reactbits-customize.js?v=8.0"></script>
+  <script src="./js/templates.js?v=8.0"></script>
+  <script src="./js/studio.js?v=8.0"></script>
+  <script src="./js/i18n-theme.js?v=8.0"></script>
 </body>
 </html>
